@@ -26,6 +26,7 @@ More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/
 
 ## Documentation
 
+- [MVP Functional requirements](docs/mvp-functional-requirements.md)
 - [Tech Stack and Rationale](docs/tech-stack.md)
 
 ## Running the project
