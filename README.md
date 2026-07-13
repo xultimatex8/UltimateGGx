@@ -22,9 +22,11 @@ It lets you explore how a match unfolded and **simulate counterfactual scenarios
 | Styling | Tailwind CSS |
 | Containerization | Docker |
 
+More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/tech-stack.md).
+
 ## Documentation
 
-> Section to be completed with documentation.
+- [Tech Stack and Rationale](docs/tech-stack.md)
 
 ## Running the project
 
