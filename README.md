@@ -33,7 +33,126 @@ More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/
 
 ## Running the project
 
-> Section to be completed during development (backend/frontend installation instructions and environment variables, including the Riot Games API key).
+### Prerequisites
+
+- [Git](https://git-scm.com/downloads)
+- [.NET SDK 10](https://dotnet.microsoft.com/download)
+- [Node.js 22+](https://nodejs.org/) and npm
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- A [Riot Games API key](https://developer.riotgames.com/)
+
+> There is no need to install PostgreSQL locally — it runs via Docker.
+
+### 1. Clone the repository
+
+```bash
+git clone <REPOSITORY_URL>
+cd UltimateGGx
+```
+
+### 2. Set up environment variables
+
+Create the `.env` file at the project root:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in the values:
+
+```env
+POSTGRES_USER=your_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=ultimateggx
+
+RIOT_API_KEY=your_riot_api_key
+```
+
+### 3. Start PostgreSQL
+
+From the project root:
+
+```bash
+docker compose up postgres -d
+```
+
+Verify it's running:
+
+```bash
+docker compose ps
+```
+
+### 4. Set up the backend
+
+```bash
+cd backend
+dotnet restore
+```
+
+Apply database migrations:
+
+```bash
+dotnet ef database update
+```
+
+> If you don't have `dotnet-ef` installed yet:
+> ```bash
+> dotnet tool install --global dotnet-ef
+> ```
+
+Start the backend:
+
+```bash
+dotnet watch run
+```
+
+The API will be available at `http://localhost:5037`.
+
+### 5. Set up the frontend
+
+```bash
+cd frontend
+npm install
+```
+
+Start the frontend:
+
+```bash
+ng serve
+```
+
+The app will be available at `http://localhost:4200`.
+
+### Day-to-day development
+
+Once everything is set up, three things need to be running simultaneously:
+
+**1 — Database (Docker):**
+```bash
+docker compose up postgres -d
+```
+
+**2 — Backend:**
+```bash
+cd backend
+dotnet watch run
+```
+
+**3 — Frontend:**
+```bash
+cd frontend
+ng serve
+```
+
+### Running everything with Docker (alternative)
+
+Instead of running the backend and frontend natively, the full stack (database, backend, and frontend) can be built and run in containers:
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost`.
 
 ## Legal notice
 
