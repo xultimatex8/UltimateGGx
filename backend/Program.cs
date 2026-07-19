@@ -7,7 +7,8 @@ Env.Load("../.env");
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString =
-    $"Host=localhost;Port=5432;" +
+    $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
+    $"Port=5432;" +
     $"Database={Environment.GetEnvironmentVariable("POSTGRES_DB")};" +
     $"Username={Environment.GetEnvironmentVariable("POSTGRES_USER")};" +
     $"Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")}";
