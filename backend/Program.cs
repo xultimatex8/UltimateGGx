@@ -1,10 +1,17 @@
 using DotNetEnv;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
+using backend.Services;
 
 Env.Load("../.env");
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient<RiotApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
+    client.DefaultRequestHeaders.Add("X-Riot-Token", Environment.GetEnvironmentVariable("RIOT_API_KEY"));
+});
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
