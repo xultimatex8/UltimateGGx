@@ -28,6 +28,7 @@ More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/
 
 - [MVP Functional requirements](docs/mvp-functional-requirements.md)
 - [Match Metrics](docs/metrics.md)
+- [Data Model](docs/data-model.md)
 - [Roadmap](docs/roadmap.md)
 - [Tech Stack and Rationale](docs/tech-stack.md)
 
