@@ -18,10 +18,10 @@ public class Participant : BaseEntity
     public int TeamId { get; set; }
     public Team Team { get; set; } = default!;
 
-    public string SummonerPuuid { get; set; } = default!;
+    public int SummonerId { get; set; }
     public Summoner Summoner { get; set; } = default!;
 
-    public int ChampionKey { get; set; }
+    public int ChampionId { get; set; }
     public Champion Champion { get; set; } = default!;
 
     public ICollection<SummonerSpell> SummonerSpells { get; set; } = [];

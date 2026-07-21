@@ -11,6 +11,6 @@ public class Queue : BaseEntity
     public int Wins { get; set; }
     public int Losses { get; set; }
 
-    public string SummonerId { get; set; } = default!;
+    public int SummonerId { get; set; }
     public Summoner Summoner { get; set; } = default!;
 }

@@ -14,7 +14,7 @@ public class Event : BaseEntity
     public string? TowerType { get; set; }
     public EventType Type { get; set; }
 
-    public string MatchId { get; set; } = default!;
+    public int MatchId { get; set; }
     public Match Match { get; set; } = default!;
 
     public int? KillerParticipantId { get; set; }
