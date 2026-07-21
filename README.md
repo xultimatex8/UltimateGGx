@@ -31,6 +31,7 @@ More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/
 - [Data Model](docs/data-model.md)
 - [Roadmap](docs/roadmap.md)
 - [Tech Stack and Rationale](docs/tech-stack.md)
+- [Decision Log](docs/decisions.md)
 
 ## Running the project
 
