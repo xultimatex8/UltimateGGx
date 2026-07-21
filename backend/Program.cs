@@ -13,6 +13,11 @@ builder.Services.AddHttpClient<RiotApiService>(client =>
     client.DefaultRequestHeaders.Add("X-Riot-Token", Environment.GetEnvironmentVariable("RIOT_API_KEY"));
 });
 
+builder.Services.AddHttpClient<DataDragonService>(client =>
+{
+    client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
+});
+
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
     $"Port=5432;" +
