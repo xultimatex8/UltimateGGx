@@ -7,6 +7,7 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    public DbSet<DataDragonState> DataDragonState => Set<DataDragonState>();
     public DbSet<Summoner> Summoners => Set<Summoner>();
     public DbSet<Queue> Queues => Set<Queue>();
     public DbSet<Champion> Champions => Set<Champion>();

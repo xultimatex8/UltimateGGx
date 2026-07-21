@@ -2,6 +2,7 @@ using DotNetEnv;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Services;
+using backend.BackgroundServices;
 
 Env.Load("../.env");
 
@@ -17,6 +18,8 @@ builder.Services.AddHttpClient<DataDragonService>(client =>
 {
     client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
 });
+
+builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
