@@ -41,6 +41,26 @@ public class ChampionSyncService
             }
         }
 
+        SummonerSpellResponseDto spellsResponse = await _dataDragonService.GetSummonerSpellsAsync(version, ct);
+        foreach (var (_, spellDto) in spellsResponse.Data)
+        {
+            int key = int.Parse(spellDto.Key);
+            SummonerSpell? existing = await _db.SummonerSpells.FindAsync([key], ct);
+
+            if (existing is null)
+            {
+                _db.SummonerSpells.Add(new SummonerSpell
+                {
+                    Key = key,
+                    Name = spellDto.Name
+                });
+            }
+            else
+            {
+                existing.Name = spellDto.Name;
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 }
