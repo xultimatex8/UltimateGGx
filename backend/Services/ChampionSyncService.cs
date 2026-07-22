@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Models;
 using backend.Models.DataDragon;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
@@ -23,7 +24,8 @@ public class ChampionSyncService
         foreach (var (_, championDto) in championsResponse.Data)
         {
             int key = int.Parse(championDto.Key);
-            Champion? existing = await _db.Champions.FindAsync([key], ct);
+            Champion? existing = await _db.Champions
+                .FirstOrDefaultAsync(c => c.Key == key, ct);
 
             if (existing is null)
             {
@@ -45,7 +47,8 @@ public class ChampionSyncService
         foreach (var (_, spellDto) in spellsResponse.Data)
         {
             int key = int.Parse(spellDto.Key);
-            SummonerSpell? existing = await _db.SummonerSpells.FindAsync([key], ct);
+            SummonerSpell? existing = await _db.SummonerSpells
+                .FirstOrDefaultAsync(sp => sp.Key == key, ct);
 
             if (existing is null)
             {
