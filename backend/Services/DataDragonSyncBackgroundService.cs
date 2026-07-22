@@ -21,7 +21,7 @@ public class DataDragonSyncBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(_checkInterval);
+        using PeriodicTimer timer = new PeriodicTimer(_checkInterval);
 
         do
         {
@@ -32,15 +32,16 @@ public class DataDragonSyncBackgroundService : BackgroundService
 
     private async Task CheckAndSyncAsync(CancellationToken ct)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var dataDragonService = scope.ServiceProvider.GetRequiredService<DataDragonService>();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        DataDragonService  dataDragonService = scope.ServiceProvider.GetRequiredService<DataDragonService>();
+        ChampionSyncService syncService = scope.ServiceProvider.GetRequiredService<ChampionSyncService>();
+        AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         try
         {
-            var latestVersion = await dataDragonService.GetLatestVersionAsync(ct);
+            string latestVersion = await dataDragonService.GetLatestVersionAsync(ct);
 
-            var state = await db.DataDragonState.FirstOrDefaultAsync(ct);
+            DataDragonState? state = await db.DataDragonState.FirstOrDefaultAsync(ct);
 
             if (state is null)
             {
@@ -53,6 +54,8 @@ public class DataDragonSyncBackgroundService : BackgroundService
                 _logger.LogInformation(
                     "New Data Dragon version detected: {Old} -> {New}",
                     state.CurrentVersion, latestVersion);
+
+                await syncService.SyncAsync(ct);
 
                 state.CurrentVersion = latestVersion;
             }

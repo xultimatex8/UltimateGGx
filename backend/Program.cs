@@ -21,6 +21,8 @@ builder.Services.AddHttpClient<DataDragonService>(client =>
 
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
+builder.Services.AddScoped<ChampionSyncService>();
+
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
     $"Port=5432;" +
