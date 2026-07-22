@@ -2,6 +2,7 @@ using DotNetEnv;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Services;
+using backend.BackgroundServices;
 
 Env.Load("../.env");
 
@@ -12,6 +13,15 @@ builder.Services.AddHttpClient<RiotApiService>(client =>
     client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
     client.DefaultRequestHeaders.Add("X-Riot-Token", Environment.GetEnvironmentVariable("RIOT_API_KEY"));
 });
+
+builder.Services.AddHttpClient<DataDragonService>(client =>
+{
+    client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
+});
+
+builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
+
+builder.Services.AddScoped<ChampionSyncService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
