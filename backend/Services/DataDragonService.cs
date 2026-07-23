@@ -1,8 +1,9 @@
+using backend.Interfaces;
 using backend.Models.DataDragon;
 
 namespace backend.Services;
 
-public class DataDragonService
+public class DataDragonService : IDataDragonService
 {
     private readonly HttpClient _httpClient;
 

@@ -1,8 +1,9 @@
+using backend.Interfaces;
 using backend.Models.Riot;
 
 namespace backend.Services;
 
-public class RiotApiService
+public class RiotApiService : IRiotApiService
 {
     private readonly HttpClient _platformClient;
     private readonly HttpClient _regionalClient;

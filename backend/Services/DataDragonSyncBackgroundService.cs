@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Interfaces;
 using backend.Models;
 using backend.Services;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ public class DataDragonSyncBackgroundService : BackgroundService
     private async Task CheckAndSyncAsync(CancellationToken ct)
     {
         using IServiceScope scope = _serviceProvider.CreateScope();
-        DataDragonService  dataDragonService = scope.ServiceProvider.GetRequiredService<DataDragonService>();
+        IDataDragonService dataDragonService = scope.ServiceProvider.GetRequiredService<IDataDragonService>();
         ChampionSyncService syncService = scope.ServiceProvider.GetRequiredService<ChampionSyncService>();
         AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 

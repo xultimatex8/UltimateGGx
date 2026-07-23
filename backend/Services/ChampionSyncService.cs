@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Interfaces;
 using backend.Models;
 using backend.Models.DataDragon;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +8,10 @@ namespace backend.Services;
 
 public class ChampionSyncService
 {
-    private readonly DataDragonService _dataDragonService;
+    private readonly IDataDragonService _dataDragonService;
     private readonly AppDbContext _db;
 
-    public ChampionSyncService(DataDragonService dataDragonService, AppDbContext db)
+    public ChampionSyncService(IDataDragonService dataDragonService, AppDbContext db)
     {
         _dataDragonService = dataDragonService;
         _db = db;

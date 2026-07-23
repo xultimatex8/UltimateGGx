@@ -1,3 +1,4 @@
+using backend.Interfaces;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,9 +8,9 @@ namespace backend.Controllers;
 [Route("api/[controller]")]
 public class SummonersController : ControllerBase
 {
-    private readonly SummonerService _summonerService;
+    private readonly ISummonerService _summonerService;
 
-    public SummonersController(SummonerService summonerService)
+    public SummonersController(ISummonerService summonerService)
     {
         _summonerService = summonerService;
     }

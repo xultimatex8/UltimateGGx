@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Services;
 using backend.BackgroundServices;
 using System.Text.Json.Serialization;
+using backend.Interfaces;
 
 Env.Load("../.env");
 
@@ -23,16 +24,16 @@ builder.Services.AddHttpClient("RiotRegional", client =>
     client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
 });
 
-builder.Services.AddHttpClient<DataDragonService>(client =>
+builder.Services.AddHttpClient<IDataDragonService, DataDragonService>(client =>
 {
     client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
 });
 
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
-builder.Services.AddScoped<RiotApiService>();
+builder.Services.AddScoped<IRiotApiService, RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
-builder.Services.AddScoped<SummonerService>();
+builder.Services.AddScoped<ISummonerService, SummonerService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +

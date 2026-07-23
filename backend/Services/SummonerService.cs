@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Interfaces;
 using backend.Models;
 using backend.Models.Dtos;
 using backend.Models.Enums;
@@ -7,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class SummonerService
+public class SummonerService : ISummonerService
 {
     private readonly AppDbContext _db;
-    private readonly RiotApiService _riotApiService;
+    private readonly IRiotApiService _riotApiService;
 
-    public SummonerService(AppDbContext db, RiotApiService riotApiService)
+    public SummonerService(AppDbContext db, IRiotApiService riotApiService)
     {
         _db = db;
         _riotApiService = riotApiService;
