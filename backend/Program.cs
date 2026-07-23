@@ -8,10 +8,18 @@ Env.Load("../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient<RiotApiService>(client =>
+var riotApiKey = Environment.GetEnvironmentVariable("RIOT_API_KEY");
+
+builder.Services.AddHttpClient("RiotPlatform", client =>
+{
+    client.BaseAddress = new Uri("https://euw1.api.riotgames.com/");
+    client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
+});
+
+builder.Services.AddHttpClient("RiotRegional", client =>
 {
     client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
-    client.DefaultRequestHeaders.Add("X-Riot-Token", Environment.GetEnvironmentVariable("RIOT_API_KEY"));
+    client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
 });
 
 builder.Services.AddHttpClient<DataDragonService>(client =>
@@ -21,6 +29,7 @@ builder.Services.AddHttpClient<DataDragonService>(client =>
 
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
+builder.Services.AddScoped<RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
 
 var connectionString =
