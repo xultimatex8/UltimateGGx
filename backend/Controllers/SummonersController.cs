@@ -20,4 +20,11 @@ public class SummonersController : ControllerBase
         var summoner = await _summonerService.GetOrFetchSummonerAsync(username, tag);
         return Ok(summoner);
     }
+
+    [HttpPut("{username}/{tag}/refresh")]
+    public async Task<IActionResult> RefreshSummoner(string username, string tag)
+    {
+        var summoner = await _summonerService.SyncSummonerAsync(username, tag);
+        return Ok(summoner);
+    }
 }

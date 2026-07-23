@@ -24,34 +24,53 @@ public class SummonerService
             .Include(s => s.Queues)
             .FirstOrDefaultAsync(s => s.Username == username && s.Tag == tag, ct);
 
-        if (existing is not null)
+        if (existing is null)
         {
-            return MapSummonerToSummonerDto(existing);
+            return await SyncSummonerAsync(username, tag, ct);
         }
 
+        return MapSummonerToSummonerDto(existing);
+    }
+
+    public async Task<SummonerDto> SyncSummonerAsync(string username, string tag, CancellationToken ct = default)
+    {
         AccountResponseDto account = await _riotApiService.GetRiotAccountAsync(username, tag, ct);
         SummonerResponseDto summonerInfo = await _riotApiService.GetRiotSummonerAsync(account.Puuid, ct);
         List<QueueResponseDto> queuesInfo = await _riotApiService.GetSummonerQueuesAsync(account.Puuid, ct);
 
-        var summoner = new Summoner
-        {
-            Puuid = account.Puuid,
-            Username = account.GameName,
-            Tag = account.TagLine,
-            Level = summonerInfo.SummonerLevel,
-            ProfileIconId = summonerInfo.ProfileIconId,
-            Queues = [.. queuesInfo.Select(q => new Queue
-            {
-                Type = MapQueueType(q.QueueType),
-                Tier = q.Tier,
-                Rank = q.Rank,
-                Points = q.LeaguePoints,
-                Wins = q.Wins,
-                Losses = q.Losses
-            })]
-        };
+        Summoner? summoner = await _db.Summoners
+            .Include(s => s.Queues)
+            .FirstOrDefaultAsync(s => s.Puuid == account.Puuid, ct);
 
-        _db.Summoners.Add(summoner);
+        if (summoner is null)
+        {
+            summoner = new Summoner
+            {
+                Puuid = account.Puuid
+            };
+
+            _db.Summoners.Add(summoner);
+        }
+        else
+        {
+            _db.Queues.RemoveRange(summoner.Queues);
+        }
+
+        summoner.Username = account.GameName;
+        summoner.Tag = account.TagLine;
+        summoner.Level = summonerInfo.SummonerLevel;
+        summoner.ProfileIconId = summonerInfo.ProfileIconId;
+
+        summoner.Queues = [.. queuesInfo.Select(q => new Queue
+        {
+            Type = MapQueueType(q.QueueType),
+            Tier = q.Tier,
+            Rank = q.Rank,
+            Points = q.LeaguePoints,
+            Wins = q.Wins,
+            Losses = q.Losses
+        })];
+
         await _db.SaveChangesAsync(ct);
 
         return MapSummonerToSummonerDto(summoner);
