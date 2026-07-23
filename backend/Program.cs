@@ -3,6 +3,7 @@ using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Services;
 using backend.BackgroundServices;
+using System.Text.Json.Serialization;
 
 Env.Load("../.env");
 
@@ -31,6 +32,7 @@ builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
 builder.Services.AddScoped<RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
+builder.Services.AddScoped<SummonerService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
@@ -39,7 +41,11 @@ var connectionString =
     $"Username={Environment.GetEnvironmentVariable("POSTGRES_USER")};" +
     $"Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")}";
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
