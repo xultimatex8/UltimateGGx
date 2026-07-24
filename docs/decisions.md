@@ -1,6 +1,25 @@
-# Decision Log
+# Decision Log — UltimateGGx
 
 Design and technical decisions made. Newest entries at the top.
+
+---
+
+## Separate HTTP clients for Riot platform and regional APIs
+
+**Decision:** register two dedicated `HttpClient` instances: one targeting the Riot platform routing (`https://euw1.api.riotgames.com/`) and another targeting the Riot regional routing (`https://europe.api.riotgames.com/`). Services resolve the appropriate client depending on the endpoint being called.
+
+**Alternatives considered:**
+
+*How to handle Riot's routing model:*
+- *Single `HttpClient` with a fixed base address* — works only for one routing domain and requires manually constructing absolute URLs for endpoints on the other domain.
+- *Single `HttpClient` that changes its `BaseAddress` dynamically* — complicates the implementation and makes the client stateful.
+- *Two dedicated named `HttpClient`s (chosen)* — clearly separates platform and regional endpoints, keeps services simple, and aligns with Riot's API routing model.
+
+*How to configure HTTP clients:*
+- *Register one typed `HttpClient` per service* — suitable when a service communicates with a single external API, but Riot requires two different base URLs depending on the endpoint.
+- *Register named `HttpClient`s (chosen)* — allows services to resolve the correct client for each request while sharing common configuration such as the Riot API key.
+
+**Why:** Riot's APIs are split between platform-routed endpoints (e.g. `euw1.api.riotgames.com`) and regional-routed endpoints (e.g. `europe.api.riotgames.com`). Using dedicated named `HttpClient`s avoids hardcoded absolute URLs, keeps endpoint selection explicit, and follows the routing model defined by Riot.
 
 ---
 
