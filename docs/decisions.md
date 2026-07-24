@@ -4,6 +4,24 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Lazy synchronization of match details
+
+**Decision:** on the first sync, only the latest 10 draft and 10 ranked `matchId`s are stored. Detailed match information is fetched only for the 10 most recent matches shown to the user. Older matches are synchronized on demand when the user navigates to them.
+
+**Alternatives considered:**
+
+*How much match data to fetch initially:*
+- *Fetch details for all 20 matches immediately* — simplest implementation, but doubles the number of Match-V5 requests during the initial sync, consuming Riot API rate limits for matches the user may never view.
+- *Fetch details only for the latest 10 matches (chosen)* — reduces initial latency and API usage while still covering the matches most users are interested in. Remaining matches are synchronized only if needed.
+
+*How to represent partially synchronized matches:*
+- *Require all match fields to exist before persisting* — forces fetching the full match payload immediately, preventing incremental synchronization.
+- *Persist only the `MatchId` initially and make the remaining fields optional (chosen)* — allows matches to be discovered first and enriched later without additional placeholder entities or temporary storage.
+
+**Why:** Riot's Match-V5 API is rate limited, and each match detail requires a separate request. Storing all discovered `matchId`s while synchronizing only the matches the user actually views significantly reduces API consumption without losing the ability to synchronize older matches later.
+
+---
+
 ## Extract Data Dragon synchronization logic into a dedicated service
 
 **Decision:** extract the version checking and synchronization logic from `DataDragonSyncBackgroundService` into a dedicated `DataDragonSyncCheckerService`. The background service is now only responsible for scheduling periodic executions, while the checker encapsulates the synchronization logic behind an `IDataDragonSyncCheckerService` interface.
