@@ -4,6 +4,25 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Extract Data Dragon synchronization logic into a dedicated service
+
+**Decision:** extract the version checking and synchronization logic from `DataDragonSyncBackgroundService` into a dedicated `DataDragonSyncCheckerService`. The background service is now only responsible for scheduling periodic executions, while the checker encapsulates the synchronization logic behind an `IDataDragonSyncCheckerService` interface.
+
+**Alternatives considered:**
+
+*How to organize the synchronization logic:*
+- *Keep the synchronization logic as a private method inside the background service* — simple implementation, but makes the synchronization behaviour difficult to test in isolation.
+- *Expose the private method using `internal` and `InternalsVisibleTo`* — allows tests to invoke the method directly, but weakens encapsulation solely for testing purposes.
+- *Extract the synchronization logic into a dedicated service (chosen)* — separates scheduling from business logic, provides a public interface that can be tested directly, and follows the Single Responsibility Principle.
+
+*How to test the synchronization behaviour:*
+- *Test only the background service through `ExecuteAsync`* — impractical because it contains an infinite loop driven by `PeriodicTimer`, making tests complex and tightly coupled to infrastructure.
+- *Test the extracted synchronization service directly (chosen)* — allows straightforward unit tests by mocking dependencies without interacting with timers, hosted services, or service scopes.
+
+**Why:** the background service's responsibility is scheduling work, not implementing synchronization logic. Extracting the synchronization behaviour into its own service improves separation of concerns, makes the business logic independently testable without exposing internal methods, and results in a cleaner architecture where infrastructure and application logic are clearly separated.
+
+---
+
 ## Separate HTTP clients for Riot platform and regional APIs
 
 **Decision:** register two dedicated `HttpClient` instances: one targeting the Riot platform routing (`https://euw1.api.riotgames.com/`) and another targeting the Riot regional routing (`https://europe.api.riotgames.com/`). Services resolve the appropriate client depending on the endpoint being called.
