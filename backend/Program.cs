@@ -2,7 +2,6 @@ using DotNetEnv;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Services;
-using backend.BackgroundServices;
 using System.Text.Json.Serialization;
 using backend.Interfaces;
 
@@ -29,6 +28,7 @@ builder.Services.AddHttpClient<IDataDragonService, DataDragonService>(client =>
     client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
 });
 
+builder.Services.AddScoped<IDataDragonSyncCheckerService, DataDragonSyncCheckerService>();
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
 builder.Services.AddScoped<IRiotApiService, RiotApiService>();
