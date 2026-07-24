@@ -1,8 +1,9 @@
+using backend.Interfaces;
 using backend.Models.DataDragon;
 
 namespace backend.Services;
 
-public class DataDragonService
+public class DataDragonService : IDataDragonService
 {
     private readonly HttpClient _httpClient;
 
@@ -22,13 +23,13 @@ public class DataDragonService
     {
         ChampionResponseDto? response = await _httpClient.GetFromJsonAsync<ChampionResponseDto>(
             $"cdn/{version}/data/en_US/champion.json", ct);
-        return response ?? throw new Exception("Could not retrieve champion data");
+        return response ?? throw new Exception("Could not retrieve champions data");
     }
 
     public async Task<SummonerSpellResponseDto> GetSummonerSpellsAsync(string version, CancellationToken ct = default)
     {
         SummonerSpellResponseDto? response = await _httpClient.GetFromJsonAsync<SummonerSpellResponseDto>(
             $"cdn/{version}/data/en_US/summoner.json", ct);
-        return response ?? throw new Exception("No se pudo obtener el catálogo de hechizos");
+        return response ?? throw new Exception("Could not retrieve summoner spells data");
     }
 }

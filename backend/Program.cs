@@ -2,26 +2,38 @@ using DotNetEnv;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Services;
-using backend.BackgroundServices;
+using System.Text.Json.Serialization;
+using backend.Interfaces;
 
 Env.Load("../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient<RiotApiService>(client =>
+var riotApiKey = Environment.GetEnvironmentVariable("RIOT_API_KEY");
+
+builder.Services.AddHttpClient("RiotPlatform", client =>
 {
-    client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
-    client.DefaultRequestHeaders.Add("X-Riot-Token", Environment.GetEnvironmentVariable("RIOT_API_KEY"));
+    client.BaseAddress = new Uri("https://euw1.api.riotgames.com/");
+    client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
 });
 
-builder.Services.AddHttpClient<DataDragonService>(client =>
+builder.Services.AddHttpClient("RiotRegional", client =>
+{
+    client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
+    client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
+});
+
+builder.Services.AddHttpClient<IDataDragonService, DataDragonService>(client =>
 {
     client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
 });
 
+builder.Services.AddScoped<IDataDragonSyncCheckerService, DataDragonSyncCheckerService>();
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 
+builder.Services.AddScoped<IRiotApiService, RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
+builder.Services.AddScoped<ISummonerService, SummonerService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
@@ -30,7 +42,11 @@ var connectionString =
     $"Username={Environment.GetEnvironmentVariable("POSTGRES_USER")};" +
     $"Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")}";
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
