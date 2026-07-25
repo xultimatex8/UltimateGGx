@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Services;
 using System.Text.Json.Serialization;
 using backend.Interfaces;
+using backend.Middleware;
 
 Env.Load("../.env");
 
@@ -72,6 +73,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
