@@ -8,5 +8,6 @@ public class Summoner : BaseEntity
     public int Level { get; set; }
     public int ProfileIconId { get; set; }
 
+    public ICollection<MatchReference> MatchReferences { get; set; } = [];
     public ICollection<Queue> Queues { get; set; } = [];
 }
