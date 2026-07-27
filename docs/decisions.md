@@ -6,7 +6,7 @@ Design and technical decisions made. Newest entries at the top.
 
 ## Lazy synchronization of match details
 
-**Decision:** on the first sync, only the latest 10 draft and 10 ranked `matchId`s are stored. Detailed match information is fetched only for the 10 most recent matches shown to the user. Older matches are synchronized on demand when the user navigates to them.
+**Decision:** on the first sync, only the latest 10 draft and 10 ranked `matchId`s are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
 
 **Alternatives considered:**
 
@@ -16,9 +16,14 @@ Design and technical decisions made. Newest entries at the top.
 
 *How to represent partially synchronized matches:*
 - *Require all match fields to exist before persisting* — forces fetching the full match payload immediately, preventing incremental synchronization.
-- *Persist only the `MatchId` initially and make the remaining fields optional (chosen)* — allows matches to be discovered first and enriched later without additional placeholder entities or temporary storage.
+- *Make `Match` fields optional and populate them incrementally* — allows a `Match` row to exist before its detail is fetched, but forces every consumer of `Match` to treat fields such as `Teams`, `EndOfGameResult`, or `GameDuration` as potentially absent even after synchronization is complete, since the type alone no longer guarantees a match is fully populated.
+- *Introduce a separate `MatchReference` entity holding only `MatchId`, many-to-many with `Summoner` (chosen)* — keeps `Match` as an all-or-nothing entity: a row only exists once fully populated, so every field can remain non-nullable and every consumer can rely on that guarantee. `MatchReference` absorbs the "discovered but not yet detailed" state instead, and also correctly models that the same match can be discovered through multiple summoners' histories without duplicating the `matchId` or re-fetching it once any one summoner has already triggered its discovery.
 
-**Why:** Riot's Match-V5 API is rate limited, and each match detail requires a separate request. Storing all discovered `matchId`s while synchronizing only the matches the user actually views significantly reduces API consumption without losing the ability to synchronize older matches later.
+*How to track whether a match's details have been fetched:*
+- *Add a `DetailsFetched` boolean flag on `MatchReference`* — explicit, but introduces a second source of truth alongside the `Match` navigation property; the two could fall out of sync (e.g. a flag left `true` after the linked `Match` is deleted).
+- *Check whether `MatchReference.Match` is null (chosen)* — a single source of truth: a match is considered synchronized exactly when its `Match` navigation is populated, with no separate state to keep consistent.
+
+**Why:** Riot's Match-V5 API is rate limited, and each match detail requires a separate request. Storing all discovered `matchId`s via `MatchReference` while synchronizing only the matches the user actually views significantly reduces API consumption without losing the ability to synchronize older matches later. Separating the "discovered" and "detailed" states into two entities also avoids weakening `Match`'s guarantees — once a `Match` row exists, its data is always complete, keeping the rest of the domain free of defensive null-checks for a state that is otherwise temporary. Deriving synchronization status from the `Match` link itself, rather than a separate flag, avoids a redundant piece of state that could drift out of sync.
 
 ---
 
