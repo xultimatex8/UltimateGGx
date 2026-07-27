@@ -6,7 +6,7 @@ Design and technical decisions made. Newest entries at the top.
 
 ## Lazy synchronization of match details
 
-**Decision:** on the first sync, only the latest 10 draft and 10 ranked `matchId`s are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
+**Decision:** on the first sync, only the latest 20 draft/ranked `matchId`s are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
 
 **Alternatives considered:**
 
