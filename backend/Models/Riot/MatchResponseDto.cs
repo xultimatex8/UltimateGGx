@@ -2,7 +2,7 @@ namespace backend.Models.Riot;
 
 public class MatchResponseDto
 {
-    public InfoDto info { get; set; } = default!;
+    public InfoDto Info { get; set; } = default!;
 }
 
 public class InfoDto
