@@ -44,7 +44,7 @@ public class RiotApiService : IRiotApiService
         string matchType = type == QueueType.DRAFT_PICK ? "normal" : "ranked";
         
         List<string>? response = await _regionalClient.GetFromJsonAsync<List<string>>(
-            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?count=10&type={matchType}", ct);
+            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?&type={matchType}", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Summoner Matches");
     }
