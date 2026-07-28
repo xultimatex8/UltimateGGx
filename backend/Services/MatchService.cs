@@ -211,6 +211,7 @@ public class MatchService : IMatchService
             ],
             Kills = dto.Kills,
             Lane = dto.TeamPosition,
+            Minions = dto.TotalMinionsKilled + dto.NeutralMinionsKilled,
             PrimaryRune = dto.Perks.Styles[0].Selections[0].Perk,
             SecondaryTree = dto.Perks.Styles[1].Style,
             DamageToChampions = dto.TotalDamageDealtToChampions,
@@ -268,6 +269,7 @@ public class MatchService : IMatchService
             Deaths = participant.Deaths,
             Gold = participant.Gold,
             Items = participant.Items,
+            Minions = participant.Minions,
             Kills = participant.Kills,
             Lane = participant.Lane,
             PrimaryRune = participant.PrimaryRune,
@@ -287,6 +289,7 @@ public class MatchService : IMatchService
             ChampionName = participant.Champion.Name,
             SummonerName = participant.Summoner.Username,
             Lane = participant.Lane,
+            Minions = participant.Minions,
             TeamId = participant.Team.TeamId
         };
     }

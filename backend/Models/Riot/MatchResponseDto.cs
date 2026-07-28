@@ -30,6 +30,8 @@ public class ParticipantDto
     public int Item5 { get; set; }
     public int Item6 { get; set; }
     public int Kills { get; set; }
+    public int NeutralMinionsKilled { get; set; }
+    public int TotalMinionsKilled { get; set; }
     public string TeamPosition { get; set; } = default!;
     public int ParticipantId { get; set; }
     public PerksDto Perks { get; set; } = default!;
