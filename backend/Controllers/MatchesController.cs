@@ -19,7 +19,7 @@ public class MatchesController : ControllerBase
     [HttpPost("summoner/{puuid}")]
     public async Task<IActionResult> FetchSummonerMatches(
         string puuid,
-        [FromQuery] QueueType queueType)
+        [FromQuery] QueueType queueType = QueueType.DRAFT_PICK)
     {
         await _matchService.FetchSummonerMatchesAsync(puuid, queueType);
         return Ok();
@@ -28,7 +28,7 @@ public class MatchesController : ControllerBase
     [HttpGet("summoner/{puuid}")]
     public async Task<IActionResult> GetSummonerMatches(
         string puuid,
-        [FromQuery] QueueType queueType)
+        [FromQuery] QueueType queueType = QueueType.DRAFT_PICK)
     {
         List<MatchDto> matches = await _matchService.GetSummonerMatchesAsync(puuid, queueType);
         return Ok(matches);

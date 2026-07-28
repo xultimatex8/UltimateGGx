@@ -61,125 +61,32 @@ public class MatchService : IMatchService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<List<MatchDto>> GetSummonerMatchesAsync(string puuid, QueueType queueType = QueueType.DRAFT_PICK, CancellationToken ct = default)
+    public async Task<List<MatchDto>> GetSummonerMatchesAsync(
+        string puuid,
+        QueueType queueType = QueueType.DRAFT_PICK,
+        CancellationToken ct = default)
     {
-        List<MatchReference> matchReferences = await _db.MatchReferences
-            .Include(m => m.Match)
-                .ThenInclude(match => match!.Teams)
-                    .ThenInclude(team => team.Participants)
-                        .ThenInclude(p => p.Champion)
-            .Include(m => m.Match)
-                .ThenInclude(match => match!.Teams)
-                    .ThenInclude(team => team.Participants)
-                        .ThenInclude(p => p.Summoner)
-            .Include(m => m.Match)
-                .ThenInclude(match => match!.Teams)
-                    .ThenInclude(team => team.Participants)
-                        .ThenInclude(p => p.SummonerSpells)
-            .Where(m => m.Summoners.Any(s => s.Puuid == puuid) && m.QueueType == queueType)
-            .OrderByDescending(m => m.MatchId)
-            .Take(10)
-            .ToListAsync(ct);
+        List<MatchReference> matchReferences = await GetMatchReferencesAsync(puuid, queueType, ct);
+
+        Dictionary<string, Summoner> summonerCache = [];
+
+        Dictionary<int, Champion> champions =
+            await _db.Champions.ToDictionaryAsync(c => c.Key, ct);
+
+        Dictionary<int, SummonerSpell> summonerSpells =
+            await _db.SummonerSpells.ToDictionaryAsync(s => s.Key, ct);
 
         List<Match> matches = [];
-        Dictionary<string, Summoner> summonersInThisRun = [];
 
-        foreach (MatchReference matchReference in matchReferences)
+        foreach (MatchReference reference in matchReferences)
         {
-            Match? match = matchReference.Match;
-
-            if (match == null)
-            {  
-                MatchResponseDto matchResponseDto = await _riotApiService.GetMatchDetailAsync(matchReference.MatchId, ct);
-                InfoDto info = matchResponseDto.Info;
-
-                List<Team> teams = [];
-                List<Participant> participants = [];
-
-                foreach (TeamDto teamDto in info.Teams)
-                {
-                    Team team = new()
-                    {
-                        Win = teamDto.Win,
-                        TeamId = teamDto.TeamId
-                    };
-
-                    teams.Add(team);
-                }
-
-                _db.Teams.AddRange(teams);
-
-                foreach (ParticipantDto participantDto in info.Participants)
-                {
-                    Champion champion = await _db.Champions.FirstOrDefaultAsync(c => c.Key == participantDto.ChampionId) ?? 
-                        throw new NotFoundException(nameof(Champion), nameof(Champion.Key), participantDto.ChampionId);
-                        
-                    List<SummonerSpell> summonerSpells = await _db.SummonerSpells
-                        .Where(sp => sp.Key == participantDto.Summoner1Id ||
-                                    sp.Key == participantDto.Summoner2Id)
-                        .ToListAsync(ct);
-
-                    string summonerPuuid = participantDto.Puuid;
-
-                    if (!summonersInThisRun.TryGetValue(summonerPuuid, out Summoner? summoner))
-                    {
-                        summoner = await _db.Summoners.FirstOrDefaultAsync(s => s.Puuid == summonerPuuid, ct);
-
-                        if (summoner is null)
-                        {
-                            summoner = new Summoner
-                            {
-                                Puuid = summonerPuuid,
-                                Username = participantDto.RiotIdGameName,
-                                Tag = participantDto.RiotIdTagLine,
-                                Level = participantDto.SummonerLevel,
-                                ProfileIconId = participantDto.ProfileIcon,
-                            };
-                            _db.Summoners.Add(summoner);
-                        }
-
-                        summonersInThisRun[summonerPuuid] = summoner;
-                    }
-
-                    Participant participant = new()
-                    {
-                        ParticipantId = participantDto.ParticipantId,
-                        Assists = participantDto.Assists,
-                        ChampionLevel = participantDto.ChampLevel,
-                        Deaths = participantDto.Deaths,
-                        Gold = participantDto.GoldEarned,
-                        Items = [participantDto.Item0, participantDto.Item1, 
-                            participantDto.Item2, participantDto.Item3, 
-                            participantDto.Item4, participantDto.Item5, 
-                            participantDto.Item6],
-                        Kills = participantDto.Kills,
-                        Lane = participantDto.TeamPosition,
-                        PrimaryRune = participantDto.Perks.Styles[0].Selections[0].Perk,
-                        SecondaryTree = participantDto.Perks.Styles[1].Style,
-                        DamageToChampions = participantDto.TotalDamageDealtToChampions,
-                        Team = teams.First(t => t.TeamId == participantDto.TeamId),
-                        Summoner = summoner,
-                        Champion = champion,
-                        SummonerSpells = summonerSpells
-                    };
-
-                    participants.Add(participant);
-                }
-
-                _db.Participants.AddRange(participants);
-
-                match = new Match
-                {
-                    EndOfGameResult = info.EndOfGameResult,
-                    GameDuration = info.GameDuration,
-                    GameEndTimestamp = info.GameEndTimestamp,
-                    QueueType = QueueTypeHelper.QueueIdToQueueType(info.QueueId),
-                    MatchReference = matchReference,
-                    Teams = teams
-                };
-
-                _db.Matches.Add(match);
-            }
+            Match match = reference.Match ??
+                await CreateMatchAsync(
+                    reference,
+                    summonerCache,
+                    champions,
+                    summonerSpells,
+                    ct);
 
             matches.Add(match);
         }
@@ -187,6 +94,161 @@ public class MatchService : IMatchService
         await _db.SaveChangesAsync(ct);
 
         return [.. matches.Select(m => MatchToMatchDto(m, puuid))];
+    }
+
+    private async Task<List<MatchReference>> GetMatchReferencesAsync(
+        string puuid,
+        QueueType queueType,
+        CancellationToken ct)
+    {
+        return await _db.MatchReferences
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Champion)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Summoner)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.SummonerSpells)
+            .Where(m =>
+                m.Summoners.Any(s => s.Puuid == puuid) &&
+                m.QueueType == queueType)
+            .OrderByDescending(m => m.MatchId)
+            .Take(10)
+            .ToListAsync(ct);
+    }
+
+    private async Task<Match> CreateMatchAsync(
+        MatchReference reference,
+        Dictionary<string, Summoner> summonerCache,
+        Dictionary<int, Champion> champions,
+        Dictionary<int, SummonerSpell> spells,
+        CancellationToken ct)
+    {
+        MatchResponseDto dto =
+            await _riotApiService.GetMatchDetailAsync(reference.MatchId, ct);
+
+        InfoDto info = dto.Info;
+
+        List<Team> teams = [.. info.Teams
+            .Select(t => new Team
+            {
+                TeamId = t.TeamId,
+                Win = t.Win
+            })];
+
+        _db.Teams.AddRange(teams);
+
+        List<Participant> participants = [];
+
+        foreach (ParticipantDto participantDto in info.Participants)
+        {
+            participants.Add(await CreateParticipantAsync(
+                participantDto,
+                teams,
+                champions,
+                spells,
+                summonerCache,
+                ct));
+        }
+
+        _db.Participants.AddRange(participants);
+
+        Match match = new()
+        {
+            EndOfGameResult = info.EndOfGameResult,
+            GameDuration = info.GameDuration,
+            GameEndTimestamp = info.GameEndTimestamp,
+            QueueType = QueueTypeHelper.QueueIdToQueueType(info.QueueId),
+            MatchReference = reference,
+            Teams = teams
+        };
+
+        _db.Matches.Add(match);
+
+        return match;
+    }
+
+    private async Task<Participant> CreateParticipantAsync(
+        ParticipantDto dto,
+        List<Team> teams,
+        Dictionary<int, Champion> champions,
+        Dictionary<int, SummonerSpell> spells,
+        Dictionary<string, Summoner> cache,
+        CancellationToken ct)
+    {
+        if (!champions.TryGetValue(dto.ChampionId, out Champion? champion))
+            throw new NotFoundException(nameof(Champion), nameof(Champion.Key), dto.ChampionId);
+
+        if (!spells.TryGetValue(dto.Summoner1Id, out SummonerSpell? spell1))
+            throw new NotFoundException(nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner1Id);
+
+        if (!spells.TryGetValue(dto.Summoner2Id, out SummonerSpell? spell2))
+            throw new NotFoundException(nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner2Id);
+
+        Summoner summoner = await GetOrCreateSummonerAsync(dto, cache, ct);
+
+        return new Participant
+        {
+            ParticipantId = dto.ParticipantId,
+            Assists = dto.Assists,
+            ChampionLevel = dto.ChampLevel,
+            Deaths = dto.Deaths,
+            Gold = dto.GoldEarned,
+            Items =
+            [
+                dto.Item0,
+                dto.Item1,
+                dto.Item2,
+                dto.Item3,
+                dto.Item4,
+                dto.Item5,
+                dto.Item6
+            ],
+            Kills = dto.Kills,
+            Lane = dto.TeamPosition,
+            PrimaryRune = dto.Perks.Styles[0].Selections[0].Perk,
+            SecondaryTree = dto.Perks.Styles[1].Style,
+            DamageToChampions = dto.TotalDamageDealtToChampions,
+            Team = teams.First(t => t.TeamId == dto.TeamId),
+            Champion = champion,
+            Summoner = summoner,
+            SummonerSpells = [spell1, spell2]
+        };
+    }
+
+    private async Task<Summoner> GetOrCreateSummonerAsync(
+        ParticipantDto dto,
+        Dictionary<string, Summoner> cache,
+        CancellationToken ct)
+    {
+        if (cache.TryGetValue(dto.Puuid, out Summoner? summoner))
+            return summoner;
+
+        summoner = await _db.Summoners
+            .FirstOrDefaultAsync(s => s.Puuid == dto.Puuid, ct);
+
+        if (summoner is null)
+        {
+            summoner = new Summoner
+            {
+                Puuid = dto.Puuid,
+                Username = dto.RiotIdGameName,
+                Tag = dto.RiotIdTagLine,
+                Level = dto.SummonerLevel,
+                ProfileIconId = dto.ProfileIcon
+            };
+
+            _db.Summoners.Add(summoner);
+        }
+
+        cache[dto.Puuid] = summoner;
+
+        return summoner;
     }
 
     private static MatchDto MatchToMatchDto(Match match, string puuid)
