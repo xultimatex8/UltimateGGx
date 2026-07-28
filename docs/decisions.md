@@ -4,6 +4,20 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Include participant details in match list responses
+
+**Decision:** each `MatchDto` returned by the match history endpoint includes the complete list of `ParticipantDetailDto`s, even though the frontend initially displays only summary information. No additional endpoint is provided to fetch match details when a match is expanded.
+
+**Alternatives considered:**
+
+*How to expose participant details:*
+- *Return only match summaries and fetch participant details on demand* — reduces the size of the initial response, but requires an additional HTTP request whenever the user expands a match, increasing latency and adding complexity to both the frontend and backend.
+- *Include participant details in every `MatchDto` (chosen)* — slightly increases the response payload, but avoids extra requests, simplifies the frontend, and provides an immediate expansion experience.
+
+**Why:** the match history endpoint is paginated and returns only 10 matches at a time, making the additional payload of participant details relatively small. Since the backend already has the data available when constructing the response, including it incurs no additional database queries. Returning all information in a single response keeps the API simpler and avoids introducing a dedicated match-details endpoint before it is justified by actual performance requirements.
+
+---
+
 ## Lazy synchronization of match details
 
 **Decision:** on the first synchronization for a given queue type, only the latest 10 matchIds for that queue are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
