@@ -47,10 +47,6 @@ public class AppDbContext : DbContext
             .HasIndex(s => s.Key)
             .IsUnique();
 
-        modelBuilder.Entity<Match>()
-            .HasIndex(m => m.MatchId)
-            .IsUnique();
-
         modelBuilder.Entity<MatchReference>()
             .HasIndex(m => m.MatchId)
             .IsUnique();
