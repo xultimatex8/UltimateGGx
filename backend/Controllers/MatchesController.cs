@@ -28,9 +28,16 @@ public class MatchesController : ControllerBase
     [HttpGet("summoner/{puuid}")]
     public async Task<IActionResult> GetSummonerMatches(
         string puuid,
-        [FromQuery] QueueType queueType = QueueType.DRAFT_PICK)
+        [FromQuery] QueueType queueType = QueueType.DRAFT_PICK,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
-        List<MatchDto> matches = await _matchService.GetSummonerMatchesAsync(puuid, queueType);
+        PagedResult<MatchDto> matches = await _matchService.GetSummonerMatchesAsync(
+            puuid,
+            page,
+            pageSize,
+            queueType);
+
         return Ok(matches);
     }
 }

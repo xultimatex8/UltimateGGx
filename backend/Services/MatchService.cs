@@ -61,12 +61,37 @@ public class MatchService : IMatchService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<List<MatchDto>> GetSummonerMatchesAsync(
+    public async Task<PagedResult<MatchDto>> GetSummonerMatchesAsync(
         string puuid,
+        int page = 1,
+        int pageSize = 10,
         QueueType queueType = QueueType.DRAFT_PICK,
         CancellationToken ct = default)
     {
-        List<MatchReference> matchReferences = await GetMatchReferencesAsync(puuid, queueType, ct);
+        var query = _db.MatchReferences
+            .Where(m =>
+                m.Summoners.Any(s => s.Puuid == puuid) &&
+                m.QueueType == queueType);
+
+        int totalItems = await query.CountAsync(ct);
+
+        List<MatchReference> matchReferences = await query
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Champion)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Summoner)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.SummonerSpells)
+            .OrderByDescending(m => m.Match!.GameEndTimestamp)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
 
         Dictionary<string, Summoner> summonerCache = [];
 
@@ -93,33 +118,13 @@ public class MatchService : IMatchService
 
         await _db.SaveChangesAsync(ct);
 
-        return [.. matches.Select(m => MatchToMatchDto(m, puuid))];
-    }
-
-    private async Task<List<MatchReference>> GetMatchReferencesAsync(
-        string puuid,
-        QueueType queueType,
-        CancellationToken ct)
-    {
-        return await _db.MatchReferences
-            .Include(m => m.Match)
-                .ThenInclude(m => m!.Teams)
-                    .ThenInclude(t => t.Participants)
-                        .ThenInclude(p => p.Champion)
-            .Include(m => m.Match)
-                .ThenInclude(m => m!.Teams)
-                    .ThenInclude(t => t.Participants)
-                        .ThenInclude(p => p.Summoner)
-            .Include(m => m.Match)
-                .ThenInclude(m => m!.Teams)
-                    .ThenInclude(t => t.Participants)
-                        .ThenInclude(p => p.SummonerSpells)
-            .Where(m =>
-                m.Summoners.Any(s => s.Puuid == puuid) &&
-                m.QueueType == queueType)
-            .OrderByDescending(m => m.MatchId)
-            .Take(10)
-            .ToListAsync(ct);
+        return new PagedResult<MatchDto>
+        {
+            Items = [.. matches.Select(m => MatchToMatchDto(m, puuid))],
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems
+        };
     }
 
     private async Task<Match> CreateMatchAsync(
