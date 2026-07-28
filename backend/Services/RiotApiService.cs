@@ -1,5 +1,6 @@
 using backend.Interfaces;
 using backend.Models.Enums;
+using backend.Helpers;
 using backend.Models.Riot;
 
 namespace backend.Services;
@@ -39,12 +40,10 @@ public class RiotApiService : IRiotApiService
         return response ?? throw new Exception("Could not retrieve Riot Summoner Queues Info");
     }
 
-    public async Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type = QueueType.DRAFT_PICK, CancellationToken ct = default)
+    public async Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type, CancellationToken ct = default)
     {
-        string matchType = type == QueueType.DRAFT_PICK ? "normal" : "ranked";
-        
         List<string>? response = await _regionalClient.GetFromJsonAsync<List<string>>(
-            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?&type={matchType}", ct);
+            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Summoner Matches");
     }

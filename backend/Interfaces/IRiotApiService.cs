@@ -8,6 +8,6 @@ public interface IRiotApiService
     Task<AccountResponseDto> GetRiotAccountAsync(string username, string tag, CancellationToken ct = default);
     Task<SummonerResponseDto> GetRiotSummonerAsync(string puuid, CancellationToken ct = default);
     Task<List<QueueResponseDto>> GetSummonerQueuesAsync(string puuid, CancellationToken ct = default);
-    Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type = QueueType.DRAFT_PICK, CancellationToken ct = default);
+    Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type, CancellationToken ct = default);
     Task<MatchResponseDto> GetMatchDetailAsync(string matchId, CancellationToken ct = default);
 }
