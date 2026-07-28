@@ -31,9 +31,15 @@ public class ParticipantDto
     public int Item6 { get; set; }
     public int Kills { get; set; }
     public string TeamPosition { get; set; } = default!;
+    public int ParticipantId { get; set; }
     public PerksDto Perks { get; set; } = default!;
+    public int ProfileIcon { get; set; }
+    public string RiotIdTagLine { get; set; } = default!;
+    public string Puuid { get; set; } = default!;
     public int Summoner1Id { get; set; }
     public int Summoner2Id { get; set; }
+    public string RiotIdGameName { get; set; } = default!;
+    public int SummonerLevel { get; set; }
     public int TeamId { get; set; }
     public int TotalDamageDealtToChampions { get; set; }
 }
