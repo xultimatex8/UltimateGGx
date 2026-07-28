@@ -35,6 +35,7 @@ builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 builder.Services.AddScoped<IRiotApiService, RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
 builder.Services.AddScoped<ISummonerService, SummonerService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
