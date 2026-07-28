@@ -263,34 +263,32 @@ public class MatchService : IMatchService
             GameEndTimestamp = match.GameEndTimestamp,
             QueueType = match.QueueType,
             Win = participant.Team.Win,
-            Assists = participant.Assists,
-            ChampionLevel = participant.ChampionLevel,
-            ChampionName = participant.Champion.Name,
-            Deaths = participant.Deaths,
-            Gold = participant.Gold,
-            Items = participant.Items,
-            Minions = participant.Minions,
-            Kills = participant.Kills,
-            Lane = participant.Lane,
-            PrimaryRune = participant.PrimaryRune,
-            SecondaryTree = participant.SecondaryTree,
-            DamageToChampions = participant.DamageToChampions,
             Participants = [.. match.Teams
                 .SelectMany(t => t.Participants)
                 .Select(ParticipantToParticipantBriefDto)],
-            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellToSummonerSpellDto)]
         };
     }
 
-    private static ParticipantBriefDto ParticipantToParticipantBriefDto(Participant participant)
+    private static ParticipantDetailDto ParticipantToParticipantBriefDto(Participant participant)
     {
-        return new ParticipantBriefDto
+        return new ParticipantDetailDto
         {
             ChampionName = participant.Champion.Name,
             SummonerName = participant.Summoner.Username,
+            SummonerTag = participant.Summoner.Tag,
+            Assists = participant.Assists,
+            ChampionLevel = participant.ChampionLevel,
+            Deaths = participant.Deaths,
+            Gold = participant.Gold,
+            Items = participant.Items,
+            Kills = participant.Kills,
             Lane = participant.Lane,
             Minions = participant.Minions,
-            TeamId = participant.Team.TeamId
+            PrimaryRune = participant.PrimaryRune,
+            SecondaryTree = participant.SecondaryTree,
+            DamageToChampions = participant.DamageToChampions,
+            TeamId = participant.Team.TeamId,
+            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellToSummonerSpellDto)]
         };
     }
 
