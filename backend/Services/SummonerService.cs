@@ -92,6 +92,7 @@ public class SummonerService : ISummonerService
     {
         return new SummonerDto
         {
+            Puuid = summoner.Puuid,
             Username = summoner.Username,
             Tag = summoner.Tag,
             Level = summoner.Level,
