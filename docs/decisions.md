@@ -6,13 +6,13 @@ Design and technical decisions made. Newest entries at the top.
 
 ## Lazy synchronization of match details
 
-**Decision:** on the first sync, only the latest 20 draft/ranked `matchId`s are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
+**Decision:** on the first synchronization for a given queue type, only the latest 10 matchIds for that queue are stored, each represented by a lightweight `MatchReference` entity linked to the summoners it was discovered for. Detailed match information is fetched only for the 10 most recent matches shown to the user, at which point a full `Match` entity is created and linked back to its `MatchReference`. Whether a match has been synchronized is determined by checking whether `MatchReference.Match` is null, rather than a separate flag. Older matches are synchronized on demand when the user navigates to them.
 
 **Alternatives considered:**
 
-*How much match data to fetch initially:*
-- *Fetch details for all 20 matches immediately* — simplest implementation, but doubles the number of Match-V5 requests during the initial sync, consuming Riot API rate limits for matches the user may never view.
-- *Fetch details only for the latest 10 matches (chosen)* — reduces initial latency and API usage while still covering the matches most users are interested in. Remaining matches are synchronized only if needed.
+*How many matches to fetch initially:*
+- *Fetch the latest 20 matches regardless of queue* — provides broader history, but stores references for matches that may never be requested and mixes different queue types.
+- *Fetch the latest 10 matches for the requested queue type (chosen)* — aligns the initial synchronization with the requested game mode (Draft Pick, Ranked Solo, or Ranked Flex), reduces Riot API usage, and avoids storing references for unrelated queues.
 
 *How to represent partially synchronized matches:*
 - *Require all match fields to exist before persisting* — forces fetching the full match payload immediately, preventing incremental synchronization.
