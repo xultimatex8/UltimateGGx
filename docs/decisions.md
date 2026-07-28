@@ -4,6 +4,20 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Avoid duplicating the requested summoner's data in `MatchDto`
+
+**Decision:** `MatchDto` does not include participant-specific fields (such as `Win`, `Kills`, `Deaths`, or `ChampionName`) for the requested summoner. Instead, it exposes the complete list of `ParticipantDetailDto`s, and the frontend identifies the requested player by matching the already known Riot ID (`SummonerName` and `SummonerTag`) against the participants.
+
+**Alternatives considered:**
+
+*How to expose the requested summoner's statistics:*
+- *Duplicate the requested summoner's data in `MatchDto`* — makes the frontend slightly simpler, but duplicates information already present in `Participants`, increasing the response size and introducing two representations of the same data that must remain consistent.
+- *Derive the requested summoner from `Participants` (chosen)* — avoids redundant data, keeps a single source of truth for participant information, and makes every participant, including the requested summoner, follow the same representation.
+
+**Why:** the frontend already knows which summoner's match history it requested, so it can identify that participant directly from the `Participants` collection. Keeping participant data exclusively within `ParticipantDetailDto` eliminates duplication and avoids synchronization issues where the same information could diverge between `MatchDto` and the participant list.
+
+---
+
 ## Include participant details in match list responses
 
 **Decision:** each `MatchDto` returned by the match history endpoint includes the complete list of `ParticipantDetailDto`s, even though the frontend initially displays only summary information. No additional endpoint is provided to fetch match details when a match is expanded.
