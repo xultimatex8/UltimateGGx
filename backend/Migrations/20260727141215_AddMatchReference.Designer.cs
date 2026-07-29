@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -12,9 +13,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260727141215_AddMatchReference")]
+    partial class AddMatchReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,6 +213,10 @@ namespace backend.Migrations
                     b.Property<long>("GameEndTimestamp")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("MatchId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("QueueType")
                         .IsRequired()
                         .HasColumnType("text");
@@ -218,6 +225,9 @@ namespace backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MatchId")
+                        .IsUnique();
 
                     b.ToTable("Matches");
                 });
@@ -239,9 +249,6 @@ namespace backend.Migrations
                     b.Property<string>("MatchId")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("QueueType")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -296,9 +303,6 @@ namespace backend.Migrations
                     b.Property<string>("Lane")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Minions")
-                        .HasColumnType("integer");
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("integer");

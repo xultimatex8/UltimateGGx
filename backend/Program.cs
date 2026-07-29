@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Services;
 using System.Text.Json.Serialization;
 using backend.Interfaces;
+using backend.Middleware;
 
 Env.Load("../.env");
 
@@ -34,6 +35,7 @@ builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
 builder.Services.AddScoped<IRiotApiService, RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
 builder.Services.AddScoped<ISummonerService, SummonerService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
@@ -72,6 +74,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

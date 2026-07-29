@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Champion> Champions => Set<Champion>();
     public DbSet<SummonerSpell> SummonerSpells => Set<SummonerSpell>();
     public DbSet<Match> Matches => Set<Match>();
+    public DbSet<MatchReference> MatchReferences => Set<MatchReference>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<Participant> Participants => Set<Participant>();
     public DbSet<ParticipantFrame> ParticipantFrames => Set<ParticipantFrame>();
@@ -46,7 +47,7 @@ public class AppDbContext : DbContext
             .HasIndex(s => s.Key)
             .IsUnique();
 
-        modelBuilder.Entity<Match>()
+        modelBuilder.Entity<MatchReference>()
             .HasIndex(m => m.MatchId)
             .IsUnique();
 
@@ -85,6 +86,12 @@ public class AppDbContext : DbContext
             .HasOne(e => e.Victim)
             .WithMany(p => p.DeathsAsVictim)
             .HasForeignKey(e => e.VictimParticipantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MatchReference>()
+            .HasOne(mr => mr.Match)
+            .WithOne(m => m.MatchReference)
+            .HasForeignKey<MatchReference>(mr => mr.MatchDbId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 

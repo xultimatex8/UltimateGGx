@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -12,9 +13,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260724184912_MakeMatchDetailsOptional")]
+    partial class MakeMatchDetailsOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,21 +39,6 @@ namespace backend.Migrations
                     b.HasIndex("AssistingParticipantsId");
 
                     b.ToTable("EventAssists", (string)null);
-                });
-
-            modelBuilder.Entity("MatchReferenceSummoner", b =>
-                {
-                    b.Property<int>("MatchReferencesId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SummonersId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MatchReferencesId", "SummonersId");
-
-                    b.HasIndex("SummonersId");
-
-                    b.ToTable("MatchReferenceSummoner");
                 });
 
             modelBuilder.Entity("ParticipantSummonerSpell", b =>
@@ -201,60 +189,30 @@ namespace backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EndOfGameResult")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("GameDuration")
+                    b.Property<long?>("GameDuration")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("GameEndTimestamp")
+                    b.Property<long?>("GameEndTimestamp")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("QueueType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("backend.Models.MatchReference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("MatchDbId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("MatchId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("QueueType")
-                        .HasColumnType("integer");
+                    b.Property<string>("QueueType")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatchDbId")
-                        .IsUnique();
-
                     b.HasIndex("MatchId")
                         .IsUnique();
 
-                    b.ToTable("MatchReferences");
+                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("backend.Models.Participant", b =>
@@ -296,9 +254,6 @@ namespace backend.Migrations
                     b.Property<string>("Lane")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Minions")
-                        .HasColumnType("integer");
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("integer");
@@ -527,21 +482,6 @@ namespace backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MatchReferenceSummoner", b =>
-                {
-                    b.HasOne("backend.Models.MatchReference", null)
-                        .WithMany()
-                        .HasForeignKey("MatchReferencesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.Summoner", null)
-                        .WithMany()
-                        .HasForeignKey("SummonersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ParticipantSummonerSpell", b =>
                 {
                     b.HasOne("backend.Models.Participant", null)
@@ -580,16 +520,6 @@ namespace backend.Migrations
                     b.Navigation("Match");
 
                     b.Navigation("Victim");
-                });
-
-            modelBuilder.Entity("backend.Models.MatchReference", b =>
-                {
-                    b.HasOne("backend.Models.Match", "Match")
-                        .WithOne("MatchReference")
-                        .HasForeignKey("backend.Models.MatchReference", "MatchDbId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Match");
                 });
 
             modelBuilder.Entity("backend.Models.Participant", b =>
@@ -660,9 +590,6 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Match", b =>
                 {
                     b.Navigation("Events");
-
-                    b.Navigation("MatchReference")
-                        .IsRequired();
 
                     b.Navigation("Teams");
                 });
