@@ -64,6 +64,26 @@ public class AppDbContext : DbContext
             .Property(e => e.Type)
             .HasConversion<string>();
 
+        modelBuilder.Entity<Event>()
+            .Property(e => e.TowerType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.BuildingType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.LaneType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.MonsterType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.MonsterSubType)
+            .HasConversion<string>();
+
 
         modelBuilder.Entity<Participant>()
             .HasMany(p => p.SummonerSpells)
@@ -75,6 +95,12 @@ public class AppDbContext : DbContext
             .WithMany(p => p.Assisted)
             .UsingEntity(j => j.ToTable("EventAssists"));
 
+
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Participant)
+            .WithMany(p => p.ParticipantInEvent)
+            .HasForeignKey(e => e.ParticipantId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Event>()
             .HasOne(e => e.Killer)

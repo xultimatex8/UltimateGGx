@@ -27,6 +27,7 @@ public class Participant : BaseEntity
 
     public ICollection<SummonerSpell> SummonerSpells { get; set; } = [];
     public ICollection<ParticipantFrame> Frames { get; set; } = [];
+    public ICollection<Event> ParticipantInEvent { get; set; } = [];
     public ICollection<Event> KillsAsKiller { get; set; } = [];
     public ICollection<Event> DeathsAsVictim { get; set; } = [];
     public ICollection<Event> Assisted { get; set; } = [];
