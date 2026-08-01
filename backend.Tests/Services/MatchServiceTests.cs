@@ -24,9 +24,9 @@ public class MatchServiceTests
 
     private static async Task SeedReferenceDataAsync(AppDbContext db)
     {
-        db.Champions.Add(new Champion { Key = 1, Name = "Annie", Roles = ["Mage"] });
-        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash" });
-        db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal" });
+        db.Champions.Add(new Champion { Key = 1, Name = "Annie", RiotId = "Annie", Roles = ["Mage"] });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash", RiotId = "SummonerFlash" });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal", RiotId = "SummonerHeal" });
         db.Items.Add(new Item { Key = 1001, Name = "Boots", Description = "desc", BuyPrice = 300, SellPrice = 210, Stats = [] });
         db.Items.Add(new Item { Key = 3006, Name = "Berserker's Greaves", Description = "desc", BuyPrice = 1100, SellPrice = 770, Stats = [] });
         await db.SaveChangesAsync();
@@ -328,9 +328,9 @@ public class MatchServiceTests
     public async Task GetSummonerMatchesAsync_WhenItemUnknown_ThrowsNotFoundException()
     {
         using var db = CreateInMemoryDb();
-        db.Champions.Add(new Champion { Key = 1, Name = "Annie", Roles = ["Mage"] });
-        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash" });
-        db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal" });
+        db.Champions.Add(new Champion { Key = 1, Name = "Annie", RiotId = "Annie", Roles = ["Mage"] });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash", RiotId = "SummonerFlash" });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal", RiotId = "SummonerHeal" });
         await db.SaveChangesAsync();
 
         var requestedSummoner = new Summoner { Puuid = "abc-123", Username = "Faker", Tag = "KR1" };

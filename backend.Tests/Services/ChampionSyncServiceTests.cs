@@ -19,20 +19,20 @@ public class ChampionSyncServiceTests
         return new AppDbContext(options);
     }
 
-    private static ChampionResponseDto BuildChampionsResponse(params (string key, string name, List<string> tags)[] champs)
+    private static ChampionResponseDto BuildChampionsResponse(params (string key, string name, string id, List<string> tags)[] champs)
     {
         var data = champs.ToDictionary(
             c => c.name,
-            c => new ChampionDto { Key = c.key, Name = c.name, Tags = c.tags });
+            c => new ChampionDto { Key = c.key, Name = c.name, Id = c.id, Tags = c.tags });
 
         return new ChampionResponseDto { Data = data };
     }
 
-    private static SummonerSpellResponseDto BuildSpellsResponse(params (string key, string name)[] spells)
+    private static SummonerSpellResponseDto BuildSpellsResponse(params (string key, string name, string id)[] spells)
     {
         var data = spells.ToDictionary(
             s => s.name,
-            s => new SummonerSpellDto { Key = s.key, Name = s.name });
+            s => new SummonerSpellDto { Key = s.key, Name = s.name, Id = s.id });
 
         return new SummonerSpellResponseDto { Data = data };
     }
@@ -61,9 +61,9 @@ public class ChampionSyncServiceTests
         mockDdragon.Setup(x => x.GetLatestVersionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("14.14.1");
         mockDdragon.Setup(x => x.GetChampionsAsync("14.14.1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", ["Mage", "Assassin"])));
+            .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", "Ahri", ["Mage", "Assassin"])));
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BuildSpellsResponse(("4", "Flash")));
+            .ReturnsAsync(BuildSpellsResponse(("4", "Flash", "SummonerFlash")));
         mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildItemsResponse());
 
@@ -74,27 +74,29 @@ public class ChampionSyncServiceTests
         var champion = await db.Champions.SingleAsync();
         champion.Key.Should().Be(103);
         champion.Name.Should().Be("Ahri");
+        champion.RiotId.Should().Be("Ahri");
         champion.Roles.Should().BeEquivalentTo(["Mage", "Assassin"]);
 
         var spell = await db.SummonerSpells.SingleAsync();
         spell.Key.Should().Be(4);
         spell.Name.Should().Be("Flash");
+        spell.RiotId.Should().Be("SummonerFlash");
     }
 
     [Fact]
     public async Task SyncAsync_UpdatesExistingChampionInsteadOfDuplicating()
     {
         using var db = CreateInMemoryDb();
-        db.Champions.Add(new Champion { Key = 103, Name = "Ahri (old name)", Roles = ["Mage"] });
+        db.Champions.Add(new Champion { Key = 103, Name = "Ahri (old name)", RiotId = "Ahri", Roles = ["Mage"] });
         await db.SaveChangesAsync();
 
         var mockDdragon = new Mock<IDataDragonService>();
         mockDdragon.Setup(x => x.GetLatestVersionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("14.14.1");
         mockDdragon.Setup(x => x.GetChampionsAsync("14.14.1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", ["Mage", "Assassin"])));
+            .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", "Ahri", ["Mage", "Assassin"])));
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BuildSpellsResponse());
+            .ReturnsAsync(BuildSpellsResponse(("4", "Flash", "SummonerFlash")));
         mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildItemsResponse());
 
@@ -112,7 +114,7 @@ public class ChampionSyncServiceTests
     public async Task SyncAsync_UpdatesExistingSpellInsteadOfDuplicating()
     {
         using var db = CreateInMemoryDb();
-        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Old Flash Name" });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Old Flash Name", RiotId = "SummonerFlash" });
         await db.SaveChangesAsync();
 
         var mockDdragon = new Mock<IDataDragonService>();
@@ -121,7 +123,7 @@ public class ChampionSyncServiceTests
         mockDdragon.Setup(x => x.GetChampionsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildChampionsResponse());
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BuildSpellsResponse(("4", "Flash")));
+            .ReturnsAsync(BuildSpellsResponse(("4", "Flash", "SummonerFlash")));
         mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildItemsResponse());
 

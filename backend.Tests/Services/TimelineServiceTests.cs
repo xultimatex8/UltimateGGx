@@ -25,8 +25,8 @@ public class TimelineServiceTests
     {
         var killerSummoner = new Summoner { Puuid = "killer-puuid", Username = "Killer", Tag = "EUW" };
         var victimSummoner = new Summoner { Puuid = "victim-puuid", Username = "Victim", Tag = "EUW" };
-        var champion = new Champion { Key = 1, Name = "Annie", Roles = ["Mage"] };
-        var spell = new SummonerSpell { Key = 4, Name = "Flash" };
+        var champion = new Champion { Key = 1, Name = "Annie", RiotId = "Annie", Roles = ["Mage"] };
+        var spell = new SummonerSpell { Key = 4, Name = "Flash", RiotId = "SummonerFlash" };
 
         Team teamA = new() { TeamId = 100, Win = true };
         Team teamB = new() { TeamId = 200, Win = false };
