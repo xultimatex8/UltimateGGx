@@ -4,6 +4,23 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Wrap external HTTP failures in dedicated, origin-specific exceptions
+
+**Decision:** `RiotApiService` catches the underlying `HttpRequestException` at a single internal `GetAsync<T>` helper and re-throw it as a dedicated exception (`RiotApiException`), carrying the real `HttpStatusCode` returned by the failing service. `ExceptionHandlingMiddleware` catches `RiotApiException` specifically and maps its `StatusCode` directly onto the HTTP response returned to the frontend, with a generic message; the underlying exception and status code are logged, not exposed in detail to the client.
+
+**Alternatives considered:**
+
+*How to distinguish failures originating from Riot from any other failure:*
+- *Catch `HttpRequestException` generically in the middleware* — cannot distinguish which external dependency failed (Riot  vs. any future HTTP integration), since all of them surface the same exception type.
+- *Dedicated exception type per external dependency, thrown at the source (chosen)* — the middleware can react specifically to failures from a known origin, and the exception type itself documents where the failure came from.
+
+*How much detail to expose to the frontend for Riot failures:*
+- *Forward Riot's exact status code with a detailed, code-specific message* — more informative, but leaks internal infrastructure details (API key issues, upstream rate limiting specifics) to any client inspecting the response, and requires maintaining a status-to-message mapping.
+- *Forward the real status code with a generic message, log the details (chosen)* — the frontend can still branch on the HTTP status code (e.g. 429 vs. 503), while the specific cause stays in the logs where it is actually useful for debugging.
+
+**Why:** without a dedicated exception type, every external HTTP dependency looks identical once it fails, making it impossible to react differently per origin or to guarantee that a failure is actually attributable to Riot before deciding how to respond to the client. Keeping the detailed status code out of the client-facing message avoids exposing internal integration details while still letting the frontend make status-code-based decisions.
+---
+
 ## Store Data Dragon identifiers instead of full image URLs
 
 **Decision:** `Champion` and `SummonerSpell` store a `RiotId` field (Data Dragon's string identifier, e.g. `"Ahri"`, `"SummonerFlash"`) in addition to their numeric `Key`. The currently synced Data Dragon version is stored once, in `DataDragonState`, rather than duplicated per entity. Full image URLs are never persisted; the frontend fetches the current version once (via a small endpoint backed by `DataDragonState`) and constructs any image URL client-side from the version plus the entity's identifier.
