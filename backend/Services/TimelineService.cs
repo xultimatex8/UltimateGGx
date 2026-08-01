@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Exceptions;
 using backend.Interfaces;
+using backend.Mappers;
 using backend.Models;
 using backend.Models.Dtos;
 using backend.Models.Enums;
@@ -364,7 +365,6 @@ public class TimelineService : ITimelineService
         return new ScoreboardParticipantDto
         {
             ParticipantId = participant.ParticipantId,
-            ChampionName = participant.Champion.Name,
             SummonerName = participant.Summoner.Username,
             Assists = assists,
             ChampionLevel = frame?.Level ?? 1,
@@ -376,7 +376,8 @@ public class TimelineService : ITimelineService
             Minions = frame?.Minions ?? 0,
             PrimaryRune = participant.PrimaryRune,
             SecondaryTree = participant.SecondaryTree,
-            SummonerSpells = [.. participant.SummonerSpells.Select(s => s.Key)],
+            Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),
+            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellMapper.SummonerSpellToSummonerSpellDto)],
             Items = [.. currentItems.Select(ItemToItemDto)]
         };
     }

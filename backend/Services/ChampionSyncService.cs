@@ -35,12 +35,14 @@ public class ChampionSyncService
                 {
                     Key = key,
                     Name = championDto.Name,
+                    RiotId = championDto.Id,
                     Roles = championDto.Tags
                 });
             }
             else
             {
                 existing.Name = championDto.Name;
+                existing.RiotId = championDto.Id;
                 existing.Roles = championDto.Tags;
             }
         }
@@ -57,12 +59,14 @@ public class ChampionSyncService
                 _db.SummonerSpells.Add(new SummonerSpell
                 {
                     Key = key,
-                    Name = spellDto.Name
+                    Name = spellDto.Name,
+                    RiotId = spellDto.Id
                 });
             }
             else
             {
                 existing.Name = spellDto.Name;
+                existing.RiotId = spellDto.Id;
             }
         }
 

@@ -15,7 +15,6 @@ public class ScoreboardTeamDto
 public class ScoreboardParticipantDto
 {
     public int ParticipantId { get; set; }
-    public string ChampionName { get; set; } = default!;
     public string SummonerName { get; set; } = default!;
     public int Assists { get; set; }
     public int ChampionLevel { get; set; }
@@ -27,6 +26,7 @@ public class ScoreboardParticipantDto
     public int Minions { get; set; }
     public int PrimaryRune { get; set; }
     public int SecondaryTree { get; set; }
-    public List<int> SummonerSpells { get; set; } = [];
+    public ChampionDto Champion { get; set; } = default!;
+    public List<SummonerSpellDto> SummonerSpells { get; set; } = [];
     public List<ItemDto> Items { get; set; } = [];
 }

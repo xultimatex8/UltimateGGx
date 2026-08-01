@@ -9,4 +9,5 @@ public class SummonerSpellDto
 {
     public string Key { get; set; } = default!;
     public string Name { get; set; } = default!;
+    public string Id { get; set; } = default!;
 }

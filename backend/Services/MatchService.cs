@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Exceptions;
 using backend.Helpers;
 using backend.Interfaces;
+using backend.Mappers;
 using backend.Models;
 using backend.Models.Dtos;
 using backend.Models.Enums;
@@ -308,7 +309,6 @@ public class MatchService : IMatchService
     {
         return new ParticipantDetailDto
         {
-            ChampionName = participant.Champion.Name,
             SummonerName = participant.Summoner.Username,
             SummonerTag = participant.Summoner.Tag,
             Assists = participant.Assists,
@@ -322,8 +322,9 @@ public class MatchService : IMatchService
             SecondaryTree = participant.SecondaryTree,
             DamageToChampions = participant.DamageToChampions,
             TeamId = participant.Team.TeamId,
+            Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),
             Items = [.. participant.Items.Select(ItemToItemDtoDto)],
-            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellToSummonerSpellDto)]
+            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellMapper.SummonerSpellToSummonerSpellDto)]
         };
     }
 
@@ -337,15 +338,6 @@ public class MatchService : IMatchService
             BuyPrice = item.BuyPrice,
             SellPrice = item.SellPrice,
             Stats = item.Stats
-        };
-    }
-
-    private static SummonerSpellDto SummonerSpellToSummonerSpellDto(SummonerSpell summonerSpell)
-    {
-        return new SummonerSpellDto
-        {
-            Key = summonerSpell.Key,
-            Name = summonerSpell.Name
         };
     }
 }
