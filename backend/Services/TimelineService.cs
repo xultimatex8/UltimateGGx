@@ -57,6 +57,9 @@ public class TimelineService : ITimelineService
             .SelectMany(t => t.Participants)
             .ToDictionary(p => p.ParticipantId);
 
+        Dictionary<int, Item> items = await _db.Items
+            .ToDictionaryAsync(i => i.Key, ct);
+
         List<Event> events = [];
         List<ParticipantFrame> frames = [];
 
@@ -64,7 +67,7 @@ public class TimelineService : ITimelineService
         {
             foreach (EventsTimeLineDto eventDto in frame.Events)
             {
-                Event? mappedEvent = MapEvent(eventDto, match, participants);
+                Event? mappedEvent = MapEvent(eventDto, match, items, participants);
 
                 if (mappedEvent is not null)
                 {
@@ -104,6 +107,7 @@ public class TimelineService : ITimelineService
     private static Event? MapEvent(
         EventsTimeLineDto dto,
         Match match,
+        Dictionary<int, Item> items,
         Dictionary<int, Participant> participants)
     {
         if (!Enum.TryParse(dto.Type, out EventType type))
@@ -118,13 +122,17 @@ public class TimelineService : ITimelineService
             Match = match,
             Bounty = dto.Bounty != 0 ? dto.Bounty : null,
             ShutdownBounty = dto.ShutdownBounty != 0 ? dto.ShutdownBounty : null,
-            ItemId = dto.ItemId != 0 ? dto.ItemId : null,
             MonsterType = ParseEnumOrNull<MonsterType>(dto.MonsterType),
             MonsterSubType = ParseEnumOrNull<MonsterSubType>(dto.MonsterSubType),
             BuildingType = ParseEnumOrNull<BuildingType>(dto.BuildingType),
             LaneType = ParseEnumOrNull<LaneType>(dto.LaneType),
-            TowerType = ParseEnumOrNull<TowerType>(dto.TowerType)
+            TowerType = ParseEnumOrNull<TowerType>(dto.TowerType),
         };
+
+        if (items.TryGetValue(dto.ItemId, out var item))
+        {
+            newEvent.Item = item;
+        }
 
         if (participants.TryGetValue(dto.ParticipantId, out Participant? participant))
         {

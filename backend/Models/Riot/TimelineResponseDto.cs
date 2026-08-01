@@ -31,6 +31,8 @@ public class EventsTimeLineDto
     public string Type { get; set; } = default!;
     public int KillerId { get; set; }
     public int ItemId { get; set; }
+    public int BeforeId { get; set; }
+    public int AfterId { get; set; }
     public int ParticipantId { get; set; }
     public int VictimId { get; set; }
     public List<int> AssistingParticipantIds { get; set; } = [];

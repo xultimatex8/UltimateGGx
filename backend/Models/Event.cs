@@ -16,12 +16,19 @@ public class Event : BaseEntity
     public LaneType? LaneType { get; set; }
     public TowerType? TowerType { get; set; }
 
-    public int? ItemId { get; set; }
-    
     public EventType Type { get; set; }
 
     public int MatchId { get; set; }
     public Match Match { get; set; } = default!;
+
+    public int? ItemId { get; set; }
+    public Item? Item { get; set; }
+
+    public int? BeforeItemId { get; set; }
+    public Item? BeforeItem { get; set; }
+
+    public int? AfterItemId { get; set; }
+    public Item? AfterItem { get; set; }
 
     public int? ParticipantId { get; set; }
     public Participant? Participant { get; set; }

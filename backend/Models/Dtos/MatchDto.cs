@@ -21,7 +21,6 @@ public class ParticipantDetailDto
     public int ChampionLevel { get; set; }
     public int Deaths { get; set; }
     public int Gold { get; set; }
-    public List<int> Items { get; set; } = [];
     public int Kills { get; set; }
     public string Lane { get; set; } = default!;
     public int Minions { get; set; }
@@ -29,6 +28,7 @@ public class ParticipantDetailDto
     public int SecondaryTree { get; set; }
     public int DamageToChampions { get; set; }
     public int TeamId { get; set; }
+    public List<ItemDto> Items { get; set; } = [];
     public List<SummonerSpellDto> SummonerSpells { get; set; } = [];
 }
 
