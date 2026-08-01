@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Exceptions;
 using backend.Helpers;
 using backend.Interfaces;
+using backend.Mappers;
 using backend.Models;
 using backend.Models.Dtos;
 using backend.Models.Enums;
@@ -88,6 +89,10 @@ public class MatchService : IMatchService
                 .ThenInclude(m => m!.Teams)
                     .ThenInclude(t => t.Participants)
                         .ThenInclude(p => p.SummonerSpells)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Items)
             .OrderByDescending(m => m.Match!.GameEndTimestamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -101,6 +106,9 @@ public class MatchService : IMatchService
         Dictionary<int, SummonerSpell> summonerSpells =
             await _db.SummonerSpells.ToDictionaryAsync(s => s.Key, ct);
 
+        Dictionary<int, Item> items =
+            await _db.Items.ToDictionaryAsync(i => i.Key, ct);
+
         List<Match> matches = [];
 
         foreach (MatchReference reference in matchReferences)
@@ -111,6 +119,7 @@ public class MatchService : IMatchService
                     summonerCache,
                     champions,
                     summonerSpells,
+                    items,
                     ct);
 
             matches.Add(match);
@@ -132,6 +141,7 @@ public class MatchService : IMatchService
         Dictionary<string, Summoner> summonerCache,
         Dictionary<int, Champion> champions,
         Dictionary<int, SummonerSpell> spells,
+        Dictionary<int, Item> items,
         CancellationToken ct)
     {
         MatchResponseDto dto =
@@ -157,6 +167,7 @@ public class MatchService : IMatchService
                 teams,
                 champions,
                 spells,
+                items,
                 summonerCache,
                 ct));
         }
@@ -183,6 +194,7 @@ public class MatchService : IMatchService
         List<Team> teams,
         Dictionary<int, Champion> champions,
         Dictionary<int, SummonerSpell> spells,
+        Dictionary<int, Item> items,
         Dictionary<string, Summoner> cache,
         CancellationToken ct)
     {
@@ -197,6 +209,34 @@ public class MatchService : IMatchService
 
         Summoner summoner = await GetOrCreateSummonerAsync(dto, cache, ct);
 
+        int[] itemIds =
+        [
+            dto.Item0,
+            dto.Item1,
+            dto.Item2,
+            dto.Item3,
+            dto.Item4,
+            dto.Item5,
+            dto.Item6
+        ];
+
+        List<Item> participantItems = [];
+
+        foreach (int itemId in itemIds)
+        {
+            if (itemId == 0)
+            {
+                continue;
+            }
+
+            if (!items.TryGetValue(itemId, out Item? item))
+            {
+                throw new NotFoundException(nameof(Item), nameof(Item.Key), itemId);
+            }
+
+            participantItems.Add(item);
+        }
+
         return new Participant
         {
             ParticipantId = dto.ParticipantId,
@@ -204,16 +244,7 @@ public class MatchService : IMatchService
             ChampionLevel = dto.ChampLevel,
             Deaths = dto.Deaths,
             Gold = dto.GoldEarned,
-            Items =
-            [
-                dto.Item0,
-                dto.Item1,
-                dto.Item2,
-                dto.Item3,
-                dto.Item4,
-                dto.Item5,
-                dto.Item6
-            ],
+            Items = participantItems,
             Kills = dto.Kills,
             Lane = dto.TeamPosition,
             Minions = dto.TotalMinionsKilled + dto.NeutralMinionsKilled,
@@ -270,22 +301,20 @@ public class MatchService : IMatchService
             Win = participant.Team.Win,
             Participants = [.. match.Teams
                 .SelectMany(t => t.Participants)
-                .Select(ParticipantToParticipantBriefDto)],
+                .Select(ParticipantToParticipantDetailDto)],
         };
     }
 
-    private static ParticipantDetailDto ParticipantToParticipantBriefDto(Participant participant)
+    private static ParticipantDetailDto ParticipantToParticipantDetailDto(Participant participant)
     {
         return new ParticipantDetailDto
         {
-            ChampionName = participant.Champion.Name,
             SummonerName = participant.Summoner.Username,
             SummonerTag = participant.Summoner.Tag,
             Assists = participant.Assists,
             ChampionLevel = participant.ChampionLevel,
             Deaths = participant.Deaths,
             Gold = participant.Gold,
-            Items = participant.Items,
             Kills = participant.Kills,
             Lane = participant.Lane,
             Minions = participant.Minions,
@@ -293,16 +322,22 @@ public class MatchService : IMatchService
             SecondaryTree = participant.SecondaryTree,
             DamageToChampions = participant.DamageToChampions,
             TeamId = participant.Team.TeamId,
-            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellToSummonerSpellDto)]
+            Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),
+            Items = [.. participant.Items.Select(ItemToItemDtoDto)],
+            SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellMapper.SummonerSpellToSummonerSpellDto)]
         };
     }
 
-    private static SummonerSpellDto SummonerSpellToSummonerSpellDto(SummonerSpell summonerSpell)
+    private static ItemDto ItemToItemDtoDto(Item item)
     {
-        return new SummonerSpellDto
+        return new ItemDto
         {
-            Key = summonerSpell.Key,
-            Name = summonerSpell.Name
+            Key = item.Key,
+            Name = item.Name,
+            Description = item.Description,
+            BuyPrice = item.BuyPrice,
+            SellPrice = item.SellPrice,
+            Stats = item.Stats
         };
     }
 }

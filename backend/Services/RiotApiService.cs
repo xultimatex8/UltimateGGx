@@ -55,4 +55,12 @@ public class RiotApiService : IRiotApiService
 
         return response ?? throw new Exception("Could not retrieve Riot Match Detail");
     }
+
+    public async Task<TimelineResponseDto> GetMatchTimelineAsync(string matchId, CancellationToken ct = default)
+    {
+        TimelineResponseDto? response = await _regionalClient.GetFromJsonAsync<TimelineResponseDto>(
+            $"/lol/match/v5/matches/{matchId}/timeline", ct);
+
+        return response ?? throw new Exception("Could not retrieve Riot Match Timeline");
+    }
 }

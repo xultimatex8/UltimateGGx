@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Queue> Queues => Set<Queue>();
     public DbSet<Champion> Champions => Set<Champion>();
     public DbSet<SummonerSpell> SummonerSpells => Set<SummonerSpell>();
+    public DbSet<Item> Items => Set<Item>();
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<MatchReference> MatchReferences => Set<MatchReference>();
     public DbSet<Team> Teams => Set<Team>();
@@ -47,6 +48,10 @@ public class AppDbContext : DbContext
             .HasIndex(s => s.Key)
             .IsUnique();
 
+        modelBuilder.Entity<Item>()
+            .HasIndex(i => i.Key)
+            .IsUnique();
+
         modelBuilder.Entity<MatchReference>()
             .HasIndex(m => m.MatchId)
             .IsUnique();
@@ -64,17 +69,71 @@ public class AppDbContext : DbContext
             .Property(e => e.Type)
             .HasConversion<string>();
 
+        modelBuilder.Entity<Event>()
+            .Property(e => e.TowerType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.BuildingType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.LaneType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.MonsterType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Event>()
+            .Property(e => e.MonsterSubType)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Item>()
+            .Property(i => i.Stats)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new());
+
 
         modelBuilder.Entity<Participant>()
             .HasMany(p => p.SummonerSpells)
             .WithMany(s => s.Participants)
             .UsingEntity(j => j.ToTable("ParticipantSummonerSpells"));
 
+        modelBuilder.Entity<Participant>()
+            .HasMany(p => p.Items)
+            .WithMany(i => i.Participants)
+            .UsingEntity(j => j.ToTable("ParticipantItems"));
+
         modelBuilder.Entity<Event>()
             .HasMany(e => e.AssistingParticipants)
             .WithMany(p => p.Assisted)
             .UsingEntity(j => j.ToTable("EventAssists"));
 
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Item)
+            .WithMany(i => i.Events)
+            .HasForeignKey(e => e.ItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.BeforeItem)
+            .WithMany(i => i.BeforeEvents)
+            .HasForeignKey(e => e.BeforeItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.AfterItem)
+            .WithMany(i => i.AfterEvents)
+            .HasForeignKey(e => e.AfterItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Participant)
+            .WithMany(p => p.ParticipantInEvent)
+            .HasForeignKey(e => e.ParticipantId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Event>()
             .HasOne(e => e.Killer)

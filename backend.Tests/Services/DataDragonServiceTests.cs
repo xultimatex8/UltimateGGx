@@ -135,4 +135,52 @@ public class DataDragonServiceTests
         result.Data.Should().ContainKey("SummonerFlash");
         result.Data["SummonerFlash"].Name.Should().Be("Flash");
     }
+
+    [Fact]
+    public async Task GetItemsAsync_ParsesItemData()
+    {
+        const string version = "14.14.1";
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When($"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json")
+            .Respond("application/json", """
+                {
+                "type": "item",
+                "version": "14.14.1",
+                "data": {
+                    "1001": {
+                    "name": "Boots",
+                    "description": "Slightly increases Movement Speed.",
+                    "gold": { "total": 300, "sell": 210 },
+                    "stats": { "FlatMovementSpeedMod": 25 }
+                    }
+                }
+                }
+                """);
+
+        var service = CreateService(mockHttp);
+
+        var result = await service.GetItemsAsync(version);
+
+        result.Data.Should().ContainKey("1001");
+        result.Data["1001"].Name.Should().Be("Boots");
+        result.Data["1001"].Gold.Total.Should().Be(300);
+        result.Data["1001"].Gold.Sell.Should().Be(210);
+        result.Data["1001"].Stats["FlatMovementSpeedMod"].Should().Be(25);
+    }
+
+    [Fact]
+    public async Task GetItemsAsync_WhenResponseIsNull_Throws()
+    {
+        const string version = "14.14.1";
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When($"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json")
+            .Respond("application/json", "null");
+
+        var service = CreateService(mockHttp);
+
+        Func<Task> act = async () => await service.GetItemsAsync(version);
+
+        await act.Should().ThrowAsync<Exception>()
+            .WithMessage("Could not retrieve items data");
+    }
 }

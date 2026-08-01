@@ -2,9 +2,11 @@ namespace backend.Models;
 
 public class ParticipantFrame : BaseEntity
 {
-    public int Gold { get; set; }
+    public int CurrentGold { get; set; }
+    public int Minions { get; set; }
     public int Level { get; set; }
     public long Timestamp { get; set; }
+    public int TotalGold { get; set; }
     public int PositionX { get; set; }
     public int PositionY { get; set; }
 

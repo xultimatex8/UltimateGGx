@@ -14,14 +14,12 @@ public class MatchDto
 
 public class ParticipantDetailDto
 {
-    public string ChampionName { get; set; } = default!;
     public string SummonerName { get; set; } = default!;
     public string SummonerTag { get; set; } = default!;
     public int Assists { get; set; }
     public int ChampionLevel { get; set; }
     public int Deaths { get; set; }
     public int Gold { get; set; }
-    public List<int> Items { get; set; } = [];
     public int Kills { get; set; }
     public string Lane { get; set; } = default!;
     public int Minions { get; set; }
@@ -29,11 +27,7 @@ public class ParticipantDetailDto
     public int SecondaryTree { get; set; }
     public int DamageToChampions { get; set; }
     public int TeamId { get; set; }
+    public ChampionDto Champion { get; set; } = default!;
+    public List<ItemDto> Items { get; set; } = [];
     public List<SummonerSpellDto> SummonerSpells { get; set; } = [];
-}
-
-public class SummonerSpellDto
-{
-    public int Key { get; set; }
-    public string Name { get; set; } = default!;
 }

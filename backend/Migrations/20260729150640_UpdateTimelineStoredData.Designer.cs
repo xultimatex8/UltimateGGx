@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -12,9 +13,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729150640_UpdateTimelineStoredData")]
+    partial class UpdateTimelineStoredData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,21 +39,6 @@ namespace backend.Migrations
                     b.HasIndex("AssistingParticipantsId");
 
                     b.ToTable("EventAssists", (string)null);
-                });
-
-            modelBuilder.Entity("ItemParticipant", b =>
-                {
-                    b.Property<int>("ItemsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ParticipantsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ItemsId", "ParticipantsId");
-
-                    b.HasIndex("ParticipantsId");
-
-                    b.ToTable("ParticipantItems", (string)null);
                 });
 
             modelBuilder.Entity("MatchReferenceSummoner", b =>
@@ -98,10 +86,6 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RiotId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -154,12 +138,6 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AfterItemId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("BeforeItemId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("Bounty")
                         .HasColumnType("integer");
 
@@ -211,12 +189,6 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AfterItemId");
-
-                    b.HasIndex("BeforeItemId");
-
-                    b.HasIndex("ItemId");
-
                     b.HasIndex("KillerParticipantId");
 
                     b.HasIndex("MatchId");
@@ -226,49 +198,6 @@ namespace backend.Migrations
                     b.HasIndex("VictimParticipantId");
 
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("backend.Models.Item", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BuyPrice")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Key")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("SellPrice")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Stats")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("backend.Models.Match", b =>
@@ -367,6 +296,10 @@ namespace backend.Migrations
 
                     b.Property<int>("Gold")
                         .HasColumnType("integer");
+
+                    b.PrimitiveCollection<List<int>>("Items")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
 
                     b.Property<int>("Kills")
                         .HasColumnType("integer");
@@ -555,10 +488,6 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RiotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -615,21 +544,6 @@ namespace backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ItemParticipant", b =>
-                {
-                    b.HasOne("backend.Models.Item", null)
-                        .WithMany()
-                        .HasForeignKey("ItemsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.Participant", null)
-                        .WithMany()
-                        .HasForeignKey("ParticipantsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("MatchReferenceSummoner", b =>
                 {
                     b.HasOne("backend.Models.MatchReference", null)
@@ -662,21 +576,6 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Event", b =>
                 {
-                    b.HasOne("backend.Models.Item", "AfterItem")
-                        .WithMany("AfterEvents")
-                        .HasForeignKey("AfterItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("backend.Models.Item", "BeforeItem")
-                        .WithMany("BeforeEvents")
-                        .HasForeignKey("BeforeItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("backend.Models.Item", "Item")
-                        .WithMany("Events")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("backend.Models.Participant", "Killer")
                         .WithMany("KillsAsKiller")
                         .HasForeignKey("KillerParticipantId")
@@ -697,12 +596,6 @@ namespace backend.Migrations
                         .WithMany("DeathsAsVictim")
                         .HasForeignKey("VictimParticipantId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AfterItem");
-
-                    b.Navigation("BeforeItem");
-
-                    b.Navigation("Item");
 
                     b.Navigation("Killer");
 
@@ -786,15 +679,6 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Champion", b =>
                 {
                     b.Navigation("Participants");
-                });
-
-            modelBuilder.Entity("backend.Models.Item", b =>
-                {
-                    b.Navigation("AfterEvents");
-
-                    b.Navigation("BeforeEvents");
-
-                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("backend.Models.Match", b =>

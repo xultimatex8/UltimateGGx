@@ -32,4 +32,11 @@ public class DataDragonService : IDataDragonService
             $"cdn/{version}/data/en_US/summoner.json", ct);
         return response ?? throw new Exception("Could not retrieve summoner spells data");
     }
+
+    public async Task<ItemResponseDto> GetItemsAsync(string version, CancellationToken ct = default)
+    {
+        ItemResponseDto? response = await _httpClient.GetFromJsonAsync<ItemResponseDto>(
+            $"cdn/{version}/data/en_US/item.json", ct);
+        return response ?? throw new Exception("Could not retrieve items data");
+    }
 }

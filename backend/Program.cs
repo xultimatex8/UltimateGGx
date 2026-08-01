@@ -36,6 +36,7 @@ builder.Services.AddScoped<IRiotApiService, RiotApiService>();
 builder.Services.AddScoped<ChampionSyncService>();
 builder.Services.AddScoped<ISummonerService, SummonerService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<ITimelineService, TimelineService>();
 
 var connectionString =
     $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
