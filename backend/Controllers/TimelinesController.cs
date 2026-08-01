@@ -1,4 +1,5 @@
 using backend.Interfaces;
+using backend.Models.Dtos;
 using backend.Models.Riot;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,16 @@ public class TimelinesController : ControllerBase
     }
 
     [HttpGet("match/{matchId}")]
-    public async Task<IActionResult> FetchSummonerMatches(string matchId)
+    public async Task<IActionResult> GetMatchTimeline(string matchId)
     {
-        await _timelineService.GetOrFetchTimelineAsync(matchId);
-        return Ok();
+        TimelineDto timeline = await _timelineService.GetTimelineAsync(matchId);
+        return Ok(timeline);
+    }
+
+    [HttpGet("match/{matchId}/scoreboard")]
+    public async Task<IActionResult> GetMatchScoreboard(string matchId, [FromQuery] long timestamp)
+    {
+        ScoreboardDto scoreboard = await _timelineService.GetScoreboardAsync(matchId, timestamp);
+        return Ok(scoreboard);
     }
 }

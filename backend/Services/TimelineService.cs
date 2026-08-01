@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Exceptions;
 using backend.Interfaces;
 using backend.Models;
+using backend.Models.Dtos;
 using backend.Models.Enums;
 using backend.Models.Riot;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ public class TimelineService : ITimelineService
         _riotApiService = riotApiService;
     }
 
-    public async Task GetOrFetchTimelineAsync(string matchId, CancellationToken ct = default)
+    public async Task CheckOrFetchTimelineAsync(string matchId, CancellationToken ct = default)
     {
         MatchReference reference = await _db.MatchReferences
             .Include(mr => mr.Match!)
@@ -104,6 +105,80 @@ public class TimelineService : ITimelineService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<TimelineDto> GetTimelineAsync(string matchId, CancellationToken ct = default)
+    {
+        await CheckOrFetchTimelineAsync(matchId, ct);
+
+        MatchReference reference = await _db.MatchReferences
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Teams)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Item)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Participant)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Killer)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Victim)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.AssistingParticipants)
+            .FirstAsync(mr => mr.MatchId == matchId, ct);
+
+        Match match = reference.Match
+            ?? throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+
+        return MatchToTimelineDto(match);
+    }
+
+    public async Task<ScoreboardDto> GetScoreboardAsync(string matchId, long timestamp, CancellationToken ct = default)
+    {
+        await CheckOrFetchTimelineAsync(matchId, ct);
+
+        MatchReference reference = await _db.MatchReferences
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Champion)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Summoner)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.SummonerSpells)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.Frames)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Item)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Participant)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Killer)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Victim)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.AssistingParticipants)
+            .FirstAsync(mr => mr.MatchId == matchId, ct);
+
+        Match match = reference.Match
+            ?? throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+
+        return MatchToScoreboardDto(match, timestamp);
+    }
+
     private static Event? MapEvent(
         EventsTimeLineDto dto,
         Match match,
@@ -129,9 +204,19 @@ public class TimelineService : ITimelineService
             TowerType = ParseEnumOrNull<TowerType>(dto.TowerType),
         };
 
-        if (items.TryGetValue(dto.ItemId, out var item))
+        if (items.TryGetValue(dto.ItemId, out Item? item))
         {
             newEvent.Item = item;
+        }
+
+        if (items.TryGetValue(dto.BeforeId, out Item? beforeItem))
+        {
+            newEvent.BeforeItem = beforeItem;
+        }
+
+        if (items.TryGetValue(dto.AfterId, out Item? afterItem))
+        {
+            newEvent.AfterItem = afterItem;
         }
 
         if (participants.TryGetValue(dto.ParticipantId, out Participant? participant))
@@ -158,6 +243,194 @@ public class TimelineService : ITimelineService
         }
 
         return newEvent;
+    }
+
+    private static TimelineDto MatchToTimelineDto(Match match)
+    {
+        List<Event> visibleEvents = RemoveUndoneAndDestroyedItemEvents(match.Events);
+
+        return new TimelineDto
+        {
+            Events = [.. visibleEvents
+                .OrderBy(e => e.Timestamp)
+                .Select(e => EventToEventDto(e, match))]
+        };
+    }
+
+    private static List<Event> RemoveUndoneAndDestroyedItemEvents(IEnumerable<Event> events)
+    {
+        List<Event> ordered = [.. events.OrderBy(e => e.Timestamp)];
+        HashSet<Event> toRemove = [];
+
+        foreach (Event undo in ordered.Where(e => e.Type == EventType.ITEM_UNDO))
+        {
+            int? targetItemKey = undo.BeforeItem?.Key ?? undo.AfterItem?.Key;
+
+            toRemove.Add(undo);
+
+            if (targetItemKey is null)
+            {
+                continue;
+            }
+
+            Event? cancelled = ordered
+                .Where(e =>
+                    e.Timestamp <= undo.Timestamp &&
+                    e != undo &&
+                    !toRemove.Contains(e) &&
+                    e.Participant?.Id == undo.Participant?.Id &&
+                    e.Item?.Key == targetItemKey &&
+                    (e.Type == EventType.ITEM_PURCHASED ||
+                    e.Type == EventType.ITEM_SOLD ||
+                    e.Type == EventType.ITEM_DESTROYED))
+                .OrderByDescending(e => e.Timestamp)
+                .FirstOrDefault();
+
+            if (cancelled is not null)
+            {
+                toRemove.Add(cancelled);
+            }
+        }
+
+        foreach (Event destroyed in ordered.Where(e => e.Type == EventType.ITEM_DESTROYED))
+        {
+            toRemove.Add(destroyed);
+        }
+
+        return [.. ordered.Where(e => !toRemove.Contains(e))];
+    }
+
+    private static EventDto EventToEventDto(Event evt, Match match)
+    {
+        return new EventDto
+        {
+            Timestamp = evt.Timestamp,
+            Bounty = evt.Bounty,
+            ShutdownBounty = evt.ShutdownBounty,
+            MonsterType = evt.MonsterType,
+            MonsterSubType = evt.MonsterSubType,
+            BuildingType = evt.BuildingType,
+            LaneType = evt.LaneType,
+            TowerType = evt.TowerType,
+            Type = evt.Type,
+            MainParticipantId = evt.Killer?.ParticipantId ?? evt.Participant?.ParticipantId,
+            VictimParticipantId = evt.Victim?.ParticipantId,
+            AssistingParticipants = [.. evt.AssistingParticipants.Select(p => p.ParticipantId)],
+            Item = evt.Item is not null ? ItemToItemDto(evt.Item) : null,
+            WinningTeamId = evt.Type == EventType.GAME_END
+                ? match.Teams.FirstOrDefault(t => t.Win)?.TeamId
+                : null
+        };
+    }
+
+    private static ScoreboardDto MatchToScoreboardDto(Match match, long timestamp)
+    {
+        List<Event> pastEvents = [.. match.Events
+            .Where(e => e.Timestamp <= timestamp)
+            .OrderBy(e => e.Timestamp)];
+
+        return new ScoreboardDto
+        {
+            Timestamp = timestamp,
+            Teams = [.. match.Teams.Select(t => TeamToScoreboardTeamDto(t, pastEvents, timestamp))]
+        };
+    }
+
+    private static ScoreboardTeamDto TeamToScoreboardTeamDto(Team team, List<Event> pastEvents, long timestamp)
+    {
+        return new ScoreboardTeamDto
+        {
+            TeamId = team.TeamId,
+            Participants = [.. team.Participants.Select(p => ParticipantToScoreboardParticipantDto(p, pastEvents, timestamp))]
+        };
+    }
+
+    private static ScoreboardParticipantDto ParticipantToScoreboardParticipantDto(
+        Participant participant,
+        List<Event> pastEvents,
+        long timestamp)
+    {
+        ParticipantFrame? frame = participant.Frames
+            .Where(f => f.Timestamp <= timestamp)
+            .OrderByDescending(f => f.Timestamp)
+            .FirstOrDefault();
+
+        int kills = pastEvents.Count(e => e.Killer?.Id == participant.Id);
+        int deaths = pastEvents.Count(e => e.Victim?.Id == participant.Id);
+        int assists = pastEvents.Count(e => e.AssistingParticipants.Any(a => a.Id == participant.Id));
+
+        List<Item> currentItems = BuildCurrentItems(pastEvents, participant);
+
+        return new ScoreboardParticipantDto
+        {
+            ParticipantId = participant.ParticipantId,
+            ChampionName = participant.Champion.Name,
+            SummonerName = participant.Summoner.Username,
+            Assists = assists,
+            ChampionLevel = frame?.Level ?? 1,
+            Deaths = deaths,
+            CurrentGold = frame?.CurrentGold ?? 0,
+            TotalGold = frame?.TotalGold ?? 0,
+            Kills = kills,
+            Lane = participant.Lane,
+            Minions = frame?.Minions ?? 0,
+            PrimaryRune = participant.PrimaryRune,
+            SecondaryTree = participant.SecondaryTree,
+            SummonerSpells = [.. participant.SummonerSpells.Select(s => s.Key)],
+            Items = [.. currentItems.Select(ItemToItemDto)]
+        };
+    }
+
+    private static List<Item> BuildCurrentItems(List<Event> pastEvents, Participant participant)
+    {
+        List<Item> inventory = [];
+
+        foreach (Event evt in pastEvents)
+        {
+            if (evt.Participant?.Id != participant.Id)
+            {
+                continue;
+            }
+
+            switch (evt.Type)
+            {
+                case EventType.ITEM_PURCHASED when evt.Item is not null:
+                    inventory.Add(evt.Item);
+                    break;
+
+                case EventType.ITEM_SOLD when evt.Item is not null:
+                case EventType.ITEM_DESTROYED when evt.Item is not null:
+                    inventory.Remove(evt.Item);
+                    break;
+
+                case EventType.ITEM_UNDO:
+                    if (evt.BeforeItem is not null)
+                    {
+                        inventory.Remove(evt.BeforeItem);
+                    }
+
+                    if (evt.AfterItem is not null)
+                    {
+                        inventory.Add(evt.AfterItem);
+                    }
+                    break;
+            }
+        }
+
+        return inventory;
+    }
+
+    private static ItemDto ItemToItemDto(Item item)
+    {
+        return new ItemDto
+        {
+            Key = item.Key,
+            Name = item.Name,
+            Description = item.Description,
+            BuyPrice = item.BuyPrice,
+            SellPrice = item.SellPrice,
+            Stats = item.Stats
+        };
     }
 
     private static TEnum? ParseEnumOrNull<TEnum>(string? value) where TEnum : struct, Enum
