@@ -25,6 +25,11 @@ public class ExceptionHandlingMiddleware
         {
             await WriteErrorResponse(context, HttpStatusCode.NotFound, ex.Message);
         }
+        catch (RiotApiException ex)
+        {
+            _logger.LogWarning(ex, "Riot API request failed with status {StatusCode}", ex.StatusCode);
+            await WriteErrorResponse(context, ex.StatusCode, "Riot API request failed. Please try again later.");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");

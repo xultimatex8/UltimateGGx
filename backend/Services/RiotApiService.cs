@@ -1,7 +1,10 @@
+using backend.Exceptions;
 using backend.Interfaces;
 using backend.Models.Enums;
 using backend.Helpers;
 using backend.Models.Riot;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace backend.Services;
 
@@ -18,49 +21,62 @@ public class RiotApiService : IRiotApiService
 
     public async Task<AccountResponseDto> GetRiotAccountAsync(string username, string tag, CancellationToken ct = default)
     {
-        AccountResponseDto? response = await _regionalClient.GetFromJsonAsync<AccountResponseDto>(
-            $"/riot/account/v1/accounts/by-riot-id/{username}/{tag}", ct);
-            
+        AccountResponseDto? response = await GetAsync<AccountResponseDto>(
+            _regionalClient, $"/riot/account/v1/accounts/by-riot-id/{username}/{tag}", ct);
+
         return response ?? throw new Exception("Could not retrieve Riot Account Info");
     }
 
     public async Task<SummonerResponseDto> GetRiotSummonerAsync(string puuid, CancellationToken ct = default)
     {
-        SummonerResponseDto? response = await _platformClient.GetFromJsonAsync<SummonerResponseDto>(
-            $"/lol/summoner/v4/summoners/by-puuid/{puuid}", ct);
+        SummonerResponseDto? response = await GetAsync<SummonerResponseDto>(
+            _platformClient, $"/lol/summoner/v4/summoners/by-puuid/{puuid}", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Summoner Info");
     }
 
     public async Task<List<QueueResponseDto>> GetSummonerQueuesAsync(string puuid, CancellationToken ct = default)
     {
-        List<QueueResponseDto>? response = await _platformClient.GetFromJsonAsync<List<QueueResponseDto>>(
-            $"/lol/league/v4/entries/by-puuid/{puuid}", ct);
+        List<QueueResponseDto>? response = await GetAsync<List<QueueResponseDto>>(
+            _platformClient, $"/lol/league/v4/entries/by-puuid/{puuid}", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Summoner Queues Info");
     }
 
     public async Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type, CancellationToken ct = default)
     {
-        List<string>? response = await _regionalClient.GetFromJsonAsync<List<string>>(
-            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10", ct);
+        List<string>? response = await GetAsync<List<string>>(
+            _regionalClient, $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Summoner Matches");
     }
 
     public async Task<MatchResponseDto> GetMatchDetailAsync(string matchId, CancellationToken ct = default)
     {
-        MatchResponseDto? response = await _regionalClient.GetFromJsonAsync<MatchResponseDto>(
-            $"/lol/match/v5/matches/{matchId}", ct);
+        MatchResponseDto? response = await GetAsync<MatchResponseDto>(
+            _regionalClient, $"/lol/match/v5/matches/{matchId}", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Match Detail");
     }
 
     public async Task<TimelineResponseDto> GetMatchTimelineAsync(string matchId, CancellationToken ct = default)
     {
-        TimelineResponseDto? response = await _regionalClient.GetFromJsonAsync<TimelineResponseDto>(
-            $"/lol/match/v5/matches/{matchId}/timeline", ct);
+        TimelineResponseDto? response = await GetAsync<TimelineResponseDto>(
+            _regionalClient, $"/lol/match/v5/matches/{matchId}/timeline", ct);
 
         return response ?? throw new Exception("Could not retrieve Riot Match Timeline");
+    }
+
+    private static async Task<T?> GetAsync<T>(HttpClient client, string url, CancellationToken ct)
+    {
+        try
+        {
+            return await client.GetFromJsonAsync<T>(url, ct);
+        }
+        catch (HttpRequestException ex)
+        {
+            HttpStatusCode statusCode = ex.StatusCode ?? HttpStatusCode.InternalServerError;
+            throw new RiotApiException(statusCode, url, ex);
+        }
     }
 }
