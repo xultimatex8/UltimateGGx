@@ -37,6 +37,21 @@ public class ChampionSyncServiceTests
         return new SummonerSpellResponseDto { Data = data };
     }
 
+    private static ItemResponseDto BuildItemsResponse(params (string key, string name, int total, int sell)[] items)
+    {
+        var data = items.ToDictionary(
+            i => i.key,
+            i => new ItemDto
+            {
+                Name = i.name,
+                Description = "<stats>+10 AD</stats><mainText>Basic item.</mainText>",
+                Gold = new ItemGoldDto { Total = i.total, Sell = i.sell },
+                Stats = new Dictionary<string, double> { ["FlatPhysicalDamageMod"] = 10 }
+            });
+
+        return new ItemResponseDto { Data = data };
+    }
+
     [Fact]
     public async Task SyncAsync_InsertsNewChampionsAndSpells()
     {
@@ -49,6 +64,8 @@ public class ChampionSyncServiceTests
             .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", ["Mage", "Assassin"])));
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildSpellsResponse(("4", "Flash")));
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse());
 
         var syncService = new ChampionSyncService(mockDdragon.Object, db);
 
@@ -78,6 +95,8 @@ public class ChampionSyncServiceTests
             .ReturnsAsync(BuildChampionsResponse(("103", "Ahri", ["Mage", "Assassin"])));
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildSpellsResponse());
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse());
 
         var syncService = new ChampionSyncService(mockDdragon.Object, db);
 
@@ -103,6 +122,8 @@ public class ChampionSyncServiceTests
             .ReturnsAsync(BuildChampionsResponse());
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildSpellsResponse(("4", "Flash")));
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse());
 
         var syncService = new ChampionSyncService(mockDdragon.Object, db);
 
@@ -113,7 +134,7 @@ public class ChampionSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncAsync_WithNoChampionsOrSpells_DoesNotThrow()
+    public async Task SyncAsync_WithNoChampionsOrSpellsOrItems_DoesNotThrow()
     {
         using var db = CreateInMemoryDb();
 
@@ -124,6 +145,8 @@ public class ChampionSyncServiceTests
             .ReturnsAsync(BuildChampionsResponse());
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildSpellsResponse());
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse());
 
         var syncService = new ChampionSyncService(mockDdragon.Object, db);
 
@@ -132,5 +155,70 @@ public class ChampionSyncServiceTests
         await act.Should().NotThrowAsync();
         (await db.Champions.CountAsync()).Should().Be(0);
         (await db.SummonerSpells.CountAsync()).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task SyncAsync_InsertsNewItems()
+    {
+        using var db = CreateInMemoryDb();
+
+        var mockDdragon = new Mock<IDataDragonService>();
+        mockDdragon.Setup(x => x.GetLatestVersionAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("14.14.1");
+        mockDdragon.Setup(x => x.GetChampionsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildChampionsResponse());
+        mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildSpellsResponse());
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse(("1001", "Boots", 300, 210)));
+
+        var syncService = new ChampionSyncService(mockDdragon.Object, db);
+
+        await syncService.SyncAsync();
+
+        var item = await db.Items.SingleAsync();
+        item.Key.Should().Be(1001);
+        item.Name.Should().Be("Boots");
+        item.BuyPrice.Should().Be(300);
+        item.SellPrice.Should().Be(210);
+        item.Stats.Should().ContainKey("FlatPhysicalDamageMod");
+        item.Description.Should().NotContain("<stats>");
+        item.Description.Should().NotContain("<mainText>");
+        item.Description.Should().Contain("Basic item.");
+    }
+
+    [Fact]
+    public async Task SyncAsync_UpdatesExistingItemInsteadOfDuplicating()
+    {
+        using var db = CreateInMemoryDb();
+        db.Items.Add(new Item
+        {
+            Key = 1001,
+            Name = "Boots (old)",
+            Description = "old",
+            BuyPrice = 250,
+            SellPrice = 175,
+            Stats = []
+        });
+        await db.SaveChangesAsync();
+
+        var mockDdragon = new Mock<IDataDragonService>();
+        mockDdragon.Setup(x => x.GetLatestVersionAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("14.14.1");
+        mockDdragon.Setup(x => x.GetChampionsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildChampionsResponse());
+        mockDdragon.Setup(x => x.GetSummonerSpellsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildSpellsResponse());
+        mockDdragon.Setup(x => x.GetItemsAsync("14.14.1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildItemsResponse(("1001", "Boots", 300, 210)));
+
+        var syncService = new ChampionSyncService(mockDdragon.Object, db);
+
+        await syncService.SyncAsync();
+
+        (await db.Items.CountAsync()).Should().Be(1);
+        var item = await db.Items.SingleAsync();
+        item.Name.Should().Be("Boots");
+        item.BuyPrice.Should().Be(300);
     }
 }

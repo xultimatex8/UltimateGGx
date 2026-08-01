@@ -33,6 +33,8 @@ public class DataDragonSyncCheckerServiceTests
             .ReturnsAsync(new Models.DataDragon.ChampionResponseDto { Data = [] });
         mockDdragon.Setup(x => x.GetSummonerSpellsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Models.DataDragon.SummonerSpellResponseDto { Data = [] });
+        mockDdragon.Setup(x => x.GetItemsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Models.DataDragon.ItemResponseDto { Data = [] });
 
         var syncService = new ChampionSyncService(mockDdragon.Object, db);
         var checker = new DataDragonSyncCheckerService(

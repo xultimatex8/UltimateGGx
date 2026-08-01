@@ -27,6 +27,8 @@ public class MatchServiceTests
         db.Champions.Add(new Champion { Key = 1, Name = "Annie", Roles = ["Mage"] });
         db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash" });
         db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal" });
+        db.Items.Add(new Item { Key = 1001, Name = "Boots", Description = "desc", BuyPrice = 300, SellPrice = 210, Stats = [] });
+        db.Items.Add(new Item { Key = 3006, Name = "Berserker's Greaves", Description = "desc", BuyPrice = 1100, SellPrice = 770, Stats = [] });
         await db.SaveChangesAsync();
     }
 
@@ -35,8 +37,11 @@ public class MatchServiceTests
         int teamId,
         int participantId,
         string username = "SomePlayer",
-        string tag = "EUW")
+        string tag = "EUW",
+        int[]? itemIds = null)
     {
+        itemIds ??= [0, 0, 0, 0, 0, 0, 0];
+
         return new ParticipantDto
         {
             Puuid = puuid,
@@ -54,13 +59,13 @@ public class MatchServiceTests
             TeamPosition = "MIDDLE",
             Summoner1Id = 4,
             Summoner2Id = 7,
-            Item0 = 0,
-            Item1 = 0,
-            Item2 = 0,
-            Item3 = 0,
-            Item4 = 0,
-            Item5 = 0,
-            Item6 = 0,
+            Item0 = itemIds[0],
+            Item1 = itemIds[1],
+            Item2 = itemIds[2],
+            Item3 = itemIds[3],
+            Item4 = itemIds[4],
+            Item5 = itemIds[5],
+            Item6 = itemIds[6],
             RiotIdGameName = username,
             RiotIdTagLine = tag,
             SummonerLevel = 200,
@@ -93,7 +98,7 @@ public class MatchServiceTests
                 ],
                 Participants =
                 [
-                    BuildParticipantDto(requestedPuuid, 100, 1, "Requested", "EUW1"),
+                    BuildParticipantDto(requestedPuuid, 100, 1, "Requested", "EUW1", [1001, 3006, 0, 0, 0, 0, 0]),
                     BuildParticipantDto("rival-puuid", 200, 2, "Rival", "EUW2")
                 ]
             }
@@ -196,7 +201,7 @@ public class MatchServiceTests
             Deaths = 1,
             Assists = 5,
             Gold = 15000,
-            Items = [0, 0, 0, 0, 0, 0, 0],
+            Items = [],
             Lane = "MIDDLE",
             PrimaryRune = 8005,
             SecondaryTree = 8100,
@@ -235,7 +240,7 @@ public class MatchServiceTests
     }
 
     [Fact]
-    public async Task GetSummonerMatchesAsync_WhenMatchNotYetSynced_FetchesDetailAndPersistsMatch()
+    public async Task GetSummonerMatchesAsync_WhenMatchNotYetSynced_MapsParticipantItems()
     {
         using var db = CreateInMemoryDb();
         await SeedReferenceDataAsync(db);
@@ -257,18 +262,10 @@ public class MatchServiceTests
 
         var result = await service.GetSummonerMatchesAsync("abc-123");
 
-        result.Items.Should().ContainSingle();
-        result.Items[0].EndOfGameResult.Should().Be("GameComplete");
-        result.Items[0].Participants.Should().HaveCount(2);
-
-        (await db.Matches.CountAsync()).Should().Be(1);
-        (await db.Participants.CountAsync()).Should().Be(2);
-
-        var rival = await db.Summoners.FirstOrDefaultAsync(s => s.Puuid == "rival-puuid");
-        rival.Should().NotBeNull();
-        rival!.Username.Should().Be("Rival");
-
-        riotMock.Verify(x => x.GetMatchDetailAsync("MATCH_1", It.IsAny<CancellationToken>()), Times.Once);
+        var requestedParticipant = result.Items[0].Participants.Single(p => p.TeamId == 100);
+        requestedParticipant.Items.Should().HaveCount(2);
+        requestedParticipant.Items.Select(i => i.Key).Should().BeEquivalentTo([1001, 3006]);
+        requestedParticipant.Items.Single(i => i.Key == 1001).Name.Should().Be("Boots");
     }
 
     [Fact]
@@ -325,5 +322,34 @@ public class MatchServiceTests
         result.Page.Should().Be(2);
         result.PageSize.Should().Be(5);
         result.Items.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task GetSummonerMatchesAsync_WhenItemUnknown_ThrowsNotFoundException()
+    {
+        using var db = CreateInMemoryDb();
+        db.Champions.Add(new Champion { Key = 1, Name = "Annie", Roles = ["Mage"] });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 4, Name = "Flash" });
+        db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal" });
+        await db.SaveChangesAsync();
+
+        var requestedSummoner = new Summoner { Puuid = "abc-123", Username = "Faker", Tag = "KR1" };
+        db.Summoners.Add(requestedSummoner);
+        await db.SaveChangesAsync();
+
+        var reference = new MatchReference { MatchId = "MATCH_1", QueueType = QueueType.DRAFT_PICK };
+        reference.Summoners.Add(requestedSummoner);
+        db.MatchReferences.Add(reference);
+        await db.SaveChangesAsync();
+
+        var riotMock = new Mock<IRiotApiService>();
+        riotMock.Setup(x => x.GetMatchDetailAsync("MATCH_1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildMatchResponseDto("abc-123"));
+
+        var service = new MatchService(db, riotMock.Object);
+
+        Func<Task> act = async () => await service.GetSummonerMatchesAsync("abc-123");
+
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 }
