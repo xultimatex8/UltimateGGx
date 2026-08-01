@@ -9,5 +9,6 @@ public enum EventType
     ITEM_PURCHASED,
     ITEM_UNDO,
     ITEM_SOLD,
-    ITEM_DESTROYED
+    ITEM_DESTROYED,
+    GAME_END
 }
