@@ -4,6 +4,28 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Riot API rate limiting via a shared `DelegatingHandler`
+
+**Decision:** enforce Riot's rate limits (requests per second and requests per two-minute window) inside a `RiotRateLimitHandler` registered as a `DelegatingHandler` on both the `RiotPlatform` and `RiotRegional` named `HttpClient`s. The handler uses two static `FixedWindowRateLimiter` instances (one per Riot limit window) with a queue, so requests that exceed the current window wait for the next one instead of failing. Limits are read from environment variables, so switching to a production key requires no code changes.
+
+**Alternatives considered:**
+
+*Where to enforce the rate limit:*
+- *Manual `RateLimiter` instantiation inside `RiotApiService`, called explicitly before each HTTP call* — works, but requires every method to remember to call it.
+- *`DelegatingHandler` registered on the named `HttpClient`s (chosen)* — applies transparently to every outgoing request without any change to `RiotApiService`.
+
+*How to keep the limiter effective across `IHttpClientFactory`'s internal handler rotation:*
+- *Instance fields on the handler* — `IHttpClientFactory` may create multiple handler instances over the application's lifetime; instance-level counters would let the effective rate limit silently multiply.
+- *Static fields shared across all handler instances (chosen)* — guarantees a single, process-wide counter per rate-limit window regardless of how many handler instances the factory creates.
+
+*How to make the limits configurable:*
+- *Hardcoded constants* — simplest, but requires a code change and redeploy when moving from a personal key (20 req/s, 100 req/2min) to a production key (500 req/10s, 30,000 req/10min).
+- *Read from environment variables with fallback defaults (chosen)* — the same handler works for both key tiers; only the `.env` needs to change on deployment.
+
+**Why:** personal and production Riot API keys have very different, hard limits enforced per region. A `DelegatingHandler` intercepts every outgoing request without coupling `RiotApiService` to rate-limiting concerns, and centralizing both time windows in one place ensures the two Riot constraints are always enforced together. Reading the limits from configuration avoids a code change when the project's key tier changes.
+
+---
+
 ## Wrap external HTTP failures in dedicated, origin-specific exceptions
 
 **Decision:** `RiotApiService` catches the underlying `HttpRequestException` at a single internal `GetAsync<T>` helper and re-throw it as a dedicated exception (`RiotApiException`), carrying the real `HttpStatusCode` returned by the failing service. `ExceptionHandlingMiddleware` catches `RiotApiException` specifically and maps its `StatusCode` directly onto the HTTP response returned to the frontend, with a generic message; the underlying exception and status code are logged, not exposed in detail to the client.
