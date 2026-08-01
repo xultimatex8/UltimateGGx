@@ -5,6 +5,7 @@ using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
 using backend.Models.Enums;
+using backend.Exceptions;
 
 namespace backend.Tests.Services;
 
@@ -44,7 +45,7 @@ public class RiotApiServiceTests
     }
 
     [Fact]
-    public async Task GetRiotAccountAsync_WhenNotFound_Throws()
+    public async Task GetRiotAccountAsync_WhenNotFound_ThrowsRiotApiException()
     {
         var (service, mockHttp) = CreateService();
 
@@ -53,7 +54,22 @@ public class RiotApiServiceTests
 
         Func<Task> act = async () => await service.GetRiotAccountAsync("Nobody", "000");
 
-        await act.Should().ThrowAsync<HttpRequestException>();
+        var exception = await act.Should().ThrowAsync<RiotApiException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetRiotAccountAsync_WhenRateLimited_ThrowsRiotApiExceptionWithTooManyRequests()
+    {
+        var (service, mockHttp) = CreateService();
+
+        mockHttp.When("https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Faker/KR1")
+            .Respond((HttpStatusCode)429);
+
+        Func<Task> act = async () => await service.GetRiotAccountAsync("Faker", "KR1");
+
+        var exception = await act.Should().ThrowAsync<RiotApiException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
     }
 
     [Fact]
@@ -142,7 +158,7 @@ public class RiotApiServiceTests
     }
 
     [Fact]
-    public async Task GetSummonerMatchesAsync_WhenServerErrors_ThrowsHttpRequestException()
+    public async Task GetSummonerMatchesAsync_WhenServerErrors_ThrowsRiotApiException()
     {
         var (service, mockHttp) = CreateService();
 
@@ -151,7 +167,8 @@ public class RiotApiServiceTests
 
         Func<Task> act = async () => await service.GetSummonerMatchesAsync("abc-123", QueueType.DRAFT_PICK);
 
-        await act.Should().ThrowAsync<HttpRequestException>();
+        var exception = await act.Should().ThrowAsync<RiotApiException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
     }
 
     [Fact]
@@ -184,7 +201,7 @@ public class RiotApiServiceTests
     }
 
     [Fact]
-    public async Task GetMatchDetailAsync_WhenNotFound_Throws()
+    public async Task GetMatchDetailAsync_WhenNotFound_ThrowsRiotApiException()
     {
         var (service, mockHttp) = CreateService();
 
@@ -193,6 +210,7 @@ public class RiotApiServiceTests
 
         Func<Task> act = async () => await service.GetMatchDetailAsync("NOT_A_REAL_MATCH");
 
-        await act.Should().ThrowAsync<HttpRequestException>();
+        var exception = await act.Should().ThrowAsync<RiotApiException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
