@@ -5,6 +5,7 @@ using backend.Services;
 using System.Text.Json.Serialization;
 using backend.Interfaces;
 using backend.Middleware;
+using backend.Http;
 
 Env.Load("../.env");
 
@@ -16,18 +17,20 @@ builder.Services.AddHttpClient("RiotPlatform", client =>
 {
     client.BaseAddress = new Uri("https://euw1.api.riotgames.com/");
     client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
-});
+}).AddHttpMessageHandler<RiotRateLimitHandler>();
 
 builder.Services.AddHttpClient("RiotRegional", client =>
 {
     client.BaseAddress = new Uri("https://europe.api.riotgames.com/");
     client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
-});
+}).AddHttpMessageHandler<RiotRateLimitHandler>();
 
 builder.Services.AddHttpClient<IDataDragonService, DataDragonService>(client =>
 {
     client.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
 });
+
+builder.Services.AddTransient<RiotRateLimitHandler>();
 
 builder.Services.AddScoped<IDataDragonSyncCheckerService, DataDragonSyncCheckerService>();
 builder.Services.AddHostedService<DataDragonSyncBackgroundService>();
