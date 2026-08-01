@@ -4,6 +4,19 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Store Data Dragon identifiers instead of full image URLs
+
+**Decision:** `Champion` and `SummonerSpell` store a `RiotId` field (Data Dragon's string identifier, e.g. `"Ahri"`, `"SummonerFlash"`) in addition to their numeric `Key`. The currently synced Data Dragon version is stored once, in `DataDragonState`, rather than duplicated per entity. Full image URLs are never persisted; the frontend fetches the current version once (via a small endpoint backed by `DataDragonState`) and constructs any image URL client-side from the version plus the entity's identifier.
+
+**Alternatives considered:**
+
+*How to let the frontend resolve image URLs:*
+- *Store the full image URL on every entity* — the version becomes duplicated across every `Champion`/`SummonerSpell`/`Item` row; a Data Dragon version bump would require rewriting every affected row purely to update a URL fragment that carries no information about the entity itself.
+- *Have the frontend fetch the latest version directly from Data Dragon* — avoids backend involvement, but the frontend's version can drift ahead of the backend's own synced version (e.g. Riot publishes a new patch before the backend's periodic sync has run), producing images that don't match the currently synced data.
+- *Store only identifiers, resolve the version from a single shared source (chosen)* — the version is stored and updated in exactly one place (`DataDragonState`), guaranteeing the frontend always builds URLs consistent with whatever version the backend actually has data for.
+
+**Why:** an image URL is a derived value, not intrinsic data about a champion, spell, or item, so persisting it couples every row to a specific Data Dragon version and multiplies the cost of a version change across the entire catalog. Storing only the stable identifier plus a single shared version value keeps the data normalized and guarantees that whatever version the frontend uses to build URLs is the same version the backend actually holds catalog data for.
+
 ## Avoid duplicating the requested summoner's data in `MatchDto`
 
 **Decision:** `MatchDto` does not include participant-specific fields (such as `Win`, `Kills`, `Deaths`, or `ChampionName`) for the requested summoner. Instead, it exposes the complete list of `ParticipantDetailDto`s, and the frontend identifies the requested player by matching the already known Riot ID (`SummonerName` and `SummonerTag`) against the participants.
