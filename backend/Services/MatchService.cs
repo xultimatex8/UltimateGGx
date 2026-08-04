@@ -309,6 +309,7 @@ public class MatchService : IMatchService
     {
         return new ParticipantDetailDto
         {
+            Puuid = participant.Summoner.Puuid,
             SummonerName = participant.Summoner.Username,
             SummonerTag = participant.Summoner.Tag,
             Assists = participant.Assists,

@@ -14,6 +14,7 @@ public class MatchDto
 
 public class ParticipantDetailDto
 {
+    public string Puuid { get; set; } = default!;
     public string SummonerName { get; set; } = default!;
     public string SummonerTag { get; set; } = default!;
     public int Assists { get; set; }
