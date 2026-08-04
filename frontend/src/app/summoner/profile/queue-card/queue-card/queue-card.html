@@ -1,0 +1,25 @@
+<div class="bg-surface border border-border rounded p-5 hover:border-accent-hover transition h-35">
+  <h3 class="text-xs font-semibold uppercase tracking-widest text-text-muted mb-3">
+    {{ label() }}
+  </h3>
+
+  @if (queue(); as q) {
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm font-semibold" [style.color]="tierColor()">
+        {{ q.tier }} {{ q.rank }}
+      </span>
+      <span class="text-text-secondary text-xs">{{ q.points }} LP</span>
+    </div>
+
+    <div class="flex items-center justify-between text-xs mb-3">
+      <span class="text-text-secondary">{{ q.wins }}W {{ q.losses }}L</span>
+      <span class="text-text-muted">{{ winRate() }}% win rate</span>
+    </div>
+
+    <div class="h-1.5 bg-surface-alt rounded-full overflow-hidden">
+      <div class="h-full bg-accent" [style.width.%]="winRate()"></div>
+    </div>
+  } @else {
+    <p class="text-text-disabled text-sm">Unranked</p>
+  }
+</div>
