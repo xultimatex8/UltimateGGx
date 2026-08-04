@@ -1,0 +1,72 @@
+<div class="min-h-screen bg-background text-text-primary">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    @if (loading()) {
+      <div class="flex items-center justify-center py-24">
+        <p class="text-text-secondary text-sm">Loading summoner…</p>
+      </div>
+    } @else if (error()) {
+      <div class="bg-surface border border-border rounded p-8 text-center">
+        <p class="text-text-primary text-sm font-medium mb-1">{{ error() }}</p>
+        <p class="text-text-muted text-xs">Check the summoner name and tag and try again.</p>
+      </div>
+    } @else if (summoner(); as s) {
+      <div class="bg-surface border border-border rounded p-6 flex flex-col sm:flex-row items-center gap-5 mb-8">
+        <div class="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24">
+          <img
+            [src]="profileIconUrl(s.profileIconId)"
+            [alt]="s.username + ' profile icon'"
+            class="w-full h-full rounded object-cover border border-border-alt"
+          />
+          <span class="absolute -bottom-1 -right-1 bg-accent-dark text-text-primary text-[10px] font-semibold px-1.5 py-0.5 rounded">
+            {{ s.level }}
+          </span>
+        </div>
+
+        <div class="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="text-center sm:text-start min-w-0">
+            <h1 class="text-xl font-bold text-text-primary tracking-tight truncate">
+              {{ s.username }}<span class="text-text-muted font-medium"> #{{ s.tag }}</span>
+            </h1>
+
+            <p class="text-text-muted text-xs mt-1">
+              Last change detected: {{ s.lastUpdate | date: 'medium' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="px-4 py-2 rounded bg-accent-dark text-white text-sm hover:bg-accent transition cursor-pointer font-medium"
+            (click)="refreshSummoner()">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mb-4">
+        <span class="w-1 h-5 bg-accent rounded-sm"></span>
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+          Ranked
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        <app-queue-card [type]="QueueType.RANKED_SOLO" [queue]="soloQueue()" />
+        <app-queue-card [type]="QueueType.RANKED_FLEX" [queue]="flexQueue()" />
+      </div>
+
+      <div class="flex items-center gap-2 mb-4">
+        <span class="w-1 h-5 bg-accent rounded-sm"></span>
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+          Match History
+        </h2>
+      </div>
+
+      <div class="bg-surface-alt border border-dashed border-border-alt rounded p-10 text-center">
+        <p class="text-text-secondary text-sm font-medium mb-1">Coming soon</p>
+        <p class="text-text-disabled text-xs">
+          Recent matches, timelines, and scoreboard replays will show up here.
+        </p>
+      </div>
+    }
+  </div>
+</div>

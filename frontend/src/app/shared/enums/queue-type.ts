@@ -1,0 +1,5 @@
+export enum QueueType {
+  DRAFT_PICK = 'DRAFT_PICK',
+  RANKED_SOLO = 'RANKED_SOLO',
+  RANKED_FLEX = 'RANKED_FLEX',
+}
