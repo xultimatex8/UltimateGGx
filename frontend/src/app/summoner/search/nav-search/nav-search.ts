@@ -3,10 +3,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SummonerSearch } from '../summoner-search';
 
 @Component({
-  selector: 'app-hero-search',
+  selector: 'app-nav-search',
   imports: [ReactiveFormsModule],
-  templateUrl: './hero-search.html',
+  templateUrl: './nav-search.html',
 })
-export class HeroSearch {
+export class NavSearch {
   protected searchService = inject(SummonerSearch);
 }

@@ -1,0 +1,26 @@
+<form [formGroup]="searchService.form" (ngSubmit)="searchService.searchSummoner()">
+  <div class="flex gap-2">
+    <input
+      type="text"
+      formControlName="username"
+      placeholder="Summoner name"
+      class="flex-1 bg-background border border-border rounded px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+    />
+
+    <span class="flex items-center px-1 text-text-muted text-sm">#</span>
+
+    <input
+      type="text"
+      formControlName="tag"
+      placeholder="TAG"
+      class="w-16 bg-background border border-border rounded px-2 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+    />
+
+    <button
+      type="submit"
+      class="bg-accent-dark hover:bg-accent disabled:opacity-50 text-text-primary text-sm font-medium px-4 py-1.5 rounded transition cursor-pointer shrink-0"
+    >
+      Search
+    </button>
+  </div>
+</form>
