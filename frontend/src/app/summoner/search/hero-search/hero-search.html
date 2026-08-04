@@ -8,7 +8,7 @@
       Search a summoner to view match history and match data and timelines
     </p>
 
-    <form [formGroup]="form" (ngSubmit)="searchSummoner()" class="max-w-md mx-auto">
+    <form [formGroup]="searchService.form" (ngSubmit)="searchService.searchSummoner()" class="max-w-md mx-auto">
       <div class="flex gap-2">
         <input
           type="text"
