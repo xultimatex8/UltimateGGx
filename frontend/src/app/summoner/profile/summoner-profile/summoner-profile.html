@@ -10,7 +10,7 @@
         <p class="text-text-muted text-xs">Check the summoner name and tag and try again.</p>
       </div>
     } @else if (summoner(); as s) {
-      <div class="bg-surface border border-border rounded p-6 flex flex-col sm:flex-row sm:items-center gap-5 mb-8">
+      <div class="bg-surface border border-border rounded p-6 flex flex-col sm:flex-row items-center gap-5 mb-8">
         <div class="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24">
           <img
             [src]="profileIconUrl(s.profileIconId)"
@@ -22,13 +22,23 @@
           </span>
         </div>
 
-        <div class="flex-1 min-w-0">
-          <h1 class="text-xl font-bold text-text-primary tracking-tight truncate">
-            {{ s.username }}<span class="text-text-muted font-medium"> #{{ s.tag }}</span>
-          </h1>
-          <p class="text-text-muted text-xs mt-1">
-            Last updated {{ s.lastUpdate | date: 'medium' }}
-          </p>
+        <div class="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="text-center sm:text-start min-w-0">
+            <h1 class="text-xl font-bold text-text-primary tracking-tight truncate">
+              {{ s.username }}<span class="text-text-muted font-medium"> #{{ s.tag }}</span>
+            </h1>
+
+            <p class="text-text-muted text-xs mt-1">
+              Last change detected: {{ s.lastUpdate | date: 'medium' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="px-4 py-2 rounded bg-accent-dark text-white text-sm hover:bg-accent transition cursor-pointer font-medium"
+            (click)="refreshSummoner()">
+            Refresh
+          </button>
         </div>
       </div>
 

@@ -19,4 +19,11 @@ export class Summoner {
       `${this.baseUrl}/${encodeURIComponent(username)}/${encodeURIComponent(tag)}`
     );
   }
+
+  refreshSummoner(username: string, tag: string): Observable<SummonerDto> {
+    return this.http.put<SummonerDto>(
+      `${this.baseUrl}/${encodeURIComponent(username)}/${encodeURIComponent(tag)}/refresh`,
+      null
+    );
+  }
 }

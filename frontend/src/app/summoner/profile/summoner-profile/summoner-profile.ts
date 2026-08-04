@@ -61,4 +61,17 @@ export class SummonerProfile {
       },
     });
   }
+
+  public refreshSummoner() {
+    this.error.set(null);
+
+    this.summonerService.refreshSummoner(this.summoner()?.username || '', this.summoner()?.tag || '').subscribe({
+      next: (summoner) => {
+        this.summoner.set(summoner);
+      },
+      error: () => {
+        this.error.set("Couldn't refresh the summoner.");
+      },
+    });
+  }
 }
