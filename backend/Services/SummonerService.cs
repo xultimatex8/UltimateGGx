@@ -96,7 +96,7 @@ public class SummonerService : ISummonerService
             Username = summoner.Username,
             Tag = summoner.Tag,
             Level = summoner.Level,
-            ProfileIcondId = summoner.ProfileIconId,
+            ProfileIconId = summoner.ProfileIconId,
             LastUpdate = summoner.UpdatedAt,
             Queues = [.. summoner.Queues.Select(q => MapQueueToQueueDto(q))]
         };
