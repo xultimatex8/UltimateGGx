@@ -39,4 +39,11 @@ public class DataDragonService : IDataDragonService
             $"cdn/{version}/data/en_US/item.json", ct);
         return response ?? throw new Exception("Could not retrieve items data");
     }
+
+    public async Task<List<RuneResponseDto>> GetRunesAsync(string version, CancellationToken ct = default)
+    {
+        List<RuneResponseDto>? response = await _httpClient.GetFromJsonAsync<List<RuneResponseDto>>(
+            $"cdn/{version}/data/en_US/runesReforged.json", ct);
+        return response ?? throw new Exception("Could not retrieve runes data");
+    }
 }

@@ -99,6 +99,57 @@ public class ChampionSyncService
             }
         }
 
+        List<RuneResponseDto> runesResponse = await _dataDragonService.GetRunesAsync(version, ct);
+
+        foreach (var styleDto in runesResponse)
+        {
+            Rune? styleExisting = await _db.Runes
+                .FirstOrDefaultAsync(r => r.RiotId == styleDto.Id, ct);
+
+            if (styleExisting is null)
+            {
+                _db.Runes.Add(new Rune
+                {
+                    Key = styleDto.Key,
+                    Name = styleDto.Name,
+                    RiotId = styleDto.Id,
+                    Icon = styleDto.Icon,
+                    IsStyle = true
+                });
+            }
+            else
+            {
+                styleExisting.Name = styleDto.Name;
+                styleExisting.Icon = styleDto.Icon;
+            }
+
+            foreach (var slot in styleDto.Slots)
+            {
+                foreach (var runeDto in slot.Runes)
+                {
+                    Rune? existing = await _db.Runes
+                        .FirstOrDefaultAsync(r => r.RiotId == runeDto.Id, ct);
+
+                    if (existing is null)
+                    {
+                        _db.Runes.Add(new Rune
+                        {
+                            RiotId = runeDto.Id,
+                            Key = runeDto.Key,
+                            Name = runeDto.Name,
+                            Icon = runeDto.Icon,
+                            IsStyle = false
+                        });
+                    }
+                    else
+                    {
+                        existing.Name = runeDto.Name;
+                        existing.Icon = runeDto.Icon;
+                    }
+                }
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 

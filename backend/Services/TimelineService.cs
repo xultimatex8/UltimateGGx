@@ -374,8 +374,8 @@ public class TimelineService : ITimelineService
             Kills = kills,
             Lane = participant.Lane,
             Minions = frame?.Minions ?? 0,
-            PrimaryRune = participant.PrimaryRune,
-            SecondaryTree = participant.SecondaryTree,
+            PrimaryRune = RuneMapper.RuneToRuneDto(participant.PrimaryRune),
+            SecondaryTree = RuneMapper.RuneToRuneDto(participant.SecondaryTree),
             Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),
             SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellMapper.SummonerSpellToSummonerSpellDto)],
             Items = [.. currentItems.Select(ItemToItemDto)]
