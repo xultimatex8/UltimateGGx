@@ -19,10 +19,9 @@ export class ItemSlots {
   protected sorted = computed(() => ItemsUtil.sortForDisplay(this.items()));
   protected mainItems = computed(() => {
     const all = this.sorted();
-    return all.length > 1 ? all.slice(0, -1) : all;
+    return all.filter(item => item.buyPrice !== 0);
   });
   protected trinket = computed(() => {
-    const all = this.sorted();
-    return all.length > 1 ? all[all.length - 1] : null;
+    return this.sorted().find(item => item.buyPrice === 0) ?? null;
   });
 }
