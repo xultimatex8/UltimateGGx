@@ -4,7 +4,6 @@ import { Match } from '../match';
 import { MatchDto } from '../match.model';
 import { DataDragon } from '../../../shared/data-dragon/data-dragon';
 import { QueueTypeLabels } from '../../../shared/utils/queue-type.util';
-import { MatchParticipantsUtil } from '../../../shared/utils/match-participants.util';
 import { RouterLink } from '@angular/router';
 import { Item } from '../../../shared/item/item';
 import { SummonerSpell } from '../../../shared/summoner-spell/summoner-spell';
@@ -12,10 +11,22 @@ import { Rune } from '../../../shared/rune/rune';
 import { FormatDurationUtil } from '../../../shared/utils/format-duration.util';
 import { ItemDto } from '../../../shared/item/item.model';
 import { QueueType } from '../../../shared/enums/queue-type';
+import { ParticipantsUtil } from '../../../shared/utils/participants.util';
+import { ItemSlots } from '../../../shared/item-slots/item-slots';
+import { ParticipantIdentity } from '../../../shared/participan-identity/participant-identity';
 
 @Component({
   selector: 'app-match-history',
-  imports: [DatePipe, DecimalPipe, RouterLink, Item, SummonerSpell, Rune],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    Item,
+    SummonerSpell,
+    Rune,
+    ItemSlots,
+    ParticipantIdentity
+  ],
   templateUrl: './match-history.html',
 })
 export class MatchHistory {
@@ -25,7 +36,7 @@ export class MatchHistory {
   private dataDragon = inject(DataDragon);
 
   protected readonly QueueTypeLabels = QueueTypeLabels;
-  protected readonly MatchParticipantsUtil = MatchParticipantsUtil;
+  protected readonly ParticipantsUtil = ParticipantsUtil;
   protected readonly FormatDurationUtil = FormatDurationUtil;
   protected readonly ddragonVersion = this.dataDragon.version();
 
@@ -172,10 +183,12 @@ export class MatchHistory {
   }
 
   getMaxDamage(match: MatchDto): number {
-    const allParticipants = [
-      ...MatchParticipantsUtil.getBlueTeam(match),
-      ...MatchParticipantsUtil.getRedTeam(match)
-    ];
-    return Math.max(...allParticipants.map(p => p.damageToChampions || 0), 1);
+    return Math.max(...match.participants.map(p => p.damageToChampions || 0), 1);
+  }
+
+  getParticipantByPuuid(match: MatchDto, puuid: string) {
+    return match.participants.find(
+      p => p.puuid === puuid
+    )
   }
 }

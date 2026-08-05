@@ -1,5 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { SummonerSpellDto } from './summoner-spell.model';
+import { DataDragonUrlUtil } from '../utils/data-dragon-url.utils';
 
 @Component({
   selector: 'app-summoner-spell',
@@ -13,7 +14,7 @@ export class SummonerSpell {
 
   protected iconUrl = computed(() => {
     const spell = this.spell();
-    return spell ? this.buildIconUrl(this.ddragonVersion(), spell.riotId) : null;
+    return spell ? DataDragonUrlUtil.spellIcon(this.ddragonVersion(), spell.riotId) : null;
   });
 
   private buildIconUrl(ddragonVersion: string, riotId: string): string {
