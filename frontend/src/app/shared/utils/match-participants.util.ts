@@ -16,6 +16,14 @@ const LANE_LABELS: Record<string, string> = {
   UTILITY: 'SUPPORT'
 };
 
+const LANE_ICONS: Record<string, string> = {
+  TOP: 'top-icon.svg',
+  JUNGLE: 'jungle-icon.svg',
+  MIDDLE: 'middle-icon.svg',
+  BOTTOM: 'bottom-icon.svg',
+  UTILITY: 'utility-icon.svg'
+};
+
 export class MatchParticipantsUtil {
 
   static getBlueTeam(match: MatchDto): ParticipantDetailDto[] {
@@ -55,5 +63,17 @@ export class MatchParticipantsUtil {
     const index = LANE_ORDER.indexOf(lane.toUpperCase());
 
     return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  }
+
+  static getLaneLabel(lane: string): string {
+    const normalizedLane = lane?.toUpperCase();
+
+    return LANE_LABELS[normalizedLane] || 'UNKNOWN LANE';
+  }
+
+  static getLaneIcon(lane: string): string {
+    const normalizedLane = lane?.toUpperCase();
+    
+    return LANE_ICONS[normalizedLane] || 'unknown-icon';
   }
 }

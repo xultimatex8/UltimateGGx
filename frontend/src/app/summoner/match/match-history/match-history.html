@@ -75,10 +75,19 @@
                     [src]="championIconUrl(participant.champion.riotId)"
                     [alt]="participant.champion.name"
                     [title]="participant.champion.name"
-                    class="w-16 h-16 rounded-lg border border-border-alt" />
+                    class="w-16 h-16 rounded-lg border border-border-alt object-cover" />
+
+                  <div 
+                    class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
+                    [title]="MatchParticipantsUtil.getLaneLabel(participant.lane)">
+                    <img
+                      [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(participant.lane)"
+                      [alt]="MatchParticipantsUtil.getLaneLabel(participant.lane)"
+                      class="w-5 h-5 opacity-80 brightness-200" />
+                  </div>
 
                   <span
-                    class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-1 py-px text-[11px] text-text-secondary">
+                    class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-1 py-px text-[11px] font-medium text-text-secondary leading-none">
                     {{ participant.championLevel }}
                   </span>
                 </div>
@@ -145,7 +154,7 @@
                   <app-item
                     [item]="item"
                     [ddragonVersion]="ddragonVersion"
-                    size="w-6 h-6" />
+                    size="w-6.5 h-6.5" />
                 }
               </div>
             </div>
@@ -248,8 +257,17 @@
                                 [src]="championIconUrl(p.champion.riotId)"
                                 [alt]="p.champion.name"
                                 [title]="p.champion.name"
-                                class="w-9 h-8 rounded border border-border/40" 
+                                class="w-8 h-8 rounded border border-border/40" 
                               />
+
+                              <div 
+                                class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
+                                [title]="MatchParticipantsUtil.getLaneLabel(p.lane)">
+                                <img
+                                  [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(p.lane)"
+                                  [alt]="MatchParticipantsUtil.getLaneLabel(p.lane)"
+                                  class="w-2.5 h-2.5 opacity-80 brightness-200" />
+                              </div>
 
                               <span
                                 class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
@@ -376,6 +394,15 @@
                                 [title]="p.champion.name"
                                 class="w-8 h-8 rounded border border-border/40" 
                               />
+
+                              <div 
+                                class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
+                                [title]="MatchParticipantsUtil.getLaneLabel(p.lane)">
+                                <img
+                                  [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(p.lane)"
+                                  [alt]="MatchParticipantsUtil.getLaneLabel(p.lane)"
+                                  class="w-2.5 h-2.5 opacity-80 brightness-200" />
+                              </div>
 
                               <span
                                 class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
