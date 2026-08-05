@@ -4,7 +4,7 @@ import { Match } from '../match';
 import { MatchDto } from '../match.model';
 import { DataDragon } from '../../../shared/data-dragon/data-dragon';
 import { QueueTypeLabels } from '../../../shared/utils/queue-type.util';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Item } from '../../../shared/item/item';
 import { SummonerSpell } from '../../../shared/summoner-spell/summoner-spell';
 import { Rune } from '../../../shared/rune/rune';
@@ -34,6 +34,7 @@ export class MatchHistory {
 
   private matchService = inject(Match);
   private dataDragon = inject(DataDragon);
+  private router = inject(Router);
 
   protected readonly QueueTypeLabels = QueueTypeLabels;
   protected readonly ParticipantsUtil = ParticipantsUtil;
@@ -124,6 +125,10 @@ export class MatchHistory {
       const bIsFree = b.buyPrice === 0 ? 1 : 0;
       return aIsFree - bIsFree;
     });
+  }
+
+  goToTimeline(matchId: string) {
+    this.router.navigate(['/match', matchId]);
   }
 
   fetchMatches(): void {

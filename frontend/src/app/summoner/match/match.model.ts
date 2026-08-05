@@ -5,6 +5,7 @@ import { RuneDto } from "../../shared/rune/rune.model";
 import { SummonerSpellDto } from "../../shared/summoner-spell/summoner-spell.model";
 
 export interface MatchDto {
+  matchId: string;
   endOfGameResult: string;
   gameDuration: number;
   gameEndTimestamp: number;
