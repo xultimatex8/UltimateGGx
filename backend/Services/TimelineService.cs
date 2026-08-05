@@ -59,6 +59,9 @@ public class TimelineService : ITimelineService
             .SelectMany(t => t.Participants)
             .ToDictionary(p => p.ParticipantId);
 
+        Dictionary<int, Team> teams = match.Teams
+            .ToDictionary(t => t.TeamId);
+
         Dictionary<int, Item> items = await _db.Items
             .ToDictionaryAsync(i => i.Key, ct);
 
@@ -69,7 +72,7 @@ public class TimelineService : ITimelineService
         {
             foreach (EventsTimeLineDto eventDto in frame.Events)
             {
-                Event? mappedEvent = MapEvent(eventDto, match, items, participants);
+                Event? mappedEvent = MapEvent(eventDto, match, items, participants, teams);
 
                 if (mappedEvent is not null)
                 {
@@ -128,6 +131,9 @@ public class TimelineService : ITimelineService
             .Include(mr => mr.Match!)
                 .ThenInclude(m => m.Events)
                     .ThenInclude(e => e.AssistingParticipants)
+            .Include(mr => mr.Match!)
+                .ThenInclude(m => m.Events)
+                    .ThenInclude(e => e.Team)
             .FirstAsync(mr => mr.MatchId == matchId, ct);
 
         Match match = reference.Match
@@ -192,7 +198,8 @@ public class TimelineService : ITimelineService
         EventsTimeLineDto dto,
         Match match,
         Dictionary<int, Item> items,
-        Dictionary<int, Participant> participants)
+        Dictionary<int, Participant> participants,
+        Dictionary<int, Team> teams)
     {
         if (!Enum.TryParse(dto.Type, out EventType type))
         {
@@ -241,6 +248,16 @@ public class TimelineService : ITimelineService
         if (participants.TryGetValue(dto.VictimId, out Participant? victim))
         {
             newEvent.Victim = victim;
+        }
+
+        if (teams.TryGetValue(dto.TeamId, out Team? team))
+        {
+            newEvent.Team = team;
+        }
+
+        if (teams.TryGetValue(dto.WinningTeam, out Team? winningTeam))
+        {
+            newEvent.Team = winningTeam;
         }
 
         foreach (int assistingId in dto.AssistingParticipantIds)
@@ -306,6 +323,11 @@ public class TimelineService : ITimelineService
             toRemove.Add(destroyed);
         }
 
+        foreach (Event destroyed in ordered.Where(e => e.Type == EventType.ITEM_PURCHASED && e.Participant == null && e.Killer == null))
+        {
+            toRemove.Add(destroyed);
+        }
+
         return [.. ordered.Where(e => !toRemove.Contains(e))];
     }
 
@@ -326,9 +348,7 @@ public class TimelineService : ITimelineService
             VictimParticipantId = evt.Victim?.ParticipantId,
             AssistingParticipants = [.. evt.AssistingParticipants.Select(p => p.ParticipantId)],
             Item = evt.Item is not null ? ItemToItemDto(evt.Item) : null,
-            WinningTeamId = evt.Type == EventType.GAME_END
-                ? match.Teams.FirstOrDefault(t => t.Win)?.TeamId
-                : null
+            TeamId = evt.Team is not null ? evt.Team.TeamId : null
         };
     }
 

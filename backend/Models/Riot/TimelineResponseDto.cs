@@ -35,6 +35,8 @@ public class EventsTimeLineDto
     public int AfterId { get; set; }
     public int ParticipantId { get; set; }
     public int VictimId { get; set; }
+    public int TeamId { get; set; }
+    public int WinningTeam { get; set; }
     public List<int> AssistingParticipantIds { get; set; } = [];
 }
 
