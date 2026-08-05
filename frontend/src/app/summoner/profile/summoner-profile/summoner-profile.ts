@@ -6,10 +6,11 @@ import { SummonerDto } from '../../summoner.model';
 import { QueueType } from '../../../shared/enums/queue-type';
 import { QueueCard } from '../queue-card/queue-card/queue-card';
 import { DataDragon } from '../../../shared/data-dragon/data-dragon';
+import { MatchHistory } from '../../match/match-history/match-history';
 
 @Component({
   selector: 'app-summoner-profile',
-  imports: [DatePipe, QueueCard],
+  imports: [DatePipe, QueueCard, MatchHistory],
   templateUrl: './summoner-profile.html',
 })
 export class SummonerProfile {
@@ -65,7 +66,10 @@ export class SummonerProfile {
   public refreshSummoner() {
     this.error.set(null);
 
-    this.summonerService.refreshSummoner(this.summoner()?.username || '', this.summoner()?.tag || '').subscribe({
+    this.summonerService.refreshSummoner(
+      this.summoner()?.username || '',
+      this.summoner()?.tag || ''
+    ).subscribe({
       next: (summoner) => {
         this.summoner.set(summoner);
       },

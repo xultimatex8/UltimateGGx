@@ -1,0 +1,191 @@
+<button
+  type="button"
+  class="mb-5 inline-flex items-center gap-2 px-4 py-2 rounded border border-border bg-surface text-text-primary text-sm font-medium hover:bg-surface-alt hover:border-accent transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+  (click)="fetchMatches()"
+  [disabled]="loading()">
+
+  @if (loading()) {
+    <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+    Fetching...
+  } @else {
+    <span class="text-accent">↻</span>
+    Fetch matches
+  }
+</button>
+
+@if (error()) {
+  <div class="mb-5 bg-danger-surface border border-danger-border rounded-lg p-4">
+    <p class="text-danger-border text-sm font-medium">
+      {{ error() }}
+    </p>
+  </div>
+}
+
+@if (matches().length === 0) {
+  <div class="bg-surface-alt border border-dashed border-border-alt rounded-lg p-10 text-center">
+    <p class="text-text-secondary text-sm font-medium mb-1">
+      No matches found
+    </p>
+
+    <p class="text-text-disabled text-xs">
+      Fetch the latest games to see the match history.
+    </p>
+  </div>
+} @else {
+  <div class="space-y-3">
+    @for (match of matches(); track $index) {
+      @let participant = MatchParticipantsUtil.getParticipant(match, puuid());
+
+      @if (participant) {
+        <div class="relative rounded-lg border border-border bg-surface px-4 py-1.5 transition hover:border-accent/50">
+          <div
+            class="absolute left-0 top-0 bottom-0 w-1"
+            [class]="matchBorderClass(match)">
+          </div>
+
+          <div class="flex items-center gap-6 pl-2">
+            <div class="flex flex-col gap-2.5 shrink-0 w-72">
+              <div class="flex items-center gap-2">
+                <div class="relative">
+                  <img
+                    [src]="championIconUrl(participant.champion.riotId)"
+                    [alt]="participant.champion.name"
+                    [title]="participant.champion.name"
+                    class="w-16 h-16 rounded-lg border border-border-alt" />
+
+                  <span
+                    class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-1 py-px text-[11px] text-text-secondary">
+                    {{ participant.championLevel }}
+                  </span>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <app-summoner-spell
+                    [spell]="participant.summonerSpells[0]"
+                    [ddragonVersion]="ddragonVersion"
+                    size="w-6.5 h-6.5" />
+
+                  <app-summoner-spell
+                    [spell]="participant.summonerSpells[1]"
+                    [ddragonVersion]="ddragonVersion"
+                    size="w-6.5 h-6.5" />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <app-rune
+                    [rune]="participant.primaryRune"
+                    size="w-6 h-6" />
+
+                  <app-rune
+                    [rune]="participant.secondaryTree"
+                    size="w-6 h-6" />
+                </div>
+
+                <div>
+                  <div class="flex items-center gap-2">
+                    <p class="font-semibold text-text-primary">
+                      {{ participant.champion.name }}
+                    </p>
+
+                    <span
+                      class="px-2 py-0.5 rounded text-[11px] font-semibold"
+                      [class]="matchResultClass(match)">
+                      {{ matchResult(match) }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-3 mt-1">
+                    <p class="text-sm font-medium text-text-primary">
+                      {{ participant.kills }}
+                      <span class="text-text-muted">/</span>
+                      {{ participant.deaths }}
+                      <span class="text-text-muted">/</span>
+                      {{ participant.assists }}
+                    </p>
+
+                    <p class="text-xs text-text-muted">
+                      {{ participant.minions }} CS
+                    </p>
+                  </div>
+
+                  @if (match.endOfGameResult !== 'GameComplete') {
+                    <p class="text-[11px] text-warning-border mt-1">
+                      {{ match.endOfGameResult }}
+                    </p>
+                  }
+                </div>
+              </div>
+
+              <div class="flex items-center gap-0.5">
+                @for (item of sortedItems(participant.items); track $index) {
+                  <app-item
+                    [item]="item"
+                    [ddragonVersion]="ddragonVersion"
+                    size="w-6 h-6" />
+                }
+              </div>
+            </div>
+
+            <div class="flex-1 grid grid-cols-2 gap-6 border-l border-r border-border px-6">
+              <div>
+                @for (p of MatchParticipantsUtil.getBlueTeam(match); track p.puuid) {
+                  <div class="flex items-center gap-3 text-xs">
+                    <img
+                      [src]="championIconUrl(p.champion.riotId)"
+                      [alt]="p.champion.name"
+                      [title]="p.champion.name"
+                      class="w-6 h-6 rounded border border-border-alt shrink-0" />
+                    <a
+                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                      class="truncate hover:underline"
+                      [class.text-accent]="p.puuid === puuid()"
+                      [class.font-semibold]="p.puuid === puuid()"
+                      [class.text-text-primary]="p.puuid !== puuid()"
+                      [title]="p.summonerName + '#' + p.summonerTag">
+                      {{ p.summonerName }}
+                    </a>
+                  </div>
+                }
+              </div>
+
+              <div>
+                @for (p of MatchParticipantsUtil.getRedTeam(match); track p.puuid) {
+                  <div class="flex items-center gap-3 text-xs">
+                    <img
+                      [src]="championIconUrl(p.champion.riotId)"
+                      [alt]="p.champion.name"
+                      [title]="p.champion.name"
+                      class="w-6 h-6 rounded border border-border-alt shrink-0" />
+                    <a
+                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                      class="truncate hover:underline"
+                      [class.text-accent]="p.puuid === puuid()"
+                      [class.font-semibold]="p.puuid === puuid()"
+                      [class.text-text-primary]="p.puuid !== puuid()"
+                      [title]="p.summonerName + '#' + p.summonerTag">
+                      {{ p.summonerName }}
+                    </a>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="text-right space-y-1 shrink-0 w-28">
+              <p class="text-sm font-medium text-text-primary">
+                {{ FormatDurationUtil.formatDuration(match.gameDuration) }}
+              </p>
+
+              <p class="text-xs text-text-muted">
+                {{ match.gameEndTimestamp | date:'short' }}
+              </p>
+
+              <p class="text-[11px] text-text-disabled">
+                {{ QueueTypeLabels[match.queueType] }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+}
