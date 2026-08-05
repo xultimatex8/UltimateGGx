@@ -115,12 +115,20 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
-                            <span class="text-text-disabled">killed</span>
+                            <span
+                              class="font-semibold"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>killed</span>
                             @if (victim?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-semibold text-text-primary">{{ victim?.summonerName ?? `P${event.victimParticipantId}` }}</span>
+                            <span
+                              class="font-semibold"
+                              [class]="getActorColorClass(event.victimParticipantId, event.teamId === 100 ? 200 : 100)">
+                              {{ getActorName(event.victimParticipantId, event.teamId === 100 ? 200 : 100) }}
+                            </span>
                             
                             @if (event.bounty || event.shutdownBounty) {
                               <span class="rounded bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-400 text-xs border border-amber-500/20">
@@ -139,7 +147,11 @@
                                     @if (assistant?.champion; as champ) {
                                       <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-4 w-4 rounded-full object-cover" />
                                     }
-                                    <span class="font-medium text-text-primary">{{ assistant?.summonerName ?? `P${assistId}` }}</span>
+                                    <span
+                                      class="font-semibold"
+                                      [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                                      {{ getActorName(assistId, event.teamId) }}
+                                    </span>
                                   </div>
                                 }
                               </div>
@@ -153,7 +165,11 @@
                           @if (actor?.champion; as champ) {
                             <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
-                          <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
                           <span>defeated</span>
                           <span class="font-bold text-text-primary">{{ formatMonster(event) }}</span>
                         </div>
@@ -164,7 +180,11 @@
                           @if (actor?.champion; as champ) {
                             <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
-                          <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
                           <span>destroyed</span>
                           <span class="font-bold text-text-primary">
                             @if (event.buildingType === 'INHIBITOR_BUILDING') {
@@ -181,7 +201,11 @@
                           @if (actor?.champion; as champ) {
                             <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
-                          <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
                           <span>
                             destroyed a 
                             @if (event.laneType) {
@@ -199,7 +223,11 @@
                           @if (actor?.champion; as champ) {
                             <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
-                          <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
                           <span>
                             @switch (event.type) {
                               @case ('ITEM_PURCHASED') { purchased }
@@ -221,7 +249,11 @@
                           @if (actor?.champion; as champ) {
                             <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
-                          <span class="font-semibold text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
                           <span>undid purchase</span>
                         </div>
                       }
@@ -230,8 +262,7 @@
                         <div class="flex items-center gap-3 flex-wrap">
                           <span
                             class="font-bold"
-                            [class.text-blue-500]="event.teamId === 100"
-                            [class.text-red-500]="event.teamId !== 100">
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
                             {{ getActorName(event.mainParticipantId, event.teamId) }} won the game
                           </span>
                         </div>
@@ -415,12 +446,20 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
-                            <span class="text-text-disabled">killed</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>killed</span>
                             @if (victim?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ victim?.summonerName ?? `P${event.victimParticipantId}` }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.victimParticipantId, event.teamId === 100 ? 200 : 100)">
+                              {{ getActorName(event.victimParticipantId, event.teamId === 100 ? 200 : 100) }}
+                            </span>
                             
                             @if (event.bounty || event.shutdownBounty) {
                               <span class="font-semibold text-amber-400">
@@ -435,7 +474,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>defeated</span>
                             <span class="font-semibold text-text-primary">{{ formatMonster(event) }}</span>
                           </div>
@@ -446,7 +489,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>destroyed</span>
                             <span class="font-semibold text-text-primary">
                               @if (event.buildingType === 'INHIBITOR_BUILDING') {
@@ -463,11 +510,16 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                              <span
+                                class="font-medium"
+                                [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                                {{ getActorName(event.mainParticipantId, event.teamId) }}
+                              </span>
                             <span>
                               destroyed a 
                               @if (event.laneType) {
-                                <span class="font-semibold text-text-primary">{{ formatLane(event.laneType) }}</span>
+                                <span class="font-semibold text-text-primary"
+                                >{{ formatLane(event.laneType) }}</span>
                               }
                               turret plate
                             </span>
@@ -479,7 +531,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>purchased</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
@@ -495,7 +551,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>sold</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
@@ -511,7 +571,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>consumed / destroyed</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
@@ -527,7 +591,11 @@
                             @if (actor?.champion; as champ) {
                               <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
-                            <span class="font-medium text-text-primary">{{ getActorName(event.mainParticipantId, event.teamId) }}</span>
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
                             <span>undid purchase</span>
                           </div>
                         }
@@ -536,8 +604,7 @@
                           <div class="flex items-center gap-1.5 flex-wrap">
                             <span
                               class="font-semibold"
-                              [class.text-blue-500]="event.teamId === 100"
-                              [class.text-red-500]="event.teamId !== 100">
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
                               {{ getActorName(event.mainParticipantId, event.teamId) }} won the game
                             </span>
                           </div>

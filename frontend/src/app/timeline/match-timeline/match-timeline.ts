@@ -273,6 +273,23 @@ export class MatchTimeline {
     return participant?.summonerName ?? `P${participantId}`;
   }
 
+  protected getParticipantTeamId(participantId?: number | null): number | undefined {
+    if (!participantId) return undefined;
+
+    return this.scoreboard()
+      ?.teams
+      .find(team => team.participants.some(p => p.participantId === participantId))
+      ?.teamId;
+  }
+
+  protected getActorColorClass(participantId?: number | null, teamId?: number): string {
+    const resolvedTeamId = this.getParticipantTeamId(participantId) ?? teamId;
+
+    if (resolvedTeamId === 100) return 'text-blue-400';
+    if (resolvedTeamId === 200) return 'text-red-400';
+    return '';
+  }
+
   protected getTeams() {
     return this.scoreboard()?.teams ?? [];
   }
