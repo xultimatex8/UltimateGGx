@@ -13,7 +13,7 @@ import { ItemDto } from '../../../shared/item/item.model';
 import { QueueType } from '../../../shared/enums/queue-type';
 import { ParticipantsUtil } from '../../../shared/utils/participants.util';
 import { ItemSlots } from '../../../shared/item-slots/item-slots';
-import { ParticipantIdentity } from '../../../shared/participan-identity/participant-identity';
+import { ParticipantIdentity } from '../../../shared/participant-identity/participant-identity';
 
 @Component({
   selector: 'app-match-history',

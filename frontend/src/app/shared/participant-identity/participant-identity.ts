@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { Rune } from '../rune/rune';
 import { SummonerSpell } from '../summoner-spell/summoner-spell';
-import { ParticipantIdentityDto } from './participan-identity.model';
+import { ParticipantIdentityDto } from './participant-identity.model';
 import { ParticipantsUtil } from '../utils/participants.util';
 import { DataDragonUrlUtil } from '../utils/data-dragon-url.utils';
 import { RouterLink } from '@angular/router';
@@ -22,7 +22,7 @@ export class ParticipantIdentity {
   laneIconSize = input('w-2.5 h-2.5');
   levelTextSize = input('text-[9px]');
   spellSize = input('w-3.5 h-3.5');
-  primaryRuneSize = input('w-4 h-4');
+  primaryRuneSize = input('w-3 h-3');
   secondaryRuneSize = input('w-3 h-3');
   nameSize = input('text-xs');
 
