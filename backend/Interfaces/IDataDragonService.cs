@@ -8,4 +8,5 @@ public interface IDataDragonService
     Task<ChampionResponseDto> GetChampionsAsync(string version, CancellationToken ct = default);
     Task<SummonerSpellResponseDto> GetSummonerSpellsAsync(string version, CancellationToken ct = default);
     Task<ItemResponseDto> GetItemsAsync(string version, CancellationToken ct = default);
+    Task<List<RuneResponseDto>> GetRunesAsync(string version, CancellationToken ct = default);
 }

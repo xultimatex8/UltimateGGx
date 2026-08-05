@@ -1,0 +1,41 @@
+@if (item(); as it) {
+  <div class="relative group inline-block">
+    <img
+      [src]="iconUrl()"
+      [alt]="it.name"
+      [title]="it.name"
+      [class]="size()"
+      class="rounded border border-border-alt" 
+    />
+
+    <div
+      class="hidden group-hover:block absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-2
+             w-64 rounded-lg border border-border bg-surface p-3 shadow-lg text-left">
+      <p class="text-sm font-semibold text-text-primary mb-1">
+        {{ it.name }}
+      </p>
+
+      <p class="text-xs text-text-secondary leading-relaxed whitespace-pre-line mb-2">
+        {{ it.description }}
+      </p>
+
+      @if (statEntries().length > 0) {
+        <div class="border-t border-border pt-2 mb-2 space-y-0.5">
+          @for (stat of statEntries(); track stat.label) {
+            <p class="text-[11px] text-text-muted flex justify-between">
+              <span>{{ stat.label }}</span>
+              <span class="text-text-primary font-medium">{{ stat.value }}</span>
+            </p>
+          }
+        </div>
+      }
+
+      <div class="border-t border-border pt-2 flex justify-between text-[11px]">
+        <span class="text-success-border">Buy: {{ it.buyPrice }}</span>
+        <span class="text-text-muted">Sell: {{ it.sellPrice }}</span>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div [class]="size()" class="rounded border border-dashed border-border-alt bg-surface-alt"></div>
+}

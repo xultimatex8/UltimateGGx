@@ -24,8 +24,8 @@ public class ScoreboardParticipantDto
     public int Kills { get; set; }
     public string Lane { get; set; } = default!;
     public int Minions { get; set; }
-    public int PrimaryRune { get; set; }
-    public int SecondaryTree { get; set; }
+    public RuneDto PrimaryRune { get; set; } = default!;
+    public RuneDto SecondaryTree { get; set; } = default!;
     public ChampionDto Champion { get; set; } = default!;
     public List<SummonerSpellDto> SummonerSpells { get; set; } = [];
     public List<ItemDto> Items { get; set; } = [];

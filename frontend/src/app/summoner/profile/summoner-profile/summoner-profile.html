@@ -61,11 +61,8 @@
         </h2>
       </div>
 
-      <div class="bg-surface-alt border border-dashed border-border-alt rounded p-10 text-center">
-        <p class="text-text-secondary text-sm font-medium mb-1">Coming soon</p>
-        <p class="text-text-disabled text-xs">
-          Recent matches, timelines, and scoreboard replays will show up here.
-        </p>
+      <div class="bg-surface-alt border border-dashed border-border-alt rounded px-10 py-5 text-center">
+        <app-match-history [puuid]="s.puuid" />
       </div>
     }
   </div>

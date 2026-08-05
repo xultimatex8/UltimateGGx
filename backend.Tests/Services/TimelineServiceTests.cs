@@ -27,6 +27,8 @@ public class TimelineServiceTests
         var victimSummoner = new Summoner { Puuid = "victim-puuid", Username = "Victim", Tag = "EUW" };
         var champion = new Champion { Key = 1, Name = "Annie", RiotId = "Annie", Roles = ["Mage"] };
         var spell = new SummonerSpell { Key = 4, Name = "Flash", RiotId = "SummonerFlash" };
+        var primaryRune = new Rune { Key = "PressTheAttack", Name = "Press the Attack", RiotId = 8005, Icon = "perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png", IsStyle = false };
+        var secondaryTree = new Rune { Key = "Domination", Name = "Domination", RiotId = 9000, Icon = "perk-images/Styles/Domination/Domination.png", IsStyle = true };
 
         Team teamA = new() { TeamId = 100, Win = true };
         Team teamB = new() { TeamId = 200, Win = false };
@@ -37,6 +39,8 @@ public class TimelineServiceTests
             Lane = "MIDDLE",
             Team = teamA,
             Summoner = killerSummoner,
+            PrimaryRune = primaryRune,
+            SecondaryTree = secondaryTree,
             Champion = champion,
             SummonerSpells = [spell]
         };
@@ -46,6 +50,8 @@ public class TimelineServiceTests
             ParticipantId = 2,
             Lane = "JUNGLE",
             Team = teamB,
+            PrimaryRune = primaryRune,
+            SecondaryTree = secondaryTree,
             Summoner = victimSummoner,
             Champion = champion,
             SummonerSpells = [spell]

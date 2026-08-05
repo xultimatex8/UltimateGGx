@@ -29,6 +29,10 @@ public class MatchServiceTests
         db.SummonerSpells.Add(new SummonerSpell { Key = 7, Name = "Heal", RiotId = "SummonerHeal" });
         db.Items.Add(new Item { Key = 1001, Name = "Boots", Description = "desc", BuyPrice = 300, SellPrice = 210, Stats = [] });
         db.Items.Add(new Item { Key = 3006, Name = "Berserker's Greaves", Description = "desc", BuyPrice = 1100, SellPrice = 770, Stats = [] });
+        db.Runes.Add(new Rune { Key = "Precision", Name = "Precision", RiotId = 8000, Icon = "perk-images/Styles/Precision/Precision.png", IsStyle = true });
+        db.Runes.Add(new Rune { Key = "PressTheAttack", Name = "Press the Attack", RiotId = 8005, Icon = "perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png", IsStyle = false });
+        db.Runes.Add(new Rune { Key = "Domination", Name = "Domination", RiotId = 9000, Icon = "perk-images/Styles/Domination/Domination.png", IsStyle = true });
+        db.Runes.Add(new Rune { Key = "Electrocute", Name = "Electrocute", RiotId = 9005, Icon = "perk-images/Styles/Domination/Electrocute/Electrocute.png", IsStyle = false });
         await db.SaveChangesAsync();
     }
 
@@ -75,7 +79,7 @@ public class MatchServiceTests
                 Styles =
                 [
                     new PerkStyleDto { Style = 8000, Selections = [new PerkStyleSelectionDto { Perk = 8005 }] },
-                    new PerkStyleDto { Style = 8100, Selections = [new PerkStyleSelectionDto { Perk = 8100 }] }
+                    new PerkStyleDto { Style = 9000, Selections = [new PerkStyleSelectionDto { Perk = 9005 }] }
                 ]
             }
         };
@@ -193,6 +197,8 @@ public class MatchServiceTests
         SummonerSpell flash = await db.SummonerSpells.FirstAsync(s => s.Key == 4);
         SummonerSpell heal = await db.SummonerSpells.FirstAsync(s => s.Key == 7);
         Champion champion = await db.Champions.FirstAsync(c => c.Key == 1);
+        Rune primaryRune = await db.Runes.FirstAsync(r => r.RiotId == 8005);
+        Rune secondaryTree = await db.Runes.FirstAsync(r => r.RiotId == 9000);
 
         teamA.Participants.Add(new Participant
         {
@@ -203,10 +209,10 @@ public class MatchServiceTests
             Gold = 15000,
             Items = [],
             Lane = "MIDDLE",
-            PrimaryRune = 8005,
-            SecondaryTree = 8100,
             DamageToChampions = 25000,
             Team = teamA,
+            PrimaryRune = primaryRune,
+            SecondaryTree = secondaryTree,
             Summoner = requestedSummoner,
             Champion = champion,
             SummonerSpells = [flash, heal]

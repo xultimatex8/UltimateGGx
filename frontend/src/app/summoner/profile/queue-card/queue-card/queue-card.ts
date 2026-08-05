@@ -1,6 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { QueueType } from '../../../../shared/enums/queue-type';
 import { QueueDto } from '../../../summoner.model';
+import { QueueTypeLabels } from '../../../../shared/utils/queue-type.util';
 
 const TIER_COLORS: Record<string, string> = {
   IRON: '#6b6560',
@@ -15,12 +16,6 @@ const TIER_COLORS: Record<string, string> = {
   CHALLENGER: '#f4c95d',
 };
 
-const QUEUE_LABELS: Record<QueueType, string> = {
-  [QueueType.DRAFT_PICK]: 'Draft Pick',
-  [QueueType.RANKED_SOLO]: 'Ranked Solo/Duo',
-  [QueueType.RANKED_FLEX]: 'Ranked Flex',
-};
-
 @Component({
   selector: 'app-queue-card',
   imports: [],
@@ -30,7 +25,7 @@ export class QueueCard {
   type = input.required<QueueType>();
   queue = input<QueueDto | null>(null);
 
-  label = computed(() => QUEUE_LABELS[this.type()]);
+  label = computed(() => QueueTypeLabels[this.type()]);
 
   winRate = computed(() => {
     const q = this.queue();

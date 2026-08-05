@@ -1,0 +1,13 @@
+@if (rune(); as r) {
+  <div class="relative group inline-block">
+    <img
+      [src]="iconUrl()"
+      [alt]="r.name"
+      [title]="r.name"
+      [class]="size()"
+      class="rounded" 
+    />
+  </div>
+} @else {
+  <div [class]="size()" class="rounded border border-dashed border-border-alt bg-surface-alt"></div>
+}

@@ -93,6 +93,14 @@ public class MatchService : IMatchService
                 .ThenInclude(m => m!.Teams)
                     .ThenInclude(t => t.Participants)
                         .ThenInclude(p => p.Items)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.PrimaryRune)
+            .Include(m => m.Match)
+                .ThenInclude(m => m!.Teams)
+                    .ThenInclude(t => t.Participants)
+                        .ThenInclude(p => p.SecondaryTree)
             .OrderByDescending(m => m.Match!.GameEndTimestamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -109,6 +117,9 @@ public class MatchService : IMatchService
         Dictionary<int, Item> items =
             await _db.Items.ToDictionaryAsync(i => i.Key, ct);
 
+        Dictionary<int, Rune> runes =
+            await _db.Runes.ToDictionaryAsync(r => r.RiotId, ct);
+
         List<Match> matches = [];
 
         foreach (MatchReference reference in matchReferences)
@@ -120,6 +131,7 @@ public class MatchService : IMatchService
                     champions,
                     summonerSpells,
                     items,
+                    runes,
                     ct);
 
             matches.Add(match);
@@ -142,6 +154,7 @@ public class MatchService : IMatchService
         Dictionary<int, Champion> champions,
         Dictionary<int, SummonerSpell> spells,
         Dictionary<int, Item> items,
+        Dictionary<int, Rune> runes,
         CancellationToken ct)
     {
         MatchResponseDto dto =
@@ -168,6 +181,7 @@ public class MatchService : IMatchService
                 champions,
                 spells,
                 items,
+                runes,
                 summonerCache,
                 ct));
         }
@@ -195,6 +209,7 @@ public class MatchService : IMatchService
         Dictionary<int, Champion> champions,
         Dictionary<int, SummonerSpell> spells,
         Dictionary<int, Item> items,
+        Dictionary<int, Rune> runes,
         Dictionary<string, Summoner> cache,
         CancellationToken ct)
     {
@@ -206,6 +221,12 @@ public class MatchService : IMatchService
 
         if (!spells.TryGetValue(dto.Summoner2Id, out SummonerSpell? spell2))
             throw new NotFoundException(nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner2Id);
+
+        if (!runes.TryGetValue(dto.Perks.Styles[0].Selections[0].Perk, out Rune? primaryRune))
+            throw new NotFoundException(nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[0].Selections[0].Perk);
+
+        if (!runes.TryGetValue(dto.Perks.Styles[1].Style, out Rune? secondaryTree))
+            throw new NotFoundException(nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[1].Style);
 
         Summoner summoner = await GetOrCreateSummonerAsync(dto, cache, ct);
 
@@ -248,10 +269,10 @@ public class MatchService : IMatchService
             Kills = dto.Kills,
             Lane = dto.TeamPosition,
             Minions = dto.TotalMinionsKilled + dto.NeutralMinionsKilled,
-            PrimaryRune = dto.Perks.Styles[0].Selections[0].Perk,
-            SecondaryTree = dto.Perks.Styles[1].Style,
             DamageToChampions = dto.TotalDamageDealtToChampions,
             Team = teams.First(t => t.TeamId == dto.TeamId),
+            PrimaryRune = primaryRune,
+            SecondaryTree = secondaryTree,
             Champion = champion,
             Summoner = summoner,
             SummonerSpells = [spell1, spell2]
@@ -309,6 +330,7 @@ public class MatchService : IMatchService
     {
         return new ParticipantDetailDto
         {
+            Puuid = participant.Summoner.Puuid,
             SummonerName = participant.Summoner.Username,
             SummonerTag = participant.Summoner.Tag,
             Assists = participant.Assists,
@@ -318,10 +340,10 @@ public class MatchService : IMatchService
             Kills = participant.Kills,
             Lane = participant.Lane,
             Minions = participant.Minions,
-            PrimaryRune = participant.PrimaryRune,
-            SecondaryTree = participant.SecondaryTree,
             DamageToChampions = participant.DamageToChampions,
             TeamId = participant.Team.TeamId,
+            PrimaryRune = RuneMapper.RuneToRuneDto(participant.PrimaryRune),
+            SecondaryTree = RuneMapper.RuneToRuneDto(participant.SecondaryTree),
             Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),
             Items = [.. participant.Items.Select(ItemToItemDtoDto)],
             SummonerSpells = [.. participant.SummonerSpells.Select(SummonerSpellMapper.SummonerSpellToSummonerSpellDto)]

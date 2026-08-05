@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Champion> Champions => Set<Champion>();
     public DbSet<SummonerSpell> SummonerSpells => Set<SummonerSpell>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<Rune> Runes => Set<Rune>();
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<MatchReference> MatchReferences => Set<MatchReference>();
     public DbSet<Team> Teams => Set<Team>();
@@ -56,7 +57,6 @@ public class AppDbContext : DbContext
             .HasIndex(m => m.MatchId)
             .IsUnique();
 
-
         modelBuilder.Entity<Queue>()
             .Property(q => q.Type)
             .HasConversion<string>();
@@ -95,6 +95,17 @@ public class AppDbContext : DbContext
                 v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
                 v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new());
 
+        modelBuilder.Entity<Participant>()
+            .HasOne(p => p.PrimaryRune)
+            .WithMany()
+            .HasForeignKey(p => p.PrimaryRuneId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Participant>()
+            .HasOne(p => p.SecondaryTree)
+            .WithMany()
+            .HasForeignKey(p => p.SecondaryTreeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Participant>()
             .HasMany(p => p.SummonerSpells)
