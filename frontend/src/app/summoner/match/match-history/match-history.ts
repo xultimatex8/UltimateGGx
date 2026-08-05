@@ -11,6 +11,7 @@ import { SummonerSpell } from '../../../shared/summoner-spell/summoner-spell';
 import { Rune } from '../../../shared/rune/rune';
 import { FormatDurationUtil } from '../../../shared/utils/format-duration.util';
 import { ItemDto } from '../../../shared/item/item.model';
+import { QueueType } from '../../../shared/enums/queue-type';
 
 @Component({
   selector: 'app-match-history',
@@ -29,14 +30,18 @@ export class MatchHistory {
   protected readonly ddragonVersion = this.dataDragon.version();
 
   matches = signal<MatchDto[]>([]);
+  queueType = signal<QueueType>(QueueType.DRAFT_PICK);
   loading = signal(false);
   error = signal<string | null>(null);
+
+  queueTypes = Object.values(QueueType);
 
   constructor() {
     effect(() => {
       const puuid = this.puuid();
+      const queueType = this.queueType();
 
-      if (puuid) {
+      if (puuid && queueType) {
         this.loadMatches();
       }
     });
@@ -90,27 +95,29 @@ export class MatchHistory {
     this.loading.set(true);
     this.error.set(null);
 
-    this.matchService.fetchSummonerMatches(this.puuid()).subscribe({
-      next: () => {
-        this.loadMatches();
-      },
-      error: () => {
-        this.error.set("Couldn't fetch matches.");
-        this.loading.set(false);
-      },
-    });
+    this.matchService
+      .fetchSummonerMatches(this.puuid(), this.queueType())
+      .subscribe({
+        next: () => this.loadMatches(),
+        error: () => {
+          this.error.set("Couldn't fetch matches.");
+          this.loading.set(false);
+        },
+      });
   }
 
   loadMatches(): void {
-    this.matchService.getSummonerMatches(this.puuid()).subscribe({
-      next: (result) => {
-        this.matches.set(result.items);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set("Couldn't load match history.");
-        this.loading.set(false);
-      },
-    });
+    this.matchService
+      .getSummonerMatches(this.puuid(), this.queueType())
+      .subscribe({
+        next: (result) => {
+          this.matches.set(result.items);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set("Couldn't load match history.");
+          this.loading.set(false);
+        },
+      });
   }
 }
