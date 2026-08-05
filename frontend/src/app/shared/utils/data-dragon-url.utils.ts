@@ -10,4 +10,8 @@ export class DataDragonUrlUtil {
   static spellIcon(version: string, riotId: string): string {
     return `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${riotId}.png`;
   }
+
+  static summonersRiftMapImage(version: string): string {
+    return `https://ddragon.leagueoflegends.com/cdn/${version}/img/map/map11.png`;
+  }
 }

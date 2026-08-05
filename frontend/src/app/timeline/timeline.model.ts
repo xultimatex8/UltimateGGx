@@ -58,6 +58,8 @@ export interface ScoreboardParticipantDto {
   kills: number;
   lane: string;
   minions: number;
+  positionX: number;
+  positionY: number;
   primaryRune: RuneDto;
   secondaryTree: RuneDto;
   champion: ChampionDto;

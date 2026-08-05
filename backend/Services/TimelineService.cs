@@ -402,6 +402,8 @@ public class TimelineService : ITimelineService
             Kills = kills,
             Lane = participant.Lane,
             Minions = frame?.Minions ?? 0,
+            PositionX = frame?.PositionX ?? 0,
+            PositionY = frame?.PositionY ?? 0,
             PrimaryRune = RuneMapper.RuneToRuneDto(participant.PrimaryRune),
             SecondaryTree = RuneMapper.RuneToRuneDto(participant.SecondaryTree),
             Champion = ChampionMapper.ChampionToChampionDto(participant.Champion),

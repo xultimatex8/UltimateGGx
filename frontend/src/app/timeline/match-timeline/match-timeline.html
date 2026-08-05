@@ -34,11 +34,37 @@
                 }
               </div>
 
-              <div class="flex aspect-square w-full items-center justify-center rounded-lg border border-border bg-surface-alt">
-                <span class="text-xs text-text-secondary">
-                  Summoner's Rift Map
-                </span>
-              </div>
+              @if (loadingScoreboard()) {
+                <div class="flex aspect-square w-full animate-pulse items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                  <span class="text-xs text-text-disabled">Loading map...</span>
+                </div>
+              } @else {
+                <div class="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                  <div class="relative h-full w-full">
+                    <img
+                      [src]="DataDragonUrlUtil.summonersRiftMapImage(ddragonVersion)"
+                      class="h-full w-full object-cover" />
+
+                    @for (team of getTeams(); track team.teamId) {
+                      @for (participant of team.participants; track participant.participantId) {
+                        <img
+                          [src]="DataDragonUrlUtil.championIcon(ddragonVersion, participant.champion.riotId)"
+                          [alt]="participant.summonerName"
+                          [title]="participant.summonerName"
+                          class="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 object-cover"
+                          [class.border-blue-500]="team.teamId === 100"
+                          [class.border-red-500]="team.teamId === 200"
+                          [style.left.%]="mapX(participant.positionX)"
+                          [style.top.%]="mapY(participant.positionY)" />
+                      }
+                    }
+                  </div>
+                </div>
+              }
+
+              <p class="mt-2 text-[11px] leading-snug text-text-disabled">
+                Player positions may be off by up to 1 min.
+              </p>
             </div>
 
             @if (loadingScoreboard()) {
@@ -247,11 +273,11 @@
           <div class="rounded-t-xl flex items-center justify-between border-b border-border bg-surface px-4 py-3">
             <div>
               <h2 class="text-sm font-semibold text-text-primary">
-                Live Scoreboard
+                Scoreboard
               </h2>
 
-              <p class="text-xs text-text-disabled">
-                Current game state
+              <p class="text-[11px] text-text-disabled">
+                Shows the closest available snapshot, not the exact moment.
               </p>
             </div>
 
@@ -349,7 +375,7 @@
               Loading timeline...
             </div>
           } @else {
-            <div class="h-193.25 overflow-y-auto p-3">
+            <div class="h-199 overflow-y-auto p-3">
               @for (event of timeline()?.events ?? []; track event.timestamp; let isLast = $last) {
                 <div class="relative flex gap-3">
                   <div class="flex shrink-0 flex-col items-center">

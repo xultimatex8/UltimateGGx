@@ -25,6 +25,8 @@ export class MatchTimeline {
   protected readonly FormatDurationUtil = FormatDurationUtil;
   protected readonly DataDragonUrlUtil = DataDragonUrlUtil;
 
+  protected readonly MAP_SIZE = 14820;
+
   matchId = signal<string | null>(null);
   timeline = signal<TimelineDto | null>(null);
   scoreboard = signal<ScoreboardDto | null>(null);
@@ -269,5 +271,17 @@ export class MatchTimeline {
     
     const participant = this.getParticipantByParticipantId(participantId);
     return participant?.summonerName ?? `P${participantId}`;
+  }
+
+  protected getTeams() {
+    return this.scoreboard()?.teams ?? [];
+  }
+
+  protected mapX(x: number): number {
+    return (x / this.MAP_SIZE) * 100;
+  }
+
+  protected mapY(y: number): number {
+    return 100 - (y / this.MAP_SIZE) * 100;
   }
 }

@@ -24,6 +24,8 @@ public class ScoreboardParticipantDto
     public int Kills { get; set; }
     public string Lane { get; set; } = default!;
     public int Minions { get; set; }
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
     public RuneDto PrimaryRune { get; set; } = default!;
     public RuneDto SecondaryTree { get; set; } = default!;
     public ChampionDto Champion { get; set; } = default!;
