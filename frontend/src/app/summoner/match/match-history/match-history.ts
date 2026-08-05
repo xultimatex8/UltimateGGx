@@ -15,7 +15,7 @@ import { QueueType } from '../../../shared/enums/queue-type';
 
 @Component({
   selector: 'app-match-history',
-  imports: [DatePipe, RouterLink, Item, SummonerSpell, Rune],
+  imports: [DatePipe, DecimalPipe, RouterLink, Item, SummonerSpell, Rune],
   templateUrl: './match-history.html',
 })
 export class MatchHistory {
@@ -34,6 +34,7 @@ export class MatchHistory {
   page = signal(1);
   loading = signal(false);
   error = signal<string | null>(null);
+  expandedMatches = signal<Set<number>>(new Set());
 
   queueTypes = Object.values(QueueType);
   pageSize = 10;
@@ -90,6 +91,22 @@ export class MatchHistory {
       : 'bg-danger-border';
   }
 
+  protected toggleMatch(index: number): void {
+    this.expandedMatches.update((expanded) => {
+      const updated = new Set(expanded);
+      if (updated.has(index)) {
+        updated.delete(index);
+      } else {
+        updated.add(index);
+      }
+      return updated;
+    });
+  }
+
+  protected isExpanded(index: number): boolean {
+    return this.expandedMatches().has(index);
+  }
+
   protected sortedItems(items: ItemDto[]): ItemDto[] {
     return [...items].sort((a, b) => {
       const aIsFree = a.buyPrice === 0 ? 1 : 0;
@@ -125,6 +142,7 @@ export class MatchHistory {
         next: (result) => {
           this.matches.set(result.items);
           this.totalItems.set(result.totalItems);
+          this.expandedMatches.set(new Set());
           this.loading.set(false);
         },
         error: () => {
@@ -151,5 +169,13 @@ export class MatchHistory {
       this.page.update(p => p - 1);
       this.loadMatches();
     }
+  }
+
+  getMaxDamage(match: MatchDto): number {
+    const allParticipants = [
+      ...MatchParticipantsUtil.getBlueTeam(match),
+      ...MatchParticipantsUtil.getRedTeam(match)
+    ];
+    return Math.max(...allParticipants.map(p => p.damageToChampions || 0), 1);
   }
 }

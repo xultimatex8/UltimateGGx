@@ -56,9 +56,12 @@
   <div class="space-y-3">
     @for (match of matches(); track $index) {
       @let participant = MatchParticipantsUtil.getParticipant(match, puuid());
+      @let maxDamage = getMaxDamage(match);
 
       @if (participant) {
-        <div class="relative rounded-lg border border-border bg-surface px-4 py-1.5 transition hover:border-accent/50">
+        <div
+          class="relative rounded-lg border border-border bg-surface px-4 py-1.5 transition hover:border-accent/50 cursor-pointer"
+          (click)="toggleMatch($index)">
           <div
             class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
             [class]="matchBorderClass(match)">
@@ -80,7 +83,7 @@
                   </span>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col -space-y-1">
                   <app-summoner-spell
                     [spell]="participant.summonerSpells[0]"
                     [ddragonVersion]="ddragonVersion"
@@ -92,14 +95,14 @@
                     size="w-6.5 h-6.5" />
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div class="-ml-0.5 flex flex-col -space-y-0.5">
                   <app-rune
                     [rune]="participant.primaryRune"
                     size="w-6 h-6" />
 
                   <app-rune
                     [rune]="participant.secondaryTree"
-                    size="w-6 h-6" />
+                    size="w-5 h-5" />
                 </div>
 
                 <div>
@@ -157,7 +160,7 @@
                       [title]="p.champion.name"
                       class="w-6 h-6 rounded border border-border-alt shrink-0" />
                     <a
-                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]" (click)="$event.stopPropagation()"
                       class="truncate hover:underline"
                       [class.text-accent]="p.puuid === puuid()"
                       [class.font-semibold]="p.puuid === puuid()"
@@ -178,7 +181,7 @@
                       [title]="p.champion.name"
                       class="w-6 h-6 rounded border border-border-alt shrink-0" />
                     <a
-                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                      [routerLink]="['/summoner', p.summonerName, p.summonerTag]" (click)="$event.stopPropagation()"
                       class="truncate hover:underline"
                       [class.text-accent]="p.puuid === puuid()"
                       [class.font-semibold]="p.puuid === puuid()"
@@ -204,7 +207,272 @@
                 {{ QueueTypeLabels[match.queueType] }}
               </p>
             </div>
+
+            <span
+              class="shrink-0 text-text-disabled transition-transform duration-150"
+              [class.rotate-180]="isExpanded($index)">
+              ▾
+            </span>
           </div>
+
+          @if (isExpanded($index)) {
+            <div
+              class="mt-3 border-t border-border flex flex-col gap-3 cursor-auto bg-surface/20 rounded-lg"
+              (click)="$event.stopPropagation()">
+
+              <div class="p-3 bg-linear-to-b from-blue-500/5 via-blue-500/2 to-transparent rounded-t-lg">
+                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-blue-400">
+                  Blue team
+                </p>
+
+                <table class="w-full text-xs">
+                  <thead>
+                    <tr class="text-left text-text-disabled border-b border-border/20">
+                      <th class="pb-1.5 font-medium">Player</th>
+                      <th class="pb-1.5 font-medium text-center w-15">KDA</th>
+                      <th class="pb-1.5 font-medium text-center w-15">CS</th>
+                      <th class="pb-1.5 font-medium text-center w-15">Gold</th>
+                      <th class="pb-1.5 font-medium text-center w-28">Damage</th>
+                      <th class="pb-1.5 font-medium text-center">Items</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border/10">
+                    @for (p of MatchParticipantsUtil.getBlueTeam(match); track p.puuid) {
+                      <tr
+                        class="transition-colors hover:bg-blue-500/3"
+                        [class.bg-blue-500/10]="p.puuid === puuid()">
+                        <td class="py-1.5 w-2xs">
+                          <div class="flex items-center gap-2">
+                            <div class="relative shrink-0">
+                              <img
+                                [src]="championIconUrl(p.champion.riotId)"
+                                [alt]="p.champion.name"
+                                [title]="p.champion.name"
+                                class="w-9 h-8 rounded border border-border/40" 
+                              />
+
+                              <span
+                                class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
+                                {{ p.championLevel }}
+                              </span>
+                            </div>
+
+                            <div class="mt-0.5 flex flex-col -space-y-0.5">
+                              <app-summoner-spell
+                                [spell]="p.summonerSpells[0]"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-3.5 h-3.5" />
+
+                              <app-summoner-spell
+                                [spell]="p.summonerSpells[1]"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-3.5 h-3.5" />
+                            </div>
+
+                            <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
+                              <app-rune
+                                [rune]="p.primaryRune"
+                                size="w-4 h-4" />
+
+                              <app-rune
+                                [rune]="p.secondaryTree"
+                                size="w-3 h-3" />
+                            </div>
+
+                            <a
+                              [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                              (click)="$event.stopPropagation()"
+                              class="truncate hover:underline text-xs"
+                              [class.text-accent]="p.puuid === puuid()"
+                              [class.font-semibold]="p.puuid === puuid()"
+                              [class.text-text-primary]="p.puuid !== puuid()"
+                              [title]="p.summonerName + '#' + p.summonerTag">
+                              {{ p.summonerName }}
+                            </a>
+                          </div>
+                        </td>
+                        <td class="text-center whitespace-nowrap text-text-secondary">
+                          <span>{{ p.kills }}</span>
+                          <span class="text-text-muted">/</span>
+                          <span>{{ p.deaths }}</span>
+                          <span class="text-text-muted">/</span>
+                          <span>{{ p.assists }}</span>
+                        </td>
+                        <td class="text-center text-text-secondary">{{ p.minions }}</td>
+                        <td class="text-center text-text-secondary">{{ p.gold | number }}</td>
+                        <td class="px-2">
+                          <div class="flex flex-col items-center gap-1">
+                            <span class="text-[11px] text-text-secondary font-medium">
+                              {{ p.damageToChampions | number }}
+                            </span>
+                            <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
+                              <div
+                                class="bg-blue-400 h-full rounded-full transition-all duration-300"
+                                [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="flex justify-center items-center gap-0.5">
+                            @let allItems = sortedItems(p.items);
+                            @let mainItems = allItems.length > 1 ? allItems.slice(0, -1) : allItems;
+                            @let trinket = allItems.length > 1 ? allItems[allItems.length - 1] : null;
+
+                            @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+                              @if (mainItems[i]) {
+                                <app-item
+                                  [item]="mainItems[i]"
+                                  [ddragonVersion]="ddragonVersion"
+                                  size="w-6 h-6" />
+                              } @else {
+                                <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+                              }
+                            }
+
+                            @if (trinket) {
+                              <app-item
+                                [item]="trinket"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-6 h-6" />
+                            } @else {
+                              <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="border-t border-border p-3 bg-linear-to-b from-red-500/5 via-red-500/2 to-transparent rounded-b-lg">
+                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-red-400">
+                  Red team
+                </p>
+
+                <table class="w-full text-xs">
+                  <thead>
+                    <tr class="text-left text-text-disabled border-b border-border/20">
+                      <th class="pb-1.5 font-medium">Player</th>
+                      <th class="pb-1.5 font-medium text-center w-15">KDA</th>
+                      <th class="pb-1.5 font-medium text-center w-15">CS</th>
+                      <th class="pb-1.5 font-medium text-center w-15">Gold</th>
+                      <th class="pb-1.5 font-medium text-center w-28">Damage</th>
+                      <th class="pb-1.5 font-medium text-center">Items</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border/10">
+                    @for (p of MatchParticipantsUtil.getRedTeam(match); track p.puuid) {
+                      <tr
+                        class="transition-colors hover:bg-red-500/3"
+                        [class.bg-red-500/10]="p.puuid === puuid()">
+                        <td class="py-1.5 w-2xs">
+                          <div class="flex items-center gap-2">
+                            <div class="relative shrink-0">
+                              <img
+                                [src]="championIconUrl(p.champion.riotId)"
+                                [alt]="p.champion.name"
+                                [title]="p.champion.name"
+                                class="w-8 h-8 rounded border border-border/40" 
+                              />
+
+                              <span
+                                class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
+                                {{ p.championLevel }}
+                              </span>
+                            </div>
+
+                            <div class="mt-0.5 flex flex-col -space-y-0.5">
+                              <app-summoner-spell
+                                [spell]="p.summonerSpells[0]"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-3.5 h-3.5" />
+
+                              <app-summoner-spell
+                                [spell]="p.summonerSpells[1]"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-3.5 h-3.5" />
+                            </div>
+
+                            <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
+                              <app-rune
+                                [rune]="p.primaryRune"
+                                size="w-4 h-4" />
+
+                              <app-rune
+                                [rune]="p.secondaryTree"
+                                size="w-3 h-3" />
+                            </div>
+
+                            <a
+                              [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+                              (click)="$event.stopPropagation()"
+                              class="truncate hover:underline text-xs"
+                              [class.text-accent]="p.puuid === puuid()"
+                              [class.font-semibold]="p.puuid === puuid()"
+                              [class.text-text-primary]="p.puuid !== puuid()"
+                              [title]="p.summonerName + '#' + p.summonerTag">
+                              {{ p.summonerName }}
+                            </a>
+                          </div>
+                        </td>
+                        <td class="text-center whitespace-nowrap text-text-secondary">
+                          <span>{{ p.kills }}</span>
+                          <span class="text-text-muted">/</span>
+                          <span>{{ p.deaths }}</span>
+                          <span class="text-text-muted">/</span>
+                          <span>{{ p.assists }}</span>
+                        </td>
+                        <td class="text-center text-text-secondary">{{ p.minions }}</td>
+                        <td class="text-center text-text-secondary">{{ p.gold | number }}</td>
+                        <td class="px-2">
+                          <div class="flex flex-col items-center gap-1">
+                            <span class="text-[11px] text-text-secondary font-medium">
+                              {{ p.damageToChampions | number }}
+                            </span>
+                            <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
+                              <div
+                                class="bg-red-400 h-full rounded-full transition-all duration-300"
+                                [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="flex justify-center items-center gap-0.5">
+                            @let allItems = sortedItems(p.items);
+                            @let mainItems = allItems.length > 1 ? allItems.slice(0, -1) : allItems;
+                            @let trinket = allItems.length > 1 ? allItems[allItems.length - 1] : null;
+
+                            @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+                              @if (mainItems[i]) {
+                                <app-item
+                                  [item]="mainItems[i]"
+                                  [ddragonVersion]="ddragonVersion"
+                                  size="w-6 h-6" />
+                              } @else {
+                                <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+                              }
+                            }
+
+                            @if (trinket) {
+                              <app-item
+                                [item]="trinket"
+                                [ddragonVersion]="ddragonVersion"
+                                size="w-6 h-6" />
+                            } @else {
+                              <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
         </div>
       }
     }
