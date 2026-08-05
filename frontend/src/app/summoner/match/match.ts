@@ -22,10 +22,20 @@ export class Match {
 
   getSummonerMatches(
     puuid: string,
-    queueType: QueueType
+    queueType: QueueType,
+    page: number,
+    pageSize: number
   ): Observable<PagedResult<MatchDto>> {
+
     return this.http.get<PagedResult<MatchDto>>(
-      `${this.baseUrl}/summoner/${encodeURIComponent(puuid)}?queueType=${queueType}`
+      `${this.baseUrl}/summoner/${encodeURIComponent(puuid)}`,
+      {
+        params: {
+          queueType,
+          page,
+          pageSize
+        }
+      }
     );
   }
 }

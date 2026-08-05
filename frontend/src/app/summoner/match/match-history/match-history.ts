@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Match } from '../match';
 import { MatchDto } from '../match.model';
@@ -31,10 +31,17 @@ export class MatchHistory {
 
   matches = signal<MatchDto[]>([]);
   queueType = signal<QueueType>(QueueType.DRAFT_PICK);
+  page = signal(1);
   loading = signal(false);
   error = signal<string | null>(null);
 
   queueTypes = Object.values(QueueType);
+  pageSize = 10;
+
+  totalItems = signal(0);
+  totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalItems() / this.pageSize))
+  );
 
   constructor() {
     effect(() => {
@@ -75,7 +82,7 @@ export class MatchHistory {
 
   protected matchBorderClass(match: MatchDto): string {
     if (match.endOfGameResult !== 'GameComplete') {
-      return 'bg-warning-border';
+      return 'bg-warning-border hover:rounded-lg';
     }
 
     return match.win
@@ -108,10 +115,16 @@ export class MatchHistory {
 
   loadMatches(): void {
     this.matchService
-      .getSummonerMatches(this.puuid(), this.queueType())
+      .getSummonerMatches(
+        this.puuid(),
+        this.queueType(),
+        this.page(),
+        this.pageSize
+      )
       .subscribe({
         next: (result) => {
           this.matches.set(result.items);
+          this.totalItems.set(result.totalItems);
           this.loading.set(false);
         },
         error: () => {
@@ -119,5 +132,24 @@ export class MatchHistory {
           this.loading.set(false);
         },
       });
+  }
+
+  changeQueue(type: QueueType) {
+    this.page.set(1);
+    this.queueType.set(type);
+  }
+
+  nextPage() {
+    if (this.page() < this.totalPages()) {
+      this.page.update(p => p + 1);
+      this.loadMatches();
+    }
+  }
+
+  previousPage() {
+    if (this.page() > 1) {
+      this.page.update(p => p - 1);
+      this.loadMatches();
+    }
   }
 }

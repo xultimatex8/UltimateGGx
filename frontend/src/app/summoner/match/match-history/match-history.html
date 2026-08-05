@@ -3,7 +3,7 @@
     @for (type of queueTypes; track type) {
       <button
         type="button"
-        (click)="queueType.set(type)"
+        (click)="changeQueue(type)"
         class="rounded-md border border-transparent px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer"
         [class.border-accent]="queueType() === type"
         [class.bg-surface]="queueType() === type"
@@ -60,7 +60,7 @@
       @if (participant) {
         <div class="relative rounded-lg border border-border bg-surface px-4 py-1.5 transition hover:border-accent/50">
           <div
-            class="absolute left-0 top-0 bottom-0 w-1"
+            class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
             [class]="matchBorderClass(match)">
           </div>
 
@@ -197,7 +197,7 @@
               </p>
 
               <p class="text-xs text-text-muted">
-                {{ match.gameEndTimestamp | date:'short' }}
+                {{ match.gameEndTimestamp | date:'dd/MM/yyyy, HH:mm' }}
               </p>
 
               <p class="text-[11px] text-text-disabled">
@@ -208,5 +208,45 @@
         </div>
       }
     }
+  </div>
+}
+
+@if (matches().length > 0) {
+  <div class="mt-6 flex items-center justify-between rounded-lg border border-border bg-surface-alt px-4 py-3">
+
+    <button
+      type="button"
+      (click)="previousPage()"
+      [disabled]="page() === 1"
+      class="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary transition
+             hover:border-accent hover:bg-surface cursor-pointer
+             disabled:border-border-alt disabled:bg-surface-alt disabled:text-text-disabled disabled:cursor-auto"
+    >
+      <span>←</span>
+      Previous
+    </button>
+
+    <div class="text-center">
+      <p class="text-xs uppercase tracking-wide text-text-disabled">
+        Page
+      </p>
+
+      <p class="text-sm font-semibold text-text-primary">
+        {{ page() }} <span class="text-text-disabled">/</span> {{ totalPages() }}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="nextPage()"
+      [disabled]="page() >= totalPages()"
+      class="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary transition
+             hover:border-accent hover:bg-surface cursor-pointer
+             disabled:border-border-alt disabled:bg-surface-alt disabled:text-text-disabled disabled:cursor-auto"
+    >
+      Next
+      <span>→</span>
+    </button>
+
   </div>
 }
