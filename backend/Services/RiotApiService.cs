@@ -4,7 +4,7 @@ using backend.Models.Enums;
 using backend.Helpers;
 using backend.Models.Riot;
 using System.Net;
-using System.Net.Http.Json;
+using backend.Models;
 
 namespace backend.Services;
 
@@ -19,59 +19,95 @@ public class RiotApiService : IRiotApiService
         _regionalClient = httpClientFactory.CreateClient("RiotRegional");
     }
 
-    public async Task<AccountResponseDto> GetRiotAccountAsync(string username, string tag, CancellationToken ct = default)
+    public async Task<AccountResponseDto> GetRiotAccountAsync(
+        string username,
+        string tag,
+        CancellationToken ct = default)
     {
-        AccountResponseDto? response = await GetAsync<AccountResponseDto>(
-            _regionalClient, $"/riot/account/v1/accounts/by-riot-id/{username}/{tag}", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Account Info");
+        return await GetAsync<AccountResponseDto>(
+            _regionalClient,
+            $"/riot/account/v1/accounts/by-riot-id/{username}/{tag}",
+            ct,
+            $"{nameof(Summoner)} \"{username}#{tag}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Account Info");
     }
 
-    public async Task<SummonerResponseDto> GetRiotSummonerAsync(string puuid, CancellationToken ct = default)
+    public async Task<SummonerResponseDto> GetRiotSummonerAsync(
+        string puuid,
+        CancellationToken ct = default)
     {
-        SummonerResponseDto? response = await GetAsync<SummonerResponseDto>(
-            _platformClient, $"/lol/summoner/v4/summoners/by-puuid/{puuid}", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Summoner Info");
+        return await GetAsync<SummonerResponseDto>(
+            _platformClient,
+            $"/lol/summoner/v4/summoners/by-puuid/{puuid}",
+            ct,
+            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Info");
     }
 
-    public async Task<List<QueueResponseDto>> GetSummonerQueuesAsync(string puuid, CancellationToken ct = default)
+    public async Task<List<QueueResponseDto>> GetSummonerQueuesAsync(
+        string puuid,
+        CancellationToken ct = default)
     {
-        List<QueueResponseDto>? response = await GetAsync<List<QueueResponseDto>>(
-            _platformClient, $"/lol/league/v4/entries/by-puuid/{puuid}", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Summoner Queues Info");
+        return await GetAsync<List<QueueResponseDto>>(
+            _platformClient,
+            $"/lol/league/v4/entries/by-puuid/{puuid}",
+            ct,
+            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Queues Info");
     }
 
-    public async Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type, CancellationToken ct = default)
+    public async Task<List<string>> GetSummonerMatchesAsync(
+        string puuid,
+        QueueType type,
+        CancellationToken ct = default)
     {
-        List<string>? response = await GetAsync<List<string>>(
-            _regionalClient, $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Summoner Matches");
+        return await GetAsync<List<string>>(
+            _regionalClient,
+            $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10",
+            ct,
+            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Matches");
     }
 
-    public async Task<MatchResponseDto> GetMatchDetailAsync(string matchId, CancellationToken ct = default)
+    public async Task<MatchResponseDto> GetMatchDetailAsync(
+        string matchId,
+        CancellationToken ct = default)
     {
-        MatchResponseDto? response = await GetAsync<MatchResponseDto>(
-            _regionalClient, $"/lol/match/v5/matches/{matchId}", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Match Detail");
+        return await GetAsync<MatchResponseDto>(
+            _regionalClient,
+            $"/lol/match/v5/matches/{matchId}",
+            ct,
+            $"{nameof(Match)} \"{matchId}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Match Detail");
     }
 
-    public async Task<TimelineResponseDto> GetMatchTimelineAsync(string matchId, CancellationToken ct = default)
+    public async Task<TimelineResponseDto> GetMatchTimelineAsync(
+        string matchId,
+        CancellationToken ct = default)
     {
-        TimelineResponseDto? response = await GetAsync<TimelineResponseDto>(
-            _regionalClient, $"/lol/match/v5/matches/{matchId}/timeline", ct);
-
-        return response ?? throw new Exception("Could not retrieve Riot Match Timeline");
+        return await GetAsync<TimelineResponseDto>(
+            _regionalClient,
+            $"/lol/match/v5/matches/{matchId}/timeline",
+            ct,
+            $"{nameof(Match)} \"{matchId}\" not found.")
+            ?? throw new InvalidOperationException("Could not retrieve Riot Match Timeline");
     }
 
-    private static async Task<T?> GetAsync<T>(HttpClient client, string url, CancellationToken ct)
+    private static async Task<T?> GetAsync<T>(
+        HttpClient client,
+        string url,
+        CancellationToken ct,
+        string? notFoundMessage = null)
     {
         try
         {
             return await client.GetFromJsonAsync<T>(url, ct);
+        }
+        catch (HttpRequestException ex) when (
+            ex.StatusCode == HttpStatusCode.NotFound &&
+            notFoundMessage is not null)
+        {
+            throw new NotFoundException(notFoundMessage);
         }
         catch (HttpRequestException ex)
         {

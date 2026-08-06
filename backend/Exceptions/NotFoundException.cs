@@ -1,8 +1,20 @@
 namespace backend.Exceptions;
 
-public class NotFoundException(string entityName, string propertyName, object value) : Exception($"{entityName} with {propertyName} '{value}' not found.")
+public class NotFoundException : Exception
 {
-    public string EntityName { get; } = entityName;
-    public string PropertyName { get; } = propertyName;
-    public object Value { get; } = value;
+    public NotFoundException(string message) : base(message)
+    {
+    }
+
+    public NotFoundException(string entityName, string propertyName, object value)
+        : base($"{entityName} with {propertyName} '{value}' not found.")
+    {
+        EntityName = entityName;
+        PropertyName = propertyName;
+        Value = value;
+    }
+
+    public string? EntityName { get; }
+    public string? PropertyName { get; }
+    public object? Value { get; }
 }
