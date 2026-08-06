@@ -1,4 +1,3 @@
-// shared/item/item.ts (completo)
 import { Component, computed, input } from '@angular/core';
 import { ItemDto } from './item.model';
 import { ITEM_STAT_LABELS } from './item-stat-labels.const';

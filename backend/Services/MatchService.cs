@@ -15,21 +15,32 @@ public class MatchService : IMatchService
 {
     private readonly AppDbContext _db;
     private readonly IRiotApiService _riotApiService;
+    private readonly ISummonerService _summonerService;
 
-    public MatchService(AppDbContext db, IRiotApiService riotApiService)
+    public MatchService(AppDbContext db, IRiotApiService riotApiService, ISummonerService summonerService)
     {
         _db = db;
         _riotApiService = riotApiService;
+        _summonerService = summonerService;
     }
 
     public async Task FetchSummonerMatchesAsync(string puuid, QueueType queueType = QueueType.DRAFT_PICK, CancellationToken ct = default)
     {
         List<string> matchIds = await _riotApiService.GetSummonerMatchesAsync(puuid, queueType, ct);
 
-        Summoner summoner = await _db.Summoners
+        Summoner? summoner = await _db.Summoners
             .Include(s => s.MatchReferences)
-            .FirstOrDefaultAsync(s => s.Puuid == puuid, ct)
-            ?? throw new NotFoundException("Summoner not found", nameof(Summoner), nameof(Summoner.Puuid), puuid);
+            .FirstOrDefaultAsync(s => s.Puuid == puuid, ct);
+
+        if (summoner is null)
+        {
+            await _summonerService.SyncSummonerByPuuidAsync(puuid, ct);
+
+            summoner = await _db.Summoners
+                .Include(s => s.MatchReferences)
+                .FirstOrDefaultAsync(s => s.Puuid == puuid, ct)
+                ?? throw new NotFoundException("Summoner not found", nameof(Summoner), nameof(Summoner.Puuid), puuid);
+        }
 
         List<MatchReference> existingRefs = await _db.MatchReferences
             .Where(m => matchIds.Contains(m.MatchId))
@@ -148,6 +159,56 @@ public class MatchService : IMatchService
         };
     }
 
+    public async Task<Match> GetOrCreateMatchAsync(string matchId, CancellationToken ct = default)
+    {
+        MatchReference? reference = await _db.MatchReferences
+            .Include(m => m.Match)
+            .FirstOrDefaultAsync(m => m.MatchId == matchId, ct);
+
+        if (reference?.Match is not null)
+        {
+            return reference.Match;
+        }
+
+        if (reference is null)
+        {
+            reference = new MatchReference
+            {
+                MatchId = matchId,
+                QueueType = QueueType.DRAFT_PICK
+            };
+
+            _db.MatchReferences.Add(reference);
+        }
+
+        Dictionary<string, Summoner> summonerCache = [];
+
+        Dictionary<int, Champion> champions =
+            await _db.Champions.ToDictionaryAsync(c => c.Key, ct);
+
+        Dictionary<int, SummonerSpell> summonerSpells =
+            await _db.SummonerSpells.ToDictionaryAsync(s => s.Key, ct);
+
+        Dictionary<int, Item> items =
+            await _db.Items.ToDictionaryAsync(i => i.Key, ct);
+
+        Dictionary<int, Rune> runes =
+            await _db.Runes.ToDictionaryAsync(r => r.RiotId, ct);
+
+        Match match = await CreateMatchAsync(
+            reference,
+            summonerCache,
+            champions,
+            summonerSpells,
+            items,
+            runes,
+            ct);
+
+        await _db.SaveChangesAsync(ct);
+
+        return match;
+    }
+
     private async Task<Match> CreateMatchAsync(
         MatchReference reference,
         Dictionary<string, Summoner> summonerCache,
@@ -199,6 +260,8 @@ public class MatchService : IMatchService
         };
 
         _db.Matches.Add(match);
+
+        reference.QueueType = match.QueueType;
 
         return match;
     }

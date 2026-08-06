@@ -45,17 +45,16 @@ public class RiotApiServiceTests
     }
 
     [Fact]
-    public async Task GetRiotAccountAsync_WhenNotFound_ThrowsRiotApiException()
+    public async Task GetRiotAccountAsync_WhenNotFound_ThrowsNotFoundException()
     {
         var (service, mockHttp) = CreateService();
 
         mockHttp.When("https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Nobody/000")
             .Respond(HttpStatusCode.NotFound);
 
-        Func<Task> act = async () => await service.GetRiotAccountAsync("Nobody", "000");
+        Func<Task> act = () => service.GetRiotAccountAsync("Nobody", "000");
 
-        var exception = await act.Should().ThrowAsync<RiotApiException>();
-        exception.Which.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]
@@ -210,7 +209,6 @@ public class RiotApiServiceTests
 
         Func<Task> act = async () => await service.GetMatchDetailAsync("NOT_A_REAL_MATCH");
 
-        var exception = await act.Should().ThrowAsync<RiotApiException>();
-        exception.Which.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 }
