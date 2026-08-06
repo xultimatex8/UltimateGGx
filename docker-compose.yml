@@ -33,9 +33,17 @@ services:
       RIOT_RATE_LIMIT_WINDOW_MINUTES: ${RIOT_RATE_LIMIT_WINDOW_MINUTES}
 
       ASPNETCORE_ENVIRONMENT: Production
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/datadragon/version"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
     depends_on:
       postgres:
         condition: service_healthy
+
     expose:
       - "8080"
 
@@ -45,7 +53,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:
