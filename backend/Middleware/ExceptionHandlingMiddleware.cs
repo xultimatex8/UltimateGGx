@@ -23,7 +23,9 @@ public class ExceptionHandlingMiddleware
         }
         catch (NotFoundException ex)
         {
-            await WriteErrorResponse(context, HttpStatusCode.NotFound, ex.Message);
+            _logger.LogWarning(ex, "Resource not found: {Message}", ex.Message);
+
+            await WriteErrorResponse(context, HttpStatusCode.NotFound, ex.UserMessage);
         }
         catch (RiotApiException ex)
         {

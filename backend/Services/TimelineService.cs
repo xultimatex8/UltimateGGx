@@ -27,11 +27,11 @@ public class TimelineService : ITimelineService
             .Include(mr => mr.Match!)
                 .ThenInclude(m => m.Events)
             .FirstOrDefaultAsync(mr => mr.MatchId == matchId, ct)
-            ?? throw new NotFoundException(nameof(MatchReference), nameof(MatchReference.MatchId), matchId);
+            ?? throw new NotFoundException("Match not found", nameof(MatchReference), nameof(MatchReference.MatchId), matchId);
 
         if (reference.Match is null)
         {
-            throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+            throw new NotFoundException("Match not found", nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
         }
 
         if (reference.Match.Events.Count == 0)
@@ -48,10 +48,10 @@ public class TimelineService : ITimelineService
                     .ThenInclude(t => t.Participants)
                         .ThenInclude(p => p.Frames)
             .FirstOrDefaultAsync(mr => mr.MatchId == matchId, ct)
-            ?? throw new NotFoundException(nameof(MatchReference), nameof(MatchReference.MatchId), matchId);
+            ?? throw new NotFoundException("Match not found", nameof(MatchReference), nameof(MatchReference.MatchId), matchId);
 
         Match match = reference.Match
-            ?? throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+            ?? throw new NotFoundException("Match not found", nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
 
         TimelineResponseDto timeline = await _riotApiService.GetMatchTimelineAsync(matchId, ct);
 
@@ -137,7 +137,7 @@ public class TimelineService : ITimelineService
             .FirstAsync(mr => mr.MatchId == matchId, ct);
 
         Match match = reference.Match
-            ?? throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+            ?? throw new NotFoundException("Match not found", nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
 
         return MatchToTimelineDto(match);
     }
@@ -189,7 +189,7 @@ public class TimelineService : ITimelineService
             .FirstAsync(mr => mr.MatchId == matchId, ct);
 
         Match match = reference.Match
-            ?? throw new NotFoundException(nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
+            ?? throw new NotFoundException("Match not found", nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
 
         return MatchToScoreboardDto(match, timestamp);
     }

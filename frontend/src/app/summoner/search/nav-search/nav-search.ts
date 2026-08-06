@@ -6,6 +6,7 @@ import { SummonerSearch } from '../summoner-search';
   selector: 'app-nav-search',
   imports: [ReactiveFormsModule],
   templateUrl: './nav-search.html',
+  providers: [SummonerSearch],
 })
 export class NavSearch {
   protected searchService = inject(SummonerSearch);

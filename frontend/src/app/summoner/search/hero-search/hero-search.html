@@ -5,7 +5,7 @@
     </h1>
 
     <p class="text-text-secondary text-sm mb-8">
-      Search a summoner to view match history and match data and timelines
+      Search for a summoner to view match history
     </p>
 
     <form [formGroup]="searchService.form" (ngSubmit)="searchService.searchSummoner()" class="max-w-md mx-auto">
@@ -29,10 +29,15 @@
 
       <button
         type="submit"
-        class="mt-4 w-full bg-accent-dark hover:bg-accent disabled:opacity-50 text-text-primary text-sm font-medium py-2.5 rounded transition cursor-pointer"
+        [disabled]="searchService.form.invalid"
+        class="mt-4 w-full bg-accent-dark hover:bg-accent disabled:opacity-50 disabled:cursor-auto disabled:hover:bg-accent-dark text-text-primary text-sm font-medium py-2.5 rounded transition cursor-pointer"
       >
         Search
       </button>
+
+      <p class="mt-2 text-text-muted text-xs mb-8">
+        To search for a summoner, please enter both the summoner name and game tag.
+      </p>
     </form>
   </div>
 </div>

@@ -6,6 +6,7 @@ import { SummonerSearch } from '../summoner-search';
   selector: 'app-hero-search',
   imports: [ReactiveFormsModule],
   templateUrl: './hero-search.html',
+  providers: [SummonerSearch],
 })
 export class HeroSearch {
   protected searchService = inject(SummonerSearch);

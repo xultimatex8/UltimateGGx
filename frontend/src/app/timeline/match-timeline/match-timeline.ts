@@ -10,6 +10,7 @@ import { TowerType, BuildingType } from '../../shared/enums/building-type';
 import { LaneType } from '../../shared/enums/lane-type';
 import { MonsterType, MonsterSubType } from '../../shared/enums/monster-type';
 import { DataDragonUrlUtil } from '../../shared/utils/data-dragon-url.utils';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-match-timeline',
@@ -106,9 +107,10 @@ export class MatchTimeline {
         this.loadingTimeline.set(false);
         this.fetchScoreboard(matchId, 0);
       },
-      error: () => {
-        this.error.set("Couldn't fetch match timeline.");
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.error?.error ?? 'An unexpected error occurred.');
         this.loadingTimeline.set(false);
+        this.initialLoadComplete.set(true);
       },
     });
   }
@@ -122,9 +124,10 @@ export class MatchTimeline {
         this.scoreboard.set(scoreboard);
         this.loadingScoreboard.set(false);
       },
-      error: () => {
-        this.error.set("Couldn't fetch scoreboard for this timestamp.");
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.error?.error ?? 'An unexpected error occurred.');
         this.loadingScoreboard.set(false);
+        this.initialLoadComplete.set(true);
       },
     });
   }
