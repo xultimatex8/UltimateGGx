@@ -14,6 +14,7 @@ import { QueueType } from '../../../shared/enums/queue-type';
 import { ParticipantsUtil } from '../../../shared/utils/participants.util';
 import { ItemSlots } from '../../../shared/item-slots/item-slots';
 import { ParticipantIdentity } from '../../../shared/participant-identity/participant-identity';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-match-history',
@@ -139,8 +140,8 @@ export class MatchHistory {
       .fetchSummonerMatches(this.puuid(), this.queueType())
       .subscribe({
         next: () => this.loadMatches(),
-        error: () => {
-          this.error.set("Couldn't fetch matches.");
+        error: (err: HttpErrorResponse) => {
+          this.error.set(err.error?.error ?? 'An unexpected error occurred.');
           this.loading.set(false);
         },
       });
@@ -161,8 +162,8 @@ export class MatchHistory {
           this.expandedMatches.set(new Set());
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set("Couldn't load match history.");
+        error: (err: HttpErrorResponse) => {
+          this.error.set(err.error?.error ?? 'An unexpected error occurred.');
           this.loading.set(false);
         },
       });

@@ -7,6 +7,7 @@ import { QueueType } from '../../../shared/enums/queue-type';
 import { QueueCard } from '../queue-card/queue-card/queue-card';
 import { DataDragon } from '../../../shared/data-dragon/data-dragon';
 import { MatchHistory } from '../../match/match-history/match-history';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-summoner-profile',
@@ -56,10 +57,10 @@ export class SummonerProfile {
         this.summoner.set(summoner);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set(`We couldn't find the summoner "${username}#${tag}".`);
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.error?.error ?? 'An unexpected error occurred.');
         this.loading.set(false);
-      },
+      }
     });
   }
 
@@ -73,9 +74,9 @@ export class SummonerProfile {
       next: (summoner) => {
         this.summoner.set(summoner);
       },
-      error: () => {
-        this.error.set("Couldn't refresh the summoner.");
-      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.error?.error ?? 'An unexpected error occurred.');
+      }
     });
   }
 }
