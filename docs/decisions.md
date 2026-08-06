@@ -4,6 +4,24 @@ Design and technical decisions made. Newest entries at the top.
 
 ---
 
+## Synchronize Riot entities on demand before returning `404`
+
+**Decision:** when a requested summoner or match does not exist in the local database but may exist in Riot, synchronize it on demand before returning a `404`. `MatchService` ensures a summoner is synchronized before fetching their match history and exposes a `GetOrCreateMatchAsync` method that creates both the `MatchReference` and the associated `Match` if they do not already exist. `TimelineService` relies on this method to guarantee that a match exists locally before attempting to retrieve its timeline.
+
+**Alternatives considered:**
+
+*How to handle missing local entities:*
+- *Return `404` immediately if the entity is not found locally* — simple, but incorrectly reports that existing Riot data does not exist whenever it has not been synchronized.
+- *Synchronize on demand before failing (chosen)* — keeps the local database as the cache while ensuring valid Riot resources remain accessible without requiring a manual synchronization.
+
+*How to ensure matches exist before retrieving timelines:*
+- *Require callers to synchronize matches beforehand* — spreads synchronization logic across multiple services and makes the API error-prone.
+- *Provide a shared `GetOrCreateMatchAsync` operation (chosen)* — centralizes the synchronization logic in `MatchService`, allowing every consumer to guarantee the match exists through a single method.
+
+**Why:** previously, requesting the timeline of a match or the match history of a summoner that existed in Riot but had not yet been synchronized resulted in an incorrect `404 Not Found`. By synchronizing the required entities on demand, the application populates the local cache before continuing, eliminating these false negatives while preserving the database as the source of cached data.
+
+---
+
 ## Riot API rate limiting via a shared `DelegatingHandler`
 
 **Decision:** enforce Riot's rate limits (requests per second and requests per two-minute window) inside a `RiotRateLimitHandler` registered as a `DelegatingHandler` on both the `RiotPlatform` and `RiotRegional` named `HttpClient`s. The handler uses two static `FixedWindowRateLimiter` instances (one per Riot limit window) with a queue, so requests that exceed the current window wait for the next one instead of failing. Limits are read from environment variables, so switching to a production key requires no code changes.
