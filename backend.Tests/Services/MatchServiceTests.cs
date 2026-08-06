@@ -117,7 +117,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetSummonerMatchesAsync("abc-123", QueueType.DRAFT_PICK, It.IsAny<CancellationToken>()))
             .ReturnsAsync(["MATCH_1"]);
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         Func<Task> act = async () => await service.FetchSummonerMatchesAsync("abc-123");
 
@@ -135,7 +137,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetSummonerMatchesAsync("abc-123", QueueType.DRAFT_PICK, It.IsAny<CancellationToken>()))
             .ReturnsAsync(["MATCH_1", "MATCH_2"]);
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         await service.FetchSummonerMatchesAsync("abc-123");
 
@@ -167,7 +171,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetSummonerMatchesAsync("abc-123", QueueType.DRAFT_PICK, It.IsAny<CancellationToken>()))
             .ReturnsAsync(["MATCH_1"]);
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         await service.FetchSummonerMatchesAsync("abc-123");
 
@@ -233,7 +239,8 @@ public class MatchServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         var result = await service.GetSummonerMatchesAsync("abc-123");
 
@@ -264,7 +271,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetMatchDetailAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildMatchResponseDto("abc-123"));
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         var result = await service.GetSummonerMatchesAsync("abc-123");
 
@@ -291,7 +300,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetMatchDetailAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildMatchResponseDto("abc-123"));
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         Func<Task> act = async () => await service.GetSummonerMatchesAsync("abc-123");
 
@@ -320,7 +331,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetMatchDetailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((string matchId, CancellationToken _) => BuildMatchResponseDto("abc-123"));
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         var result = await service.GetSummonerMatchesAsync("abc-123", page: 2, pageSize: 5);
 
@@ -352,7 +365,9 @@ public class MatchServiceTests
         riotMock.Setup(x => x.GetMatchDetailAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildMatchResponseDto("abc-123"));
 
-        var service = new MatchService(db, riotMock.Object);
+        var summonerMock = new Mock<ISummonerService>();
+        
+        var service = new MatchService(db, riotMock.Object, summonerMock.Object);
 
         Func<Task> act = async () => await service.GetSummonerMatchesAsync("abc-123");
 

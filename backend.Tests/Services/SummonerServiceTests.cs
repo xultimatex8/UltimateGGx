@@ -31,7 +31,7 @@ public class SummonerServiceTests
         var mock = new Mock<IRiotApiService>();
         mock.Setup(x => x.GetRiotAccountAsync(username, tag, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AccountResponseDto { Puuid = puuid, GameName = username, TagLine = tag });
-        mock.Setup(x => x.GetRiotSummonerAsync(puuid, It.IsAny<CancellationToken>()))
+        mock.Setup(x => x.GetRiotSummonerAsync(puuid, $"{username}#{tag}", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SummonerResponseDto { SummonerLevel = level, ProfileIconId = profileIconId });
         mock.Setup(x => x.GetSummonerQueuesAsync(puuid, It.IsAny<CancellationToken>()))
             .ReturnsAsync(queues ?? []);

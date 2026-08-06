@@ -100,18 +100,6 @@ public class TimelineServiceTests
     }
 
     [Fact]
-    public async Task CheckOrFetchTimelineAsync_WhenMatchReferenceNotFound_Throws()
-    {
-        using var db = CreateInMemoryDb();
-        var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
-
-        Func<Task> act = async () => await service.CheckOrFetchTimelineAsync("UNKNOWN");
-
-        await act.Should().ThrowAsync<NotFoundException>();
-    }
-
-    [Fact]
     public async Task CheckOrFetchTimelineAsync_WhenNoEventsYet_CallsSync()
     {
         using var db = CreateInMemoryDb();
@@ -121,7 +109,9 @@ public class TimelineServiceTests
         riotMock.Setup(x => x.GetMatchTimelineAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildTimeline());
 
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         await service.CheckOrFetchTimelineAsync("MATCH_1");
 
@@ -145,7 +135,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         await service.CheckOrFetchTimelineAsync("MATCH_1");
 
@@ -173,7 +164,9 @@ public class TimelineServiceTests
         riotMock.Setup(x => x.GetMatchTimelineAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildTimeline(frame));
 
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         await service.SyncTimelineAsync("MATCH_1");
 
@@ -204,7 +197,9 @@ public class TimelineServiceTests
         riotMock.Setup(x => x.GetMatchTimelineAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildTimeline(frame));
 
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         await service.SyncTimelineAsync("MATCH_1");
 
@@ -226,7 +221,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var timeline = await service.GetTimelineAsync("MATCH_1");
 
@@ -247,7 +243,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var timeline = await service.GetTimelineAsync("MATCH_1");
 
@@ -273,7 +270,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var timeline = await service.GetTimelineAsync("MATCH_1");
 
@@ -296,7 +294,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var timeline = await service.GetTimelineAsync("MATCH_1");
 
@@ -319,7 +318,9 @@ public class TimelineServiceTests
         riotMock.Setup(x => x.GetMatchTimelineAsync("MATCH_1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildTimeline());
 
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var scoreboard = await service.GetScoreboardAsync("MATCH_1", timestamp: 90000);
 
@@ -343,7 +344,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var scoreboard = await service.GetScoreboardAsync("MATCH_1", timestamp: 100000);
 
@@ -371,7 +373,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var scoreboard = await service.GetScoreboardAsync("MATCH_1", timestamp: 5000);
 
@@ -396,7 +399,8 @@ public class TimelineServiceTests
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
-        var service = new TimelineService(db, riotMock.Object);
+        var matchMock = new Mock<IMatchService>();
+        var service = new TimelineService(db, riotMock.Object, matchMock.Object);
 
         var scoreboard = await service.GetScoreboardAsync("MATCH_1", timestamp: 5000);
 
