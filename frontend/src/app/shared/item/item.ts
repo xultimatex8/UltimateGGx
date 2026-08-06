@@ -1,58 +1,8 @@
+// shared/item/item.ts (completo)
 import { Component, computed, input } from '@angular/core';
 import { ItemDto } from './item.model';
-
-const STAT_LABELS: Record<string, string> = {
-  FlatHPPoolMod: 'Health',
-  rFlatHPModPerLevel: 'Health per Level',
-  FlatMPPoolMod: 'Mana',
-  rFlatMPModPerLevel: 'Mana per Level',
-  PercentHPPoolMod: 'Health',
-  PercentMPPoolMod: 'Mana',
-  FlatHPRegenMod: 'Health Regen',
-  rFlatHPRegenModPerLevel: 'Health Regen per Level',
-  PercentHPRegenMod: 'Health Regen',
-  FlatMPRegenMod: 'Mana Regen',
-  rFlatMPRegenModPerLevel: 'Mana Regen per Level',
-  PercentMPRegenMod: 'Mana Regen',
-  FlatArmorMod: 'Armor',
-  rFlatArmorModPerLevel: 'Armor per Level',
-  PercentArmorMod: 'Armor',
-  FlatPhysicalDamageMod: 'Attack Damage',
-  rFlatPhysicalDamageModPerLevel: 'Attack Damage per Level',
-  PercentPhysicalDamageMod: 'Attack Damage',
-  FlatSpellBlockMod: 'Magic Resist',
-  rFlatSpellBlockModPerLevel: 'Magic Resist per Level',
-  PercentSpellBlockMod: 'Magic Resist',
-  FlatMagicDamageMod: 'Ability Power',
-  rFlatMagicDamageModPerLevel: 'Ability Power per Level',
-  PercentMagicDamageMod: 'Ability Power',
-  FlatMovementSpeedMod: 'Movement Speed',
-  rFlatMovementSpeedModPerLevel: 'Movement Speed per Level',
-  PercentMovementSpeedMod: 'Movement Speed',
-  FlatAttackSpeedMod: 'Attack Speed',
-  PercentAttackSpeedMod: 'Attack Speed',
-  rPercentAttackSpeedModPerLevel: 'Attack Speed per Level',
-  FlatCritChanceMod: 'Critical Strike Chance',
-  PercentCritChanceMod: 'Critical Strike Chance',
-  FlatCritDamageMod: 'Critical Strike Damage',
-  PercentCritDamageMod: 'Critical Strike Damage',
-  FlatBlockMod: 'Block',
-  PercentBlockMod: 'Block',
-  FlatSpellDamageMod: 'Spell Damage',
-  PercentSpellDamageMod: 'Spell Damage',
-  FlatEXPBonus: 'Experience Bonus',
-  PercentEXPBonus: 'Experience Bonus',
-  FlatEnergyPoolMod: 'Energy',
-  rFlatEnergyModPerLevel: 'Energy per Level',
-  PercentEnergyPoolMod: 'Energy',
-  FlatEnergyRegenMod: 'Energy Regen',
-  rFlatEnergyRegenModPerLevel: 'Energy Regen per Level',
-  PercentEnergyRegenMod: 'Energy Regen',
-  FlatRuneMod: 'Rune',
-  PercentRuneMod: 'Rune',
-  PercentLifeStealMod: 'Life Steal',
-  PercentSpellVampMod: 'Spell Vamp',
-};
+import { ITEM_STAT_LABELS } from './item-stat-labels.const';
+import { DataDragonUrlUtil } from '../utils/data-dragon-url.utils';
 
 @Component({
   selector: 'app-item',
@@ -66,7 +16,7 @@ export class Item {
 
   protected iconUrl = computed(() => {
     const item = this.item();
-    return item ? this.buildIconUrl(this.ddragonVersion(), item.key) : null;
+    return item ? DataDragonUrlUtil.itemIcon(this.ddragonVersion(), item.key) : null;
   });
 
   protected statEntries = computed(() => {
@@ -83,17 +33,12 @@ export class Item {
     if (statKey.toLowerCase().includes('percent')) {
       return `${Math.round(value * 100)}%`;
     }
-
     return `${value}`;
   }
 
-  private buildIconUrl(ddragonVersion: string, key: number): string {
-    return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${key}.png`;
-  }
-
   private formatStatName(statKey: string): string {
-    if (STAT_LABELS[statKey]) {
-      return STAT_LABELS[statKey];
+    if (ITEM_STAT_LABELS[statKey]) {
+      return ITEM_STAT_LABELS[statKey];
     }
 
     return statKey

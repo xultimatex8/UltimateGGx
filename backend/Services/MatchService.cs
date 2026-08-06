@@ -315,6 +315,7 @@ public class MatchService : IMatchService
 
         return new MatchDto
         {
+            MatchId = match.MatchReference.MatchId,
             EndOfGameResult = match.EndOfGameResult,
             GameDuration = match.GameDuration,
             GameEndTimestamp = match.GameEndTimestamp,

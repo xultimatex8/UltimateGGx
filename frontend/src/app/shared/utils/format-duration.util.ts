@@ -10,4 +10,8 @@ export class FormatDurationUtil {
 
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
+
+  static formatTimestamp(timestamp: number): string {
+    return this.formatDuration(Math.floor(timestamp / 1000));
+  }
 }

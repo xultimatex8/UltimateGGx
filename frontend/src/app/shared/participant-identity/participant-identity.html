@@ -1,0 +1,56 @@
+@let p = participant();
+
+<div class="flex items-center gap-2">
+  <div class="relative shrink-0">
+    <img
+      [src]="championIconUrl(p.champion.riotId)"
+      [alt]="p.champion.name"
+      [title]="p.champion.name"
+      [class]="avatarSize()"
+      class="rounded border border-border/40 object-cover" />
+
+    <div
+      class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
+      [title]="ParticipantsUtil.getLaneLabel(p.lane)">
+      <img
+        [src]="'/icons/' + ParticipantsUtil.getLaneIcon(p.lane)"
+        [alt]="ParticipantsUtil.getLaneLabel(p.lane)"
+        [class]="laneIconSize()"
+        class="opacity-80 brightness-200" />
+    </div>
+
+    <span
+      [class]="levelTextSize()"
+      class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-text-secondary font-medium leading-none">
+      {{ p.championLevel }}
+    </span>
+  </div>
+
+  <div class="mt-0.5 flex flex-col -space-y-0.5">
+    <app-summoner-spell [spell]="p.summonerSpells[0]" [ddragonVersion]="ddragonVersion()" [size]="spellSize()" />
+    <app-summoner-spell [spell]="p.summonerSpells[1]" [ddragonVersion]="ddragonVersion()" [size]="spellSize()" />
+  </div>
+
+  <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
+    <app-rune [rune]="p.primaryRune" [size]="primaryRuneSize()" />
+    <app-rune [rune]="p.secondaryTree" [size]="secondaryRuneSize()" />
+  </div>
+
+  @if (linkToProfile()) {
+    <a
+      [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
+      (click)="$event.stopPropagation()"
+      class="truncate hover:underline"
+      [class]="nameSize()"
+      [class.text-accent]="isHighlighted()"
+      [class.font-semibold]="isHighlighted()"
+      [class.text-text-primary]="!isHighlighted()"
+      [title]="p.summonerName + '#' + p.summonerTag">
+      {{ p.summonerName }}
+    </a>
+  } @else {
+    <span class="truncate font-semibold text-text-primary" [class]="nameSize()" [title]="p.summonerName">
+      {{ p.summonerName }}
+    </span>
+  }
+</div>

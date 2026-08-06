@@ -1,0 +1,101 @@
+@if (scoreboard()) {
+  <div class="grid grid-cols-2 gap-4">
+    @for (team of [
+      {
+        label: 'Blue Team',
+        accent: 'text-blue-400',
+        border: 'border-blue-500/30',
+        bg: 'bg-blue-500/5',
+        hover: 'hover:bg-blue-500/5',
+        line: 'bg-blue-400',
+        participants: blueTeam()
+      },
+      {
+        label: 'Red Team',
+        accent: 'text-red-400',
+        border: 'border-red-500/30',
+        bg: 'bg-red-500/5',
+        hover: 'hover:bg-red-500/5',
+        line: 'bg-red-400',
+        participants: redTeam()
+      }
+    ]; track team.label) {
+      <div class="relative rounded-lg rounded-tr-none border border-border bg-surface">
+        <div
+          class="rounded-l-xl absolute left-0 top-0 bottom-0 w-1"
+          [class]="team.line">
+        </div>
+
+        <div
+          class="flex items-center justify-between border-b border-border px-4 py-2.5 pl-5"
+          [class]="team.bg">
+            <h3
+              class="text-xs font-bold uppercase tracking-wide"
+              [class]="team.accent">
+              {{ team.label }}
+            </h3>
+        </div>
+
+        <div class="p-3">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-left text-text-disabled border-b border-border/20">
+                <th class="pb-2 font-medium">Player</th>
+                <th class="pb-2 font-medium text-center w-16">KDA</th>
+                <th class="pb-2 font-medium text-center w-12">CS</th>
+                <th class="pb-2 font-medium text-center w-16">Gold</th>
+                <th class="pb-2 font-medium text-center">Items</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border/10">
+              @for (p of team.participants; track p.participantId) {
+                <tr
+                  class="transition-colors"
+                  [class]="team.hover">
+                  <td class="py-2">
+                    <app-participant-identity
+                      [participant]="p"
+                      [ddragonVersion]="ddragonVersion()" />
+                  </td>
+                  <td class="text-center whitespace-nowrap text-text-secondary">
+                    <span>{{ p.kills }}</span>
+                    <span class="text-text-muted">/</span>
+                    <span>{{ p.deaths }}</span>
+                    <span class="text-text-muted">/</span>
+                    <span>{{ p.assists }}</span>
+                  </td>
+                  <td class="text-center font-medium text-text-secondary">
+                    {{ p.minions }}
+                  </td>
+                  <td class="text-center">
+                    <div class="font-semibold text-accent">
+                      {{ p.currentGold | number }}
+                    </div>
+                    <div class="text-[10px] text-text-disabled">
+                      {{ p.totalGold | number }}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <app-item-slots
+                      [items]="p.items"
+                      [ddragonVersion]="ddragonVersion()" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="rounded-lg border border-dashed border-border-alt bg-surface-alt p-10 text-center">
+    <p class="text-sm font-medium text-text-secondary">
+      No event selected
+    </p>
+
+    <p class="mt-2 text-xs text-text-disabled">
+      Select an event from the timeline to inspect the game state.
+    </p>
+  </div>
+}

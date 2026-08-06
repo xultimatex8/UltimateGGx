@@ -153,6 +153,12 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Event>()
+            .HasOne(e => e.Team)
+            .WithMany(t => t.Events)
+            .HasForeignKey(e => e.TeamId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Event>()
             .HasOne(e => e.Victim)
             .WithMany(p => p.DeathsAsVictim)
             .HasForeignKey(e => e.VictimParticipantId)

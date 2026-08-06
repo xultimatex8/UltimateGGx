@@ -9,4 +9,5 @@ public class Team : BaseEntity
     public Match Match { get; set; } = default!;
     
     public ICollection<Participant> Participants { get; set; } = [];
+    public ICollection<Event> Events { get; set; } = [];
 }

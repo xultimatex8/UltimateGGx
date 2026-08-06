@@ -55,7 +55,7 @@
 } @else {
   <div class="space-y-3">
     @for (match of matches(); track $index) {
-      @let participant = MatchParticipantsUtil.getParticipant(match, puuid());
+      @let participant = getParticipantByPuuid(match, puuid());
       @let maxDamage = getMaxDamage(match);
 
       @if (participant) {
@@ -79,10 +79,10 @@
 
                   <div 
                     class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
-                    [title]="MatchParticipantsUtil.getLaneLabel(participant.lane)">
+                    [title]="ParticipantsUtil.getLaneLabel(participant.lane)">
                     <img
-                      [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(participant.lane)"
-                      [alt]="MatchParticipantsUtil.getLaneLabel(participant.lane)"
+                      [src]="'/icons/' + ParticipantsUtil.getLaneIcon(participant.lane)"
+                      [alt]="ParticipantsUtil.getLaneLabel(participant.lane)"
                       class="w-5 h-5 opacity-80 brightness-200" />
                   </div>
 
@@ -161,7 +161,7 @@
 
             <div class="flex-1 grid grid-cols-2 gap-6 border-l border-r border-border px-6">
               <div>
-                @for (p of MatchParticipantsUtil.getBlueTeam(match); track p.puuid) {
+                @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 100); track p.puuid) {
                   <div class="flex items-center gap-3 text-xs">
                     <img
                       [src]="championIconUrl(p.champion.riotId)"
@@ -182,7 +182,7 @@
               </div>
 
               <div>
-                @for (p of MatchParticipantsUtil.getRedTeam(match); track p.puuid) {
+                @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 200); track p.puuid) {
                   <div class="flex items-center gap-3 text-xs">
                     <img
                       [src]="championIconUrl(p.champion.riotId)"
@@ -217,11 +217,25 @@
               </p>
             </div>
 
-            <span
-              class="shrink-0 text-text-disabled transition-transform duration-150"
-              [class.rotate-180]="isExpanded($index)">
-              ▾
-            </span>
+            <div class="flex flex-col items-center gap-2 shrink-0">
+              <button
+                type="button"
+                (click)="$event.stopPropagation(); goToTimeline(match.matchId)"
+                title="View match timeline"
+                class="flex h-6 w-6 items-center justify-center rounded-md text-text-disabled transition hover:bg-surface-alt hover:text-accent cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M12 7v5l4 2" />
+                </svg>
+              </button>
+
+              <span
+                class="text-text-disabled transition-transform duration-150"
+                [class.rotate-180]="isExpanded($index)">
+                ▾
+              </span>
+            </div>
           </div>
 
           @if (isExpanded($index)) {
@@ -246,68 +260,16 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border/10">
-                    @for (p of MatchParticipantsUtil.getBlueTeam(match); track p.puuid) {
+                    @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 100); track p.puuid) {
                       <tr
                         class="transition-colors hover:bg-blue-500/3"
                         [class.bg-blue-500/10]="p.puuid === puuid()">
                         <td class="py-1.5 w-2xs">
-                          <div class="flex items-center gap-2">
-                            <div class="relative shrink-0">
-                              <img
-                                [src]="championIconUrl(p.champion.riotId)"
-                                [alt]="p.champion.name"
-                                [title]="p.champion.name"
-                                class="w-8 h-8 rounded border border-border/40" 
-                              />
-
-                              <div 
-                                class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
-                                [title]="MatchParticipantsUtil.getLaneLabel(p.lane)">
-                                <img
-                                  [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(p.lane)"
-                                  [alt]="MatchParticipantsUtil.getLaneLabel(p.lane)"
-                                  class="w-2.5 h-2.5 opacity-80 brightness-200" />
-                              </div>
-
-                              <span
-                                class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
-                                {{ p.championLevel }}
-                              </span>
-                            </div>
-
-                            <div class="mt-0.5 flex flex-col -space-y-0.5">
-                              <app-summoner-spell
-                                [spell]="p.summonerSpells[0]"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-3.5 h-3.5" />
-
-                              <app-summoner-spell
-                                [spell]="p.summonerSpells[1]"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-3.5 h-3.5" />
-                            </div>
-
-                            <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
-                              <app-rune
-                                [rune]="p.primaryRune"
-                                size="w-4 h-4" />
-
-                              <app-rune
-                                [rune]="p.secondaryTree"
-                                size="w-3 h-3" />
-                            </div>
-
-                            <a
-                              [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
-                              (click)="$event.stopPropagation()"
-                              class="truncate hover:underline text-xs"
-                              [class.text-accent]="p.puuid === puuid()"
-                              [class.font-semibold]="p.puuid === puuid()"
-                              [class.text-text-primary]="p.puuid !== puuid()"
-                              [title]="p.summonerName + '#' + p.summonerTag">
-                              {{ p.summonerName }}
-                            </a>
-                          </div>
+                          <app-participant-identity
+                            [participant]="p"
+                            [ddragonVersion]="ddragonVersion"
+                            [linkToProfile]="true"
+                            [highlightPuuid]="puuid()" />
                         </td>
                         <td class="text-center whitespace-nowrap text-text-secondary">
                           <span>{{ p.kills }}</span>
@@ -332,31 +294,7 @@
                           </div>
                         </td>
                         <td>
-                          <div class="flex justify-center items-center gap-0.5">
-                            @let allItems = sortedItems(p.items);
-                            @let mainItems = allItems.length > 1 ? allItems.slice(0, -1) : allItems;
-                            @let trinket = allItems.length > 1 ? allItems[allItems.length - 1] : null;
-
-                            @for (i of [0, 1, 2, 3, 4, 5]; track i) {
-                              @if (mainItems[i]) {
-                                <app-item
-                                  [item]="mainItems[i]"
-                                  [ddragonVersion]="ddragonVersion"
-                                  size="w-6 h-6" />
-                              } @else {
-                                <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
-                              }
-                            }
-
-                            @if (trinket) {
-                              <app-item
-                                [item]="trinket"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-6 h-6" />
-                            } @else {
-                              <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
-                            }
-                          </div>
+                          <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
                         </td>
                       </tr>
                     }
@@ -381,68 +319,16 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border/10">
-                    @for (p of MatchParticipantsUtil.getRedTeam(match); track p.puuid) {
+                    @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 200); track p.puuid) {
                       <tr
                         class="transition-colors hover:bg-red-500/3"
                         [class.bg-red-500/10]="p.puuid === puuid()">
                         <td class="py-1.5 w-2xs">
-                          <div class="flex items-center gap-2">
-                            <div class="relative shrink-0">
-                              <img
-                                [src]="championIconUrl(p.champion.riotId)"
-                                [alt]="p.champion.name"
-                                [title]="p.champion.name"
-                                class="w-8 h-8 rounded border border-border/40" 
-                              />
-
-                              <div 
-                                class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
-                                [title]="MatchParticipantsUtil.getLaneLabel(p.lane)">
-                                <img
-                                  [src]="'/icons/' + MatchParticipantsUtil.getLaneIcon(p.lane)"
-                                  [alt]="MatchParticipantsUtil.getLaneLabel(p.lane)"
-                                  class="w-2.5 h-2.5 opacity-80 brightness-200" />
-                              </div>
-
-                              <span
-                                class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 py-px text-[9px] text-text-secondary font-medium leading-none">
-                                {{ p.championLevel }}
-                              </span>
-                            </div>
-
-                            <div class="mt-0.5 flex flex-col -space-y-0.5">
-                              <app-summoner-spell
-                                [spell]="p.summonerSpells[0]"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-3.5 h-3.5" />
-
-                              <app-summoner-spell
-                                [spell]="p.summonerSpells[1]"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-3.5 h-3.5" />
-                            </div>
-
-                            <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
-                              <app-rune
-                                [rune]="p.primaryRune"
-                                size="w-4 h-4" />
-
-                              <app-rune
-                                [rune]="p.secondaryTree"
-                                size="w-3 h-3" />
-                            </div>
-
-                            <a
-                              [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
-                              (click)="$event.stopPropagation()"
-                              class="truncate hover:underline text-xs"
-                              [class.text-accent]="p.puuid === puuid()"
-                              [class.font-semibold]="p.puuid === puuid()"
-                              [class.text-text-primary]="p.puuid !== puuid()"
-                              [title]="p.summonerName + '#' + p.summonerTag">
-                              {{ p.summonerName }}
-                            </a>
-                          </div>
+                          <app-participant-identity
+                            [participant]="p"
+                            [ddragonVersion]="ddragonVersion"
+                            [linkToProfile]="true"
+                            [highlightPuuid]="puuid()" />
                         </td>
                         <td class="text-center whitespace-nowrap text-text-secondary">
                           <span>{{ p.kills }}</span>
@@ -467,31 +353,7 @@
                           </div>
                         </td>
                         <td>
-                          <div class="flex justify-center items-center gap-0.5">
-                            @let allItems = sortedItems(p.items);
-                            @let mainItems = allItems.length > 1 ? allItems.slice(0, -1) : allItems;
-                            @let trinket = allItems.length > 1 ? allItems[allItems.length - 1] : null;
-
-                            @for (i of [0, 1, 2, 3, 4, 5]; track i) {
-                              @if (mainItems[i]) {
-                                <app-item
-                                  [item]="mainItems[i]"
-                                  [ddragonVersion]="ddragonVersion"
-                                  size="w-6 h-6" />
-                              } @else {
-                                <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
-                              }
-                            }
-
-                            @if (trinket) {
-                              <app-item
-                                [item]="trinket"
-                                [ddragonVersion]="ddragonVersion"
-                                size="w-6 h-6" />
-                            } @else {
-                              <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
-                            }
-                          </div>
+                          <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
                         </td>
                       </tr>
                     }

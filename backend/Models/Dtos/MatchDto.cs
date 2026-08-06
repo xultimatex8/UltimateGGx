@@ -4,6 +4,7 @@ namespace backend.Models.Dtos;
 
 public class MatchDto
 {
+    public string MatchId { get; set; } = default!;
     public string EndOfGameResult { get; set; } = default!;
     public long GameDuration { get; set; }
     public long GameEndTimestamp { get; set; }

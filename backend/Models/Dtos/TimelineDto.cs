@@ -21,7 +21,7 @@ public class EventDto
     public LaneType? LaneType { get; set; }
     public TowerType? TowerType { get; set; }
 
-    public int? WinningTeamId { get; set; }
+    public int? TeamId { get; set; }
 
     public EventType Type { get; set; }
 

@@ -39,5 +39,9 @@ public class Event : BaseEntity
     public int? VictimParticipantId { get; set; }
     public Participant? Victim { get; set; }
 
+    public int? TeamId { get; set; }
+    public Team? Team { get; set; }
+
+
     public ICollection<Participant> AssistingParticipants { get; set; } = [];
 }
