@@ -5,16 +5,46 @@
       <p class="text-sm text-text-secondary">Loading match...</p>
     </div>
   </div>
+} @else if (error()) {
+  <div class="min-h-[calc(100vh-14rem)] bg-background text-text-primary flex items-center">
+    <div class="max-w-5xl w-full mx-auto px-6 py-10">
+      <div class="min-h-[55vh] bg-surface border border-border rounded p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+        <div class="flex justify-center items-center gap-2 mb-6">
+          <span class="w-1 h-5 bg-accent rounded-sm"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+            Error
+          </h2>
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-text-primary mb-4">
+          Couldn't load match
+        </h1>
+
+        <p class="text-text-secondary text-sm leading-relaxed max-w-md">
+          The match data could not be retrieved. It may not exist or is currently unavailable.
+        </p>
+
+        @if (error()) {
+          <div class="mt-5 max-w-md rounded border border-border bg-surface-alt px-4 py-3">
+            <p class="text-xs text-text-muted leading-relaxed">
+              {{ error() }}
+            </p>
+          </div>
+        }
+
+        <div class="flex gap-3 mt-8">
+          <a
+            routerLink="/"
+            class="bg-accent-dark hover:bg-accent text-text-primary text-sm font-medium px-5 py-2.5 rounded transition cursor-pointer"
+          >
+            Go back home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 } @else {
   <div class="min-h-screen w-full bg-background px-8 py-8">
-    @if (error()) {
-      <div class="mb-6 rounded-xl border border-danger-border bg-danger-surface p-4">
-        <p class="text-sm font-medium text-danger-border">
-          {{ error() }}
-        </p>
-      </div>
-    }
-
     <div class="grid grid-cols-[minmax(0,1fr)_360px] items-start gap-6">
       <main class="min-w-0 space-y-6">
         <section class="rounded-xl border border-border bg-hero p-4">

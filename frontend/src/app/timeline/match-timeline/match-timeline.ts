@@ -110,6 +110,7 @@ export class MatchTimeline {
       error: (err: HttpErrorResponse) => {
         this.error.set(err.error?.error ?? 'An unexpected error occurred.');
         this.loadingTimeline.set(false);
+        this.initialLoadComplete.set(true);
       },
     });
   }
@@ -126,6 +127,7 @@ export class MatchTimeline {
       error: (err: HttpErrorResponse) => {
         this.error.set(err.error?.error ?? 'An unexpected error occurred.');
         this.loadingScoreboard.set(false);
+        this.initialLoadComplete.set(true);
       },
     });
   }
