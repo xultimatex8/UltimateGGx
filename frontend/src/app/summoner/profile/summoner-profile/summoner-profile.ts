@@ -57,7 +57,7 @@ export class SummonerProfile {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set("We couldn't find that summoner.");
+        this.error.set(`We couldn't find the summoner "${username}#${tag}".`);
         this.loading.set(false);
       },
     });
