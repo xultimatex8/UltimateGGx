@@ -18,13 +18,13 @@ export class ParticipantIdentity {
   linkToProfile = input(false);
   highlightPuuid = input<string | null>(null);
 
-  avatarSize = input('w-8 h-8');
-  laneIconSize = input('w-2.5 h-2.5');
-  levelTextSize = input('text-[9px]');
-  spellSize = input('w-3.5 h-3.5');
-  primaryRuneSize = input('w-3 h-3');
-  secondaryRuneSize = input('w-3 h-3');
-  nameSize = input('text-xs');
+  avatarSize = input('w-8 h-8 lg:w-9 lg:h-9');
+  laneIconSize = input('w-2.5 h-2.5 lg:w-3 lg:h-3');
+  levelTextSize = input('text-[9px] lg:text-[10px]');
+  spellSize = input('w-3.5 h-3.5 lg:w-4 lg:h-4');
+  primaryRuneSize = input('w-3 h-3 lg:w-4 lg:h-4');
+  secondaryRuneSize = input('w-3 h-3 lg:w-3.5 lg:h-3.5');
+  nameSize = input('text-[11px] md:text-xs lg:sm');
 
   protected readonly ParticipantsUtil = ParticipantsUtil;
 
