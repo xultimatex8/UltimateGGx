@@ -7,9 +7,12 @@ using backend.Interfaces;
 using backend.Middleware;
 using backend.Http;
 
-Env.Load("../.env");
-
 var builder = WebApplication.CreateBuilder(args);
+
+if (!builder.Environment.IsProduction())
+{
+    Env.Load("../.env");
+}
 
 var riotApiKey = Environment.GetEnvironmentVariable("RIOT_API_KEY");
 
@@ -73,6 +76,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
