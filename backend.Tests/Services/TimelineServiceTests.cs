@@ -21,7 +21,7 @@ public class TimelineServiceTests
         return new AppDbContext(options);
     }
 
-    private static (Models.Match match, Participant killer, Participant victim) SeedMatchAsync(AppDbContext db)
+    private static (Models.Match match, Participant killer, Participant victim, Team teamA) SeedMatchAsync(AppDbContext db)
     {
         var killerSummoner = new Summoner { Puuid = "killer-puuid", Username = "Killer", Tag = "EUW" };
         var victimSummoner = new Summoner { Puuid = "victim-puuid", Username = "Victim", Tag = "EUW" };
@@ -74,7 +74,7 @@ public class TimelineServiceTests
         db.MatchReferences.Add(reference);
         db.SaveChanges();
 
-        return (match, killer, victim);
+        return (match, killer, victim, teamA);
     }
 
     private static TimelineResponseDto BuildTimeline(params FramesTimeLineDto[] frames)
@@ -132,7 +132,7 @@ public class TimelineServiceTests
     public async Task CheckOrFetchTimelineAsync_WhenEventsAlreadyExist_DoesNotCallRiotApi()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, _) = SeedMatchAsync(db);
 
         db.Events.Add(new Event
         {
@@ -156,7 +156,7 @@ public class TimelineServiceTests
     public async Task SyncTimelineAsync_MapsChampionKillEventAndParticipantFrames()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, _) = SeedMatchAsync(db);
 
         var frame = new FramesTimeLineDto
         {
@@ -215,7 +215,7 @@ public class TimelineServiceTests
     public async Task GetTimelineAsync_RemovesUndoneItemPurchaseAndTheUndoItself()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, _) = SeedMatchAsync(db);
+        var (match, killer, _, _) = SeedMatchAsync(db);
 
         var potion = new Item { Key = 2003, Name = "Health Potion", Description = "d", BuyPrice = 50, SellPrice = 35, Stats = [] };
         db.Items.Add(potion);
@@ -237,7 +237,7 @@ public class TimelineServiceTests
     public async Task GetTimelineAsync_RemovesAllDestroyedItemEvents()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, _) = SeedMatchAsync(db);
+        var (match, killer, _, _) = SeedMatchAsync(db);
 
         var component = new Item { Key = 1042, Name = "Dagger", Description = "d", BuyPrice = 300, SellPrice = 210, Stats = [] };
         db.Items.Add(component);
@@ -258,7 +258,7 @@ public class TimelineServiceTests
     public async Task GetTimelineAsync_KeepsRegularChampionKillEventWithParticipantIds()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, _) = SeedMatchAsync(db);
 
         db.Events.Add(new Event
         {
@@ -289,10 +289,10 @@ public class TimelineServiceTests
     public async Task GetTimelineAsync_SetsWinningTeamIdOnlyOnGameEndEvent()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, teamA) = SeedMatchAsync(db);
 
         db.Events.Add(new Event { Timestamp = 100, Type = EventType.CHAMPION_KILL, Match = match, Killer = killer, Victim = victim });
-        db.Events.Add(new Event { Timestamp = 200000, Type = EventType.GAME_END, Match = match });
+        db.Events.Add(new Event { Timestamp = 200000, Type = EventType.GAME_END, Match = match, Team = teamA });
         await db.SaveChangesAsync();
 
         var riotMock = new Mock<IRiotApiService>();
@@ -301,15 +301,15 @@ public class TimelineServiceTests
         var timeline = await service.GetTimelineAsync("MATCH_1");
 
         timeline.Events.Should().HaveCount(2);
-        timeline.Events.Single(e => e.Type == EventType.CHAMPION_KILL).WinningTeamId.Should().BeNull();
-        timeline.Events.Single(e => e.Type == EventType.GAME_END).WinningTeamId.Should().Be(100);
+        timeline.Events.Single(e => e.Type == EventType.CHAMPION_KILL).TeamId.Should().BeNull();
+        timeline.Events.Single(e => e.Type == EventType.GAME_END).TeamId.Should().Be(100);
     }
 
     [Fact]
     public async Task GetScoreboardAsync_ReturnsGoldAndLevelFromNearestPreviousFrame()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, _) = SeedMatchAsync(db);
 
         killer.Frames.Add(new ParticipantFrame { Timestamp = 60000, CurrentGold = 500, TotalGold = 1500, Level = 3, Minions = 20, Participant = killer });
         killer.Frames.Add(new ParticipantFrame { Timestamp = 120000, CurrentGold = 900, TotalGold = 2500, Level = 5, Minions = 40, Participant = killer });
@@ -336,7 +336,7 @@ public class TimelineServiceTests
     public async Task GetScoreboardAsync_CountsKillsDeathsAssistsOnlyUpToTimestamp()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, victim) = SeedMatchAsync(db);
+        var (match, killer, victim, _) = SeedMatchAsync(db);
 
         db.Events.Add(new Event { Timestamp = 60000, Type = EventType.CHAMPION_KILL, Match = match, Killer = killer, Victim = victim });
         db.Events.Add(new Event { Timestamp = 200000, Type = EventType.CHAMPION_KILL, Match = match, Killer = killer, Victim = victim });
@@ -358,7 +358,7 @@ public class TimelineServiceTests
     public async Task GetScoreboardAsync_ReconstructsItemsAfterUndo()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, _) = SeedMatchAsync(db);
+        var (match, killer, _, _) = SeedMatchAsync(db);
 
         var boots = new Item { Key = 1001, Name = "Boots", Description = "d", BuyPrice = 300, SellPrice = 210, Stats = [] };
         var potion = new Item { Key = 2003, Name = "Health Potion", Description = "d", BuyPrice = 50, SellPrice = 35, Stats = [] };
@@ -385,7 +385,7 @@ public class TimelineServiceTests
     public async Task GetScoreboardAsync_RemovesItemOnSold()
     {
         using var db = CreateInMemoryDb();
-        var (match, killer, _) = SeedMatchAsync(db);
+        var (match, killer, _, _) = SeedMatchAsync(db);
 
         var boots = new Item { Key = 1001, Name = "Boots", Description = "d", BuyPrice = 300, SellPrice = 210, Stats = [] };
         db.Items.Add(boots);
