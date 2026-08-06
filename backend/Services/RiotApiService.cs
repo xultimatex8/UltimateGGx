@@ -28,19 +28,26 @@ public class RiotApiService : IRiotApiService
             _regionalClient,
             $"/riot/account/v1/accounts/by-riot-id/{username}/{tag}",
             ct,
-            $"{nameof(Summoner)} \"{username}#{tag}\" not found.")
+            $"Summoner {username}#{tag} not found.",
+            nameof(Summoner),
+            $"{nameof(Summoner.Username)}/{nameof(Summoner.Tag)}",
+            $"{username}#{tag}")
             ?? throw new InvalidOperationException("Could not retrieve Riot Account Info");
     }
 
     public async Task<SummonerResponseDto> GetRiotSummonerAsync(
         string puuid,
+        string? identifier = null,
         CancellationToken ct = default)
     {
         return await GetAsync<SummonerResponseDto>(
             _platformClient,
             $"/lol/summoner/v4/summoners/by-puuid/{puuid}",
             ct,
-            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            $"Summoner {identifier ?? puuid}\" not found.",
+            nameof(Summoner),
+            nameof(Summoner.Puuid),
+            identifier ?? puuid)
             ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Info");
     }
 
@@ -52,7 +59,10 @@ public class RiotApiService : IRiotApiService
             _platformClient,
             $"/lol/league/v4/entries/by-puuid/{puuid}",
             ct,
-            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            "We couldn't find this summoner's ranked data.",
+            nameof(Summoner),
+            nameof(Summoner.Puuid),
+            puuid)
             ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Queues Info");
     }
 
@@ -65,7 +75,10 @@ public class RiotApiService : IRiotApiService
             _regionalClient,
             $"/lol/match/v5/matches/by-puuid/{puuid}/ids?queue={QueueTypeHelper.QueueTypeToQueueId(type)}&count=10",
             ct,
-            $"{nameof(Summoner)} \"{puuid}\" not found.")
+            "We couldn't find this summoner's matches.",
+            nameof(Summoner),
+            nameof(Summoner.Puuid),
+            puuid)
             ?? throw new InvalidOperationException("Could not retrieve Riot Summoner Matches");
     }
 
@@ -77,7 +90,10 @@ public class RiotApiService : IRiotApiService
             _regionalClient,
             $"/lol/match/v5/matches/{matchId}",
             ct,
-            $"{nameof(Match)} \"{matchId}\" not found.")
+            "We couldn't find this match details.",
+            nameof(Match),
+            nameof(Match.MatchReference.MatchId),
+            matchId)
             ?? throw new InvalidOperationException("Could not retrieve Riot Match Detail");
     }
 
@@ -89,7 +105,10 @@ public class RiotApiService : IRiotApiService
             _regionalClient,
             $"/lol/match/v5/matches/{matchId}/timeline",
             ct,
-            $"{nameof(Match)} \"{matchId}\" not found.")
+            "The timeline for this match is not available.",
+            nameof(Match),
+            nameof(Match.MatchReference.MatchId),
+            matchId)
             ?? throw new InvalidOperationException("Could not retrieve Riot Match Timeline");
     }
 
@@ -97,7 +116,10 @@ public class RiotApiService : IRiotApiService
         HttpClient client,
         string url,
         CancellationToken ct,
-        string? notFoundMessage = null)
+        string? userMessage = null,
+        string? entityName = null,
+        string? propertyName = null,
+        object? value = null)
     {
         try
         {
@@ -105,9 +127,13 @@ public class RiotApiService : IRiotApiService
         }
         catch (HttpRequestException ex) when (
             ex.StatusCode == HttpStatusCode.NotFound &&
-            notFoundMessage is not null)
+            userMessage is not null)
         {
-            throw new NotFoundException(notFoundMessage);
+            throw new NotFoundException(
+                userMessage,
+                entityName!,
+                propertyName!,
+                value!);
         }
         catch (HttpRequestException ex)
         {

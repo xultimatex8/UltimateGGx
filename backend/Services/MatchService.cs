@@ -29,7 +29,7 @@ public class MatchService : IMatchService
         Summoner summoner = await _db.Summoners
             .Include(s => s.MatchReferences)
             .FirstOrDefaultAsync(s => s.Puuid == puuid, ct)
-            ?? throw new NotFoundException(nameof(Summoner), nameof(Summoner.Puuid), puuid);
+            ?? throw new NotFoundException("Summoner not found", nameof(Summoner), nameof(Summoner.Puuid), puuid);
 
         List<MatchReference> existingRefs = await _db.MatchReferences
             .Where(m => matchIds.Contains(m.MatchId))
@@ -214,19 +214,19 @@ public class MatchService : IMatchService
         CancellationToken ct)
     {
         if (!champions.TryGetValue(dto.ChampionId, out Champion? champion))
-            throw new NotFoundException(nameof(Champion), nameof(Champion.Key), dto.ChampionId);
+            throw new NotFoundException("Could not create match participants", nameof(Champion), nameof(Champion.Key), dto.ChampionId);
 
         if (!spells.TryGetValue(dto.Summoner1Id, out SummonerSpell? spell1))
-            throw new NotFoundException(nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner1Id);
+            throw new NotFoundException("Could not create match participants", nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner1Id);
 
         if (!spells.TryGetValue(dto.Summoner2Id, out SummonerSpell? spell2))
-            throw new NotFoundException(nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner2Id);
+            throw new NotFoundException("Could not create match participants", nameof(SummonerSpell), nameof(SummonerSpell.Key), dto.Summoner2Id);
 
         if (!runes.TryGetValue(dto.Perks.Styles[0].Selections[0].Perk, out Rune? primaryRune))
-            throw new NotFoundException(nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[0].Selections[0].Perk);
+            throw new NotFoundException("Could not create match participants", nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[0].Selections[0].Perk);
 
         if (!runes.TryGetValue(dto.Perks.Styles[1].Style, out Rune? secondaryTree))
-            throw new NotFoundException(nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[1].Style);
+            throw new NotFoundException("Could not create match participants", nameof(Rune), nameof(Rune.RiotId), dto.Perks.Styles[1].Style);
 
         Summoner summoner = await GetOrCreateSummonerAsync(dto, cache, ct);
 
@@ -252,7 +252,7 @@ public class MatchService : IMatchService
 
             if (!items.TryGetValue(itemId, out Item? item))
             {
-                throw new NotFoundException(nameof(Item), nameof(Item.Key), itemId);
+                throw new NotFoundException("Could not create match participants", nameof(Item), nameof(Item.Key), itemId);
             }
 
             participantItems.Add(item);

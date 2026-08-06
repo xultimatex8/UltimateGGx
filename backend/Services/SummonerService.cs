@@ -36,7 +36,7 @@ public class SummonerService : ISummonerService
     public async Task<SummonerDto> SyncSummonerAsync(string username, string tag, CancellationToken ct = default)
     {
         AccountResponseDto account = await _riotApiService.GetRiotAccountAsync(username, tag, ct);
-        SummonerResponseDto summonerInfo = await _riotApiService.GetRiotSummonerAsync(account.Puuid, ct);
+        SummonerResponseDto summonerInfo = await _riotApiService.GetRiotSummonerAsync(account.Puuid, $"{username}#{tag}", ct);
         List<QueueResponseDto> queuesInfo = await _riotApiService.GetSummonerQueuesAsync(account.Puuid, ct);
 
         Summoner? summoner = await _db.Summoners
