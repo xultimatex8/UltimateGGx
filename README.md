@@ -4,14 +4,14 @@ A web application for advanced analysis of **League of Legends** matches, built 
 
 It lets you explore how a match unfolded and **simulate counterfactual scenarios** — modifying key events (a kill, securing an objective) at specific points in time — to estimate how the game state would have evolved under alternative conditions, comparing the real match to the hypothetical version and helping identify the decisive moments that shaped the final outcome.
 
-## Main features (MVP)
+## Main Features (MVP)
 
 - Match and user search and full timeline reconstruction.
 - Navigable timeline with key events (kills, objectives) marked.
 - Dynamic charts for gold advantage, XP advantage, and estimated win probability.
 - Counterfactual simulation: cancel out an event (kill or objective) and compare the real curve vs. the hypothetical one.
 
-## Tech stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -33,7 +33,7 @@ More detail and rationale behind these decisions in [`docs/tech-stack.md`](docs/
 - [Tech Stack and Rationale](docs/tech-stack.md)
 - [Decision Log](docs/decisions.md)
 
-## Running the project
+## Running the Project
 
 ### Prerequisites
 
@@ -67,10 +67,38 @@ POSTGRES_USER=your_user
 POSTGRES_PASSWORD=your_password
 POSTGRES_DB=ultimateggx
 
+RIOT_RATE_LIMIT_PER_SECOND=20
+RIOT_RATE_LIMIT_PER_SECOND_WINDOW=1
+RIOT_RATE_LIMIT_PER_WINDOW=100
+RIOT_RATE_LIMIT_WINDOW_MINUTES=2
+
 RIOT_API_KEY=your_riot_api_key
 ```
 
-### 3. Start PostgreSQL
+The Riot rate limit variables should match the limits associated with your Riot API key.
+
+- `RIOT_RATE_LIMIT_PER_SECOND`: Maximum number of requests allowed within the short time window.
+- `RIOT_RATE_LIMIT_PER_SECOND_WINDOW`: Duration (in seconds) of the short time window.
+- `RIOT_RATE_LIMIT_PER_WINDOW`: Maximum number of requests allowed within the longer time window.
+- `RIOT_RATE_LIMIT_WINDOW_MINUTES`: Duration (in minutes) of the longer time window.
+
+For a standard Riot development API key, the default values are:
+
+- **20 requests every 1 second**
+- **100 requests every 2 minutes**
+
+If you use a personal or production API key with different limits, update these values accordingly.
+
+## 3. Run the project
+
+The project can be run in two different ways:
+
+- **Development mode**: run the backend and frontend natively while using PostgreSQL in Docker. This is recommended when developing the application.
+- **Production mode (Docker)**: run the entire stack (database, backend, and frontend) in Docker containers.
+
+### Development mode
+
+#### Start PostgreSQL
 
 From the project root:
 
@@ -84,78 +112,69 @@ Verify it's running:
 docker compose ps
 ```
 
-### 4. Set up the backend
+#### Start the backend
 
 ```bash
 cd backend
 dotnet restore
-```
-
-Apply database migrations:
-
-```bash
-dotnet ef database update
-```
-
-> If you don't have `dotnet-ef` installed yet:
-> ```bash
-> dotnet tool install --global dotnet-ef
-> ```
-
-Start the backend:
-
-```bash
 dotnet watch run
 ```
 
 The API will be available at `http://localhost:5037`.
 
-### 5. Set up the frontend
+> Database migrations are applied automatically when the application starts.
+
+#### Start the frontend
 
 ```bash
 cd frontend
 npm install
-```
-
-Start the frontend:
-
-```bash
 ng serve
 ```
 
-The app will be available at `http://localhost:4200`.
+The application will be available at `http://localhost:4200`.
 
-### Day-to-day development
+#### Day-to-day development
 
-Once everything is set up, three things need to be running simultaneously:
+During development, the following three processes should be running simultaneously:
 
-**1 — Database (Docker):**
+1. **PostgreSQL**
 ```bash
 docker compose up postgres -d
 ```
 
-**2 — Backend:**
+2. **Backend**
 ```bash
 cd backend
 dotnet watch run
 ```
 
-**3 — Frontend:**
+3. **Frontend**
 ```bash
 cd frontend
 ng serve
 ```
 
-### Running everything with Docker (alternative)
+### Production mode (Docker)
 
-Instead of running the backend and frontend natively, the full stack (database, backend, and frontend) can be built and run in containers:
+Build and start the entire application stack:
 
 ```bash
 docker compose up --build
 ```
 
-The app will be available at `http://localhost`.
+The application will be available at `http://localhost`.
+
+To stop all containers, press `Ctrl + C` if `docker compose up` is running in the foreground. If the containers are running in detached mode, stop and remove them with:
+
+```bash
+docker compose down
+```
+
+This stops all services while preserving the PostgreSQL data stored in the Docker volume.
 
 ## Legal notice
 
-This project isn't affiliated with Riot Games. League of Legends and Riot Games are trademarks of Riot Games, Inc. This application only consumes Riot Games' public API in accordance with their [developer policies](https://developer.riotgames.com/policies/general).
+This project uses Riot Games' public API in accordance with their [developer policies](https://developer.riotgames.com/policies/general).
+
+UltimateGGx is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
