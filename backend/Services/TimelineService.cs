@@ -14,27 +14,25 @@ public class TimelineService : ITimelineService
 {
     private readonly AppDbContext _db;
     private readonly IRiotApiService _riotApiService;
+    private readonly IMatchService _matchService;
 
-    public TimelineService(AppDbContext db, IRiotApiService riotApiService)
+    public TimelineService(AppDbContext db, IRiotApiService riotApiService, IMatchService matchService)
     {
         _db = db;
         _riotApiService = riotApiService;
+        _matchService = matchService;
     }
 
     public async Task CheckOrFetchTimelineAsync(string matchId, CancellationToken ct = default)
     {
+        await _matchService.GetOrCreateMatchAsync(matchId, ct);
+
         MatchReference reference = await _db.MatchReferences
             .Include(mr => mr.Match!)
                 .ThenInclude(m => m.Events)
-            .FirstOrDefaultAsync(mr => mr.MatchId == matchId, ct)
-            ?? throw new NotFoundException("Match not found", nameof(MatchReference), nameof(MatchReference.MatchId), matchId);
+            .FirstAsync(mr => mr.MatchId == matchId, ct);
 
-        if (reference.Match is null)
-        {
-            throw new NotFoundException("Match not found", nameof(MatchReference.Match), nameof(MatchReference.MatchId), matchId);
-        }
-
-        if (reference.Match.Events.Count == 0)
+        if (reference.Match!.Events.Count == 0)
         {
             await SyncTimelineAsync(matchId, ct);
         }

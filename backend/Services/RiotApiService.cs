@@ -35,6 +35,21 @@ public class RiotApiService : IRiotApiService
             ?? throw new InvalidOperationException("Could not retrieve Riot Account Info");
     }
 
+    public async Task<AccountResponseDto> GetRiotAccountByPuuidAsync(
+        string puuid,
+        CancellationToken ct = default)
+    {
+        return await GetAsync<AccountResponseDto>(
+            _regionalClient,
+            $"/riot/account/v1/accounts/by-puuid/{puuid}",
+            ct,
+            $"Summoner not found.",
+            nameof(Summoner),
+            nameof(Summoner.Puuid),
+            puuid)
+            ?? throw new InvalidOperationException("Could not retrieve Riot Account Info");
+    }
+
     public async Task<SummonerResponseDto> GetRiotSummonerAsync(
         string puuid,
         string? identifier = null,
@@ -44,7 +59,7 @@ public class RiotApiService : IRiotApiService
             _platformClient,
             $"/lol/summoner/v4/summoners/by-puuid/{puuid}",
             ct,
-            $"Summoner {identifier ?? puuid}\" not found.",
+            $"Summoner{(string.IsNullOrEmpty(identifier) ? string.Empty : $" {identifier}")} not found.",
             nameof(Summoner),
             nameof(Summoner.Puuid),
             identifier ?? puuid)
@@ -90,7 +105,7 @@ public class RiotApiService : IRiotApiService
             _regionalClient,
             $"/lol/match/v5/matches/{matchId}",
             ct,
-            "We couldn't find this match details.",
+            "Match not found.",
             nameof(Match),
             nameof(Match.MatchReference.MatchId),
             matchId)

@@ -33,6 +33,13 @@ public class SummonerService : ISummonerService
         return MapSummonerToSummonerDto(existing);
     }
 
+    public async Task<SummonerDto> SyncSummonerByPuuidAsync(string puuid, CancellationToken ct = default)
+    {
+        AccountResponseDto account = await _riotApiService.GetRiotAccountByPuuidAsync(puuid, ct);
+
+        return await SyncSummonerAsync(account.GameName, account.TagLine, ct);
+    }
+
     public async Task<SummonerDto> SyncSummonerAsync(string username, string tag, CancellationToken ct = default)
     {
         AccountResponseDto account = await _riotApiService.GetRiotAccountAsync(username, tag, ct);

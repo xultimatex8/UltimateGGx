@@ -11,4 +11,5 @@ public interface IRiotApiService
     Task<List<string>> GetSummonerMatchesAsync(string puuid, QueueType type, CancellationToken ct = default);
     Task<MatchResponseDto> GetMatchDetailAsync(string matchId, CancellationToken ct = default);
     Task<TimelineResponseDto> GetMatchTimelineAsync(string matchId, CancellationToken ct = default);
+    Task<AccountResponseDto> GetRiotAccountByPuuidAsync(string puuid, CancellationToken ct = default);
 }
