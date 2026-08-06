@@ -1,6 +1,6 @@
 @let p = participant();
 
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 sm:gap-2">
   <div class="relative shrink-0">
     <img
       [src]="championIconUrl(p.champion.riotId)"
@@ -26,12 +26,12 @@
     </span>
   </div>
 
-  <div class="mt-0.5 flex flex-col -space-y-0.5">
+  <div class="mt-1.5 sm:mt-0.5 flex flex-col -space-y-0.5">
     <app-summoner-spell [spell]="p.summonerSpells[0]" [ddragonVersion]="ddragonVersion()" [size]="spellSize()" />
     <app-summoner-spell [spell]="p.summonerSpells[1]" [ddragonVersion]="ddragonVersion()" [size]="spellSize()" />
   </div>
 
-  <div class="mt-px -ml-1 flex flex-col -space-y-0.5">
+  <div class="mt-1.5 sm:mt-px -ml-1 flex flex-col -space-y-0.5">
     <app-rune [rune]="p.primaryRune" [size]="primaryRuneSize()" />
     <app-rune [rune]="p.secondaryTree" [size]="secondaryRuneSize()" />
   </div>
@@ -40,7 +40,7 @@
     <a
       [routerLink]="['/summoner', p.summonerName, p.summonerTag]"
       (click)="$event.stopPropagation()"
-      class="truncate hover:underline"
+      class="ml-1 sm:ml-0 truncate hover:underline"
       [class]="nameSize()"
       [class.text-accent]="isHighlighted()"
       [class.font-semibold]="isHighlighted()"
@@ -49,7 +49,7 @@
       {{ p.summonerName }}
     </a>
   } @else {
-    <span class="truncate font-semibold text-text-primary" [class]="nameSize()" [title]="p.summonerName">
+    <span class="ml-1 sm:ml-0 truncate font-semibold text-text-primary" [class]="nameSize()" [title]="p.summonerName">
       {{ p.summonerName }}
     </span>
   }
