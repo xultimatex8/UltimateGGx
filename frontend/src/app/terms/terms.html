@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-background text-text-primary">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-xl font-bold text-text-primary tracking-tight">
+        Terms &amp; Conditions
+      </h1>
+      <p class="text-text-muted text-xs mt-1">
+        Last updated: {{ lastUpdated }}
+      </p>
+    </div>
+
+    <nav class="bg-surface-alt border border-dashed border-border-alt rounded p-5 mb-8">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-text-muted mb-3">
+        Jump to section
+      </h2>
+      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+        @for (section of sections; track section.id) {
+          <li>
+            <a
+              href=""
+              (click)="scrollTo($event, section.id)"
+              class="text-text-secondary hover:text-accent text-xs transition"
+            >
+              {{ section.title }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="bg-surface border border-border rounded p-6 sm:p-8 space-y-8">
+      @for (section of sections; track section.id) {
+        <section [id]="section.id">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-1 h-5 bg-accent rounded-sm"></span>
+            <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+              {{ section.title }}
+            </h2>
+          </div>
+
+          <div class="space-y-3">
+            @for (paragraph of section.paragraphs; track paragraph) {
+              <p class="text-text-secondary text-sm leading-relaxed">
+                {{ paragraph }}
+              </p>
+            }
+
+            @if (section.id === 'data-privacy') {
+              <p class="text-text-secondary text-sm leading-relaxed">
+                If you want data associated with your summoner name removed from the cache, see
+                <a href="" (click)="scrollTo($event, 'contact')" class="text-accent hover:underline">Contact</a> below.
+              </p>
+            }
+
+            @if (section.id === 'contact') {
+              <ul class="space-y-3 mt-1">
+                <li class="text-sm">
+                  <span class="text-text-primary font-medium">Data removal / privacy requests:</span>
+                  <a
+                    [href]="'mailto:' + privacyEmail"
+                    class="text-accent hover:underline ml-1"
+                  >
+                    {{ privacyEmail }}
+                  </a>
+                  <p class="text-text-muted text-xs mt-1">
+                    Use this for anything related to your data being cached by UltimateGGx (e.g. asking for it to be removed).
+                  </p>
+                </li>
+                <li class="text-sm">
+                  <span class="text-text-primary font-medium">Bugs and general feedback:</span>
+                  <a
+                    href="https://github.com/xultimatex8/UltimateGGx/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-accent hover:underline ml-1"
+                  >
+                    GitHub Issues
+                  </a>
+                </li>
+                <li class="text-sm text-text-muted">
+                  The Portfolio link in the footer is unrelated to project support — it's there for people interested in the developer's work, not for contacting the project.
+                </li>
+              </ul>
+            }
+          </div>
+        </section>
+      }
+    </div>
+
+    <p class="text-text-disabled text-xs mt-6 text-center sm:text-start">
+      By using UltimateGGx, you acknowledge that you have read and understood these terms.
+    </p>
+  </div>
+</div>
