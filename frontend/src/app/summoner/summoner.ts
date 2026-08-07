@@ -3,12 +3,13 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/internal/Observable';
 import { SummonerDto } from './summoner.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Summoner {
   private router = inject(Router);
   private http = inject(HttpClient);
-  private baseUrl = '/api/summoners';
+  private baseUrl = `${environment.apiUrl}/api/summoners`;
 
   navigateToSummoner(username: string, tag: string) {
     this.router.navigate(['/summoner', username, tag]);
