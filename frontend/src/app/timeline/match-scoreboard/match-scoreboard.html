@@ -1,5 +1,5 @@
 @if (scoreboard()) {
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
     @for (team of [
       {
         label: 'Blue Team',
@@ -27,24 +27,24 @@
         </div>
 
         <div
-          class="flex items-center justify-between border-b border-border px-4 py-2.5 pl-5"
+          class="flex items-center justify-between border-b border-border px-3 py-2 pl-4 sm:px-4 sm:py-2.5 sm:pl-5"
           [class]="team.bg">
             <h3
-              class="text-xs font-bold uppercase tracking-wide"
+              class="text-[11px] sm:text-xs font-bold uppercase tracking-wide"
               [class]="team.accent">
               {{ team.label }}
             </h3>
         </div>
 
-        <div class="p-3">
-          <table class="w-full text-xs">
+        <div class="p-2 sm:p-3 overflow-x-auto">
+          <table class="w-full min-w-120 text-[11px] sm:text-xs overflow-y-hidden">
             <thead>
               <tr class="text-left text-text-disabled border-b border-border/20">
-                <th class="pb-2 font-medium">Player</th>
-                <th class="pb-2 font-medium text-center w-16">KDA</th>
-                <th class="pb-2 font-medium text-center w-12">CS</th>
-                <th class="pb-2 font-medium text-center w-16">Gold</th>
-                <th class="pb-2 font-medium text-center">Items</th>
+                <th class="pb-1.5 sm:pb-2 font-medium">Player</th>
+                <th class="pb-1.5 sm:pb-2 font-medium text-center w-16 lg:w-12">KDA</th>
+                <th class="pb-1.5 sm:pb-2 font-medium text-center w-12 lg:w-10">CS</th>
+                <th class="pb-1.5 sm:pb-2 font-medium text-center w-16 lg:w-12">Gold</th>
+                <th class="pb-1.5 sm:pb-2 font-medium text-center">Items</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border/10">
@@ -52,7 +52,7 @@
                 <tr
                   class="transition-colors"
                   [class]="team.hover">
-                  <td class="py-2">
+                  <td class="w-40 sm:w-55 md:w-65 lg:w-55 py-1.5 sm:py-2">
                     <app-participant-identity
                       [participant]="p"
                       [ddragonVersion]="ddragonVersion()" />
@@ -75,7 +75,7 @@
                       {{ p.totalGold | number }}
                     </div>
                   </td>
-                  <td class="text-center">
+                  <td class="text-center w-40 md:w-68 lg:w-55 xl:w-60">
                     <app-item-slots
                       [items]="p.items"
                       [ddragonVersion]="ddragonVersion()" />
@@ -89,7 +89,7 @@
     }
   </div>
 } @else {
-  <div class="rounded-lg border border-dashed border-border-alt bg-surface-alt p-10 text-center">
+  <div class="rounded-lg border border-dashed border-border-alt bg-surface-alt p-6 sm:p-10 text-center">
     <p class="text-sm font-medium text-text-secondary">
       No event selected
     </p>

@@ -7,8 +7,8 @@
   </div>
 } @else if (error()) {
   <div class="min-h-[calc(100vh-14rem)] bg-background text-text-primary flex items-center">
-    <div class="max-w-5xl w-full mx-auto px-6 py-10">
-      <div class="min-h-[55vh] bg-surface border border-border rounded p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+    <div class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div class="min-h-[55vh] bg-surface border border-border rounded p-6 sm:p-8 lg:p-12 flex flex-col items-center justify-center text-center">
         <div class="flex justify-center items-center gap-2 mb-6">
           <span class="w-1 h-5 bg-accent rounded-sm"></span>
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
@@ -16,7 +16,7 @@
           </h2>
         </div>
 
-        <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-text-primary mb-4">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-text-primary mb-4">
           Couldn't load match
         </h1>
 
@@ -44,12 +44,12 @@
     </div>
   </div>
 } @else {
-  <div class="min-h-screen w-full bg-background px-8 py-8">
-    <div class="grid grid-cols-[minmax(0,1fr)_360px] items-start gap-6">
-      <main class="min-w-0 space-y-6">
-        <section class="rounded-xl border border-border bg-hero p-4">
-          <div class="grid grid-cols-[320px_minmax(0,1fr)] items-start gap-5">
-            <div class="rounded-lg border border-border bg-surface p-3">
+  <div class="min-h-screen w-full bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] items-start gap-4 lg:gap-3">
+      <main class="min-w-0 space-y-4 lg:space-y-3">
+        <section class="rounded-xl border border-border bg-hero p-3 sm:p-3">
+          <div class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] items-start gap-4 lg:gap-3">
+            <div class="w-full lg:w-60 xl:w-80 rounded-lg border border-border bg-surface p-3">
               <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-text-primary">
                   Summoner's Rift
@@ -65,11 +65,11 @@
               </div>
 
               @if (loadingScoreboard()) {
-                <div class="flex aspect-square w-full animate-pulse items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                <div class="flex aspect-square w-full max-w-xs mx-auto lg:max-w-none animate-pulse items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
                   <span class="text-xs text-text-disabled">Loading map...</span>
                 </div>
               } @else {
-                <div class="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                <div class="flex aspect-square w-full max-w-xs mx-auto lg:max-w-none items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
                   <div class="relative h-full w-full">
                     <img
                       [src]="DataDragonUrlUtil.summonersRiftMapImage(ddragonVersion)"
@@ -98,7 +98,7 @@
             </div>
 
             @if (loadingScoreboard()) {
-              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-5">
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -119,18 +119,18 @@
                 </div>
               </div>
             } @else if (selectedEvent(); as event) {
-              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-5">
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
-                  <div class="flex items-center justify-between">
+                  <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
                       Selected Event
                     </span>
-                    <span class="rounded bg-surface-alt px-3 py-1 font-mono text-xs text-text-secondary">
+                    <span class="shrink-0 rounded bg-surface-alt px-3 py-1 font-mono text-xs text-text-secondary">
                       {{ FormatDurationUtil.formatTimestamp(event.timestamp) }}
                     </span>
                   </div>
 
-                  <h2 class="mt-2 text-xl font-bold text-text-primary">
+                  <h2 class="mt-2 text-lg sm:text-xl font-bold text-text-primary">
                     {{ getEventTitle(event) }}
                   </h2>
 
@@ -168,7 +168,7 @@
                           </div>
 
                           @if (event.assistingParticipants.length) {
-                            <div class="flex items-center gap-1.5 pt-1 border-t border-border/50 text-xs">
+                            <div class="flex items-center gap-1.5 pt-1 border-t border-border/50 text-xs flex-wrap">
                               <span class="text-text-disabled">Assisted by:</span>
                               <div class="flex items-center gap-1.5 flex-wrap">
                                 @for (assistId of event.assistingParticipants; track assistId) {
@@ -306,7 +306,7 @@
                 </div>
               </div>
             } @else {
-              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-5">
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -317,7 +317,7 @@
                     </span>
                   </div>
 
-                  <h2 class="mt-2 text-xl font-bold text-text-primary">
+                  <h2 class="mt-2 text-lg sm:text-xl font-bold text-text-primary">
                     Select an Event
                   </h2>
                   
@@ -331,8 +331,8 @@
         </section>
 
         <section class="rounded-xl border border-border bg-hero">
-          <div class="rounded-t-xl flex items-center justify-between border-b border-border bg-surface px-4 py-3">
-            <div>
+          <div class="rounded-t-xl flex items-center justify-between border-b border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3 gap-2">
+            <div class="min-w-0">
               <h2 class="text-sm font-semibold text-text-primary">
                 Scoreboard
               </h2>
@@ -343,17 +343,17 @@
             </div>
 
             @if (loadingScoreboard()) {
-              <span class="inline-block h-6.5 w-14 animate-pulse rounded bg-surface-alt"></span>
+              <span class="inline-block h-6.5 w-14 shrink-0 animate-pulse rounded bg-surface-alt"></span>
             } @else if (scoreboard()) {
-                <span class="rounded bg-surface-alt px-2 py-1 font-mono text-xs text-text-secondary">
+                <span class="shrink-0 rounded bg-surface-alt px-2 py-1 font-mono text-xs text-text-secondary">
                 {{ FormatDurationUtil.formatTimestamp(scoreboard()!.timestamp) }}
               </span>
             }
           </div>
 
           @if (loadingScoreboard()) {
-            <div class="rounded-b-xl bg-surface p-4">
-              <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-b-xl bg-surface p-3 sm:p-4">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                 @for (side of [1, 2]; track side) {
                   <div class="relative overflow-hidden rounded-lg rounded-tr-none border border-border bg-surface">
                     <div
@@ -362,18 +362,18 @@
                     </div>
 
                     <div
-                      class="flex items-center justify-between border-b border-border px-4 py-2.5 pl-5"
+                      class="flex items-center justify-between border-b border-border px-3 py-2 pl-4 sm:px-4 sm:py-2.5 sm:pl-5"
                       [class]="side === 1 ? 'bg-blue-500/5' : 'bg-red-500/5'">
                       <div class="h-3 w-20 animate-pulse rounded bg-surface-alt"></div>
                     </div>
 
-                    <div class="h-68.5 p-3">
-                      <table class="w-full text-xs">
+                    <div class="p-2 sm:p-3 overflow-x-auto">
+                      <table class="w-full min-w-105 sm:min-w-0 text-[11px] sm:text-xs">
                         <thead>
                           <tr class="text-left text-text-disabled border-b border-border/20">
                             <th class="pb-2 font-medium">Player</th>
                             <th class="pb-2 font-medium text-center w-16">KDA</th>
-                            <th class="pb-2 font-medium text-center w-12">CS</th>
+                            <th class="hidden sm:table-cell pb-2 font-medium text-center w-12">CS</th>
                             <th class="pb-2 font-medium text-center w-16">Gold</th>
                             <th class="pb-2 font-medium text-center">Items</th>
                           </tr>
@@ -381,7 +381,7 @@
                         <tbody class="divide-y divide-border/10">
                           @for (row of [1, 2, 3, 4, 5]; track row) {
                             <tr>
-                              <td class="py-2">
+                              <td class="py-3">
                                 <div class="flex items-center gap-2">
                                   <div class="h-6 w-6 shrink-0 animate-pulse rounded-full bg-surface-alt"></div>
                                   <div class="h-3 w-16 animate-pulse rounded bg-surface-alt"></div>
@@ -390,7 +390,7 @@
                               <td class="text-center">
                                 <div class="mx-auto h-3 w-10 animate-pulse rounded bg-surface-alt"></div>
                               </td>
-                              <td class="text-center">
+                              <td class="hidden sm:table-cell text-center">
                                 <div class="mx-auto h-3 w-6 animate-pulse rounded bg-surface-alt"></div>
                               </td>
                               <td class="text-center">
@@ -426,7 +426,7 @@
 
       <aside class="relative">
         <div class="overflow-hidden rounded-xl border border-border bg-hero">
-          <div class="border-b border-border bg-surface px-4 py-3">
+          <div class="border-b border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3">
             <h2 class="text-sm font-semibold text-text-primary">
               Match Timeline
             </h2>
@@ -436,7 +436,7 @@
               Loading timeline...
             </div>
           } @else {
-            <div class="h-199 overflow-y-auto p-3">
+            <div class="h-105 sm:h-130 lg:h-179 xl:h-199 overflow-y-auto p-3">
               @for (event of timeline()?.events ?? []; track event.timestamp; let isLast = $last) {
                 <div class="relative flex gap-3">
                   <div class="flex shrink-0 flex-col items-center">
@@ -448,7 +448,7 @@
 
                   <button
                     type="button"
-                    (click)="selectEvent(event)"
+                    (click)="selectEvent(event); ScrollUtil.scrollTo(null, 'selected-event', 120)"
                     class="mb-3 w-full rounded-lg border border-border bg-surface p-3 text-left transition hover:bg-surface-alt disabled:opacity-60"
                     [class.cursor-pointer]="selectedTimestamp() !== event.timestamp && !loadingScoreboard()"
                     [class.cursor-auto]="loadingScoreboard() && selectedTimestamp() !== event.timestamp"
@@ -457,11 +457,11 @@
                     [class.border-accent]="selectedTimestamp() === event.timestamp"
                     [class.bg-surface-alt]="selectedTimestamp() === event.timestamp">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-2">
                       <div class="font-mono text-[11px] text-text-disabled">
                         {{ FormatDurationUtil.formatTimestamp(event.timestamp) }}
                       </div>
-                      <span class="text-[10px] uppercase tracking-wide text-accent font-semibold">
+                      <span class="shrink-0 text-[10px] uppercase tracking-wide text-accent font-semibold">
                         {{ getEventTitle(event) }}
                       </span>
                     </div>
