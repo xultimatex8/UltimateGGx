@@ -15,6 +15,7 @@ import { ParticipantsUtil } from '../../../shared/utils/participants.util';
 import { ItemSlots } from '../../../shared/item-slots/item-slots';
 import { ParticipantIdentity } from '../../../shared/participant-identity/participant-identity';
 import { HttpErrorResponse } from '@angular/common/http';
+import { delay } from 'rxjs';
 
 @Component({
   selector: 'app-match-history',
@@ -148,12 +149,17 @@ export class MatchHistory {
   }
 
   loadMatches(): void {
+    this.loading.set(true);
+    
     this.matchService
       .getSummonerMatches(
         this.puuid(),
         this.queueType(),
         this.page(),
         this.pageSize
+      )
+      .pipe(
+        delay(600)
       )
       .subscribe({
         next: (result) => {
@@ -172,6 +178,7 @@ export class MatchHistory {
   changeQueue(type: QueueType) {
     this.page.set(1);
     this.queueType.set(type);
+    this.matches.set([]);
   }
 
   nextPage() {
