@@ -24,7 +24,8 @@ export class Terms {
       title: '1. About this project',
       paragraphs: [
         'UltimateGGx is an independent, fan-made project for exploring and analyzing League of Legends match data. It is not an official Riot Games product and is not affiliated with, endorsed by, or sponsored by Riot Games, Inc.',
-        'The project is provided free of charge, for informational and educational purposes.',
+        'UltimateGGx was created under Riot Games\u2019 \"Legal Jibber Jabber\" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.',
+        'The project is provided free of charge, for informational and educational purposes. UltimateGGx does not charge for access and does not use paywalled content. Any future monetization would only be introduced in compliance with Riot Games\u2019 API Terms and with Riot\u2019s prior written approval.',
         'UltimateGGx depends on Riot Games APIs and may be temporarily unavailable due to maintenance, Riot API outages, rate limits, or other technical issues.',
       ],
     },
@@ -53,6 +54,7 @@ export class Terms {
       paragraphs: [
         'UltimateGGx only stores publicly available match and summoner data obtained through the Riot Games API (e.g. summoner names, ranks, match history, timelines). No passwords, payment information, or Riot account credentials are ever collected or stored.',
         'Match and player account data is cached to improve performance and reduce unnecessary requests to the Riot Games API. Cached data is refreshed on request and may be removed upon request where applicable.',
+        'In compliance with GDPR-aligned Riot Games policies, if Riot Games notifies us that a player has requested deletion of their data, the corresponding cached data associated with that player will be deleted from our systems.',
       ],
     },
     {
