@@ -1,8 +1,16 @@
 <div class="min-h-screen bg-background text-text-primary">
   <div class="max-w-5xl mx-auto px-3 sm:px-6 py-10">
     @if (loading()) {
-      <div class="flex items-center justify-center py-24">
-        <p class="text-text-secondary text-sm">Loading summoner…</p>
+      <div class="flex min-h-[50vh] w-full items-center justify-center">
+        <div class="text-center">
+          <div
+            class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-accent border-t-transparent">
+          </div>
+
+          <p class="text-sm text-text-secondary">
+            Loading summoner...
+          </p>
+        </div>
       </div>
     } @else if (error()) {
       <div class="bg-surface border border-border rounded p-8 text-center">

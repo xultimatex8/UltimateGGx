@@ -47,7 +47,7 @@
   <div class="min-h-screen w-full bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-6">
     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] items-start gap-4 lg:gap-3">
       <main class="min-w-0 space-y-4 lg:space-y-3">
-        <section class="rounded-xl border border-border bg-hero p-3 sm:p-3">
+        <section id="map" class="rounded-xl border border-border bg-hero p-3 sm:p-3">
           <div class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] items-start gap-4 lg:gap-3">
             <div class="w-full lg:w-60 xl:w-80 rounded-lg border border-border bg-surface p-3">
               <div class="mb-3 flex items-center justify-between">
@@ -98,7 +98,7 @@
             </div>
 
             @if (loadingScoreboard()) {
-              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -119,7 +119,7 @@
                 </div>
               </div>
             } @else if (selectedEvent(); as event) {
-              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -306,7 +306,7 @@
                 </div>
               </div>
             } @else {
-              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+              <div class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
                 <div>
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -448,7 +448,7 @@
 
                   <button
                     type="button"
-                    (click)="selectEvent(event); ScrollUtil.scrollTo(null, 'selected-event', 120)"
+                    (click)="selectEvent(event); ScrollUtil.scrollTo(null, 'map', 120)"
                     class="mb-3 w-full rounded-lg border border-border bg-surface p-3 text-left transition hover:bg-surface-alt disabled:opacity-60"
                     [class.cursor-pointer]="selectedTimestamp() !== event.timestamp && !loadingScoreboard()"
                     [class.cursor-auto]="loadingScoreboard() && selectedTimestamp() !== event.timestamp"

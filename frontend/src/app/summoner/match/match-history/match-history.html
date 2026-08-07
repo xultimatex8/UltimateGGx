@@ -42,7 +42,16 @@
   </div>
 }
 
-@if (matches().length === 0) {
+@if (loading()) {
+  <div class="min-h-25 flex flex-col items-center justify-center py-7 gap-3">
+    <span
+      class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent">
+    </span>
+      <p class="text-sm text-text-secondary">
+        Loading matches...
+      </p>
+  </div>
+} @else if (matches().length === 0) {
   <div class="bg-surface-alt border border-dashed border-border-alt rounded-lg p-10 text-center">
     <p class="text-text-secondary text-sm font-medium mb-1">
       No matches found
