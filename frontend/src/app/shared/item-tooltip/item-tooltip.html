@@ -1,0 +1,33 @@
+<div class="w-64 rounded-lg border border-border bg-surface p-3 shadow-lg text-left">
+  <p class="text-sm font-semibold text-text-primary mb-1">
+    {{ item().name }}
+  </p>
+
+  <p class="text-xs text-text-secondary leading-relaxed whitespace-pre-line mb-2">
+    {{ item().description }}
+  </p>
+
+  @if (stats().length) {
+    <div class="border-t border-border pt-2 mb-2 space-y-0.5">
+      @for (stat of stats(); track stat.label) {
+        <p class="text-[11px] text-text-muted flex justify-between">
+          <span>{{ stat.label }}</span>
+          <span class="text-text-primary font-medium">
+            {{ stat.value }}
+          </span>
+        </p>
+      }
+    </div>
+  }
+
+  <div class="border-t border-border pt-2 flex justify-between text-[11px]">
+    <span class="text-success-border">
+      Buy: {{ item().buyPrice }}
+    </span>
+
+    <span class="text-text-muted">
+      Sell: {{ item().sellPrice }}
+    </span>
+  </div>
+
+</div>

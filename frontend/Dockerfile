@@ -5,7 +5,7 @@ COPY package*.json .
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build -- --configuration=docker
 
 FROM nginx:alpine AS final
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html

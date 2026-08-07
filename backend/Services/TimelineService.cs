@@ -132,6 +132,7 @@ public class TimelineService : ITimelineService
             .Include(mr => mr.Match!)
                 .ThenInclude(m => m.Events)
                     .ThenInclude(e => e.Team)
+            .AsSplitQuery()
             .FirstAsync(mr => mr.MatchId == matchId, ct);
 
         Match match = reference.Match
@@ -184,6 +185,7 @@ public class TimelineService : ITimelineService
             .Include(mr => mr.Match!)
                 .ThenInclude(m => m.Events)
                     .ThenInclude(e => e.AssistingParticipants)
+            .AsSplitQuery()
             .FirstAsync(mr => mr.MatchId == matchId, ct);
 
         Match match = reference.Match
