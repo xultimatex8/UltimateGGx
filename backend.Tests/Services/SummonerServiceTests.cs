@@ -117,19 +117,31 @@ public class SummonerServiceTests
     }
 
     [Fact]
-    public async Task SyncSummonerAsync_WithUnknownQueueType_ThrowsArgumentOutOfRangeException()
+    public async Task SyncSummonerAsync_WithUnknownQueueType_DoesNotAddQueue()
     {
         using var db = CreateInMemoryDb();
+
         var riotMock = BuildRiotApiMock(queues:
         [
-            new() { QueueType = "RANKED_TFT_TURBO", Tier = "GOLD", Rank = "II", LeaguePoints = 0, Wins = 0, Losses = 0 }
+            new()
+            {
+                QueueType = "RANKED_TFT_TURBO",
+                Tier = "GOLD",
+                Rank = "II",
+                LeaguePoints = 0,
+                Wins = 0,
+                Losses = 0
+            }
         ]);
+
         var service = new SummonerService(db, riotMock.Object);
 
-        Func<Task> act = async () => await service.SyncSummonerAsync("Faker", "KR1");
+        var result = await service.SyncSummonerAsync("Faker", "KR1");
 
-        await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
+        result.Should().NotBeNull();
+        result!.Queues.Should().BeEmpty();
     }
+
 
     [Theory]
     [InlineData("RANKED_SOLO_5x5", QueueType.RANKED_SOLO)]
