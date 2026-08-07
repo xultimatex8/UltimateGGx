@@ -1,17 +1,22 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { ItemDto } from './item.model';
 import { ITEM_STAT_LABELS } from './item-stat-labels.const';
 import { DataDragonUrlUtil } from '../utils/data-dragon-url.utils';
+import { Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal, PortalModule } from '@angular/cdk/portal';
+import { ItemTooltip } from '../item-tooltip/item-tooltip';
 
 @Component({
   selector: 'app-item',
-  imports: [],
+  imports: [OverlayModule, PortalModule],
   templateUrl: './item.html',
 })
 export class Item {
   item = input<ItemDto | null>(null);
   ddragonVersion = input.required<string>();
   size = input<string>('w-6 h-6');
+  private overlay = inject(Overlay);
+  private overlayRef?: OverlayRef;
 
   protected iconUrl = computed(() => {
     const item = this.item();
@@ -27,6 +32,40 @@ export class Item {
       value: this.formatStatValue(key, value),
     }));
   });
+
+  showTooltip(element: HTMLElement) {
+    const item = this.item();
+    if (!item || this.overlayRef) return;
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(element)
+        .withPositions([
+          {
+            originX: 'center',
+            originY: 'top',
+            overlayX: 'center',
+            overlayY: 'bottom',
+            offsetY: -8,
+          }
+        ]),
+
+      scrollStrategy: this.overlay.scrollStrategies.reposition(),
+    });
+
+    const portal = new ComponentPortal(ItemTooltip);
+
+    const component = this.overlayRef.attach(portal);
+
+    component.setInput('item', item);
+    component.setInput('stats', this.statEntries());
+  }
+
+  hideTooltip() {
+    this.overlayRef?.dispose();
+    this.overlayRef = undefined;
+  }
 
   private formatStatValue(statKey: string, value: number): string {
     if (statKey.toLowerCase().includes('percent')) {
