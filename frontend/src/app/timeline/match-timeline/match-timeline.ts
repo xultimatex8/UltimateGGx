@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { afterNextRender, Component, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DataDragon } from '../../shared/data-dragon/data-dragon';
 import { FormatDurationUtil } from '../../shared/utils/format-duration.util';
@@ -55,6 +55,10 @@ export class MatchTimeline {
       if (this.scoreboard() && !this.initialLoadComplete()) {
         this.initialLoadComplete.set(true);
       }
+    });
+
+    afterNextRender(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth', });
     });
   }
 
