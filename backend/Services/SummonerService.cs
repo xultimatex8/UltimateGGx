@@ -69,30 +69,37 @@ public class SummonerService : ISummonerService
         summoner.Level = summonerInfo.SummonerLevel;
         summoner.ProfileIconId = summonerInfo.ProfileIconId;
 
-        summoner.Queues = [.. queuesInfo.Select(q => new Queue
-        {
-            Type = MapQueueType(q.QueueType),
-            Tier = q.Tier,
-            Rank = q.Rank,
-            Points = q.LeaguePoints,
-            Wins = q.Wins,
-            Losses = q.Losses
-        })];
+        summoner.Queues =
+        [
+            .. queuesInfo
+                .Select(q => new
+                {
+                    Queue = q,
+                    Type = TryMapQueueType(q.QueueType)
+                })
+                .Where(x => x.Type.HasValue)
+                .Select(x => new Queue
+                {
+                    Type = x.Type!.Value,
+                    Tier = x.Queue.Tier,
+                    Rank = x.Queue.Rank,
+                    Points = x.Queue.LeaguePoints,
+                    Wins = x.Queue.Wins,
+                    Losses = x.Queue.Losses
+                })
+        ];
 
         await _db.SaveChangesAsync(ct);
 
         return MapSummonerToSummonerDto(summoner);
     }
 
-    private static QueueType MapQueueType(string queueType) => queueType switch
+    private static QueueType? TryMapQueueType(string queueType) => queueType switch
     {
         "RANKED_SOLO_5x5" => QueueType.RANKED_SOLO,
         "RANKED_FLEX_SR" => QueueType.RANKED_FLEX,
 
-        _ => throw new ArgumentOutOfRangeException(
-            nameof(queueType),
-            queueType,
-            "Unknown queue type.")
+        _ => null
     };
 
     private static SummonerDto MapSummonerToSummonerDto(Summoner summoner)
