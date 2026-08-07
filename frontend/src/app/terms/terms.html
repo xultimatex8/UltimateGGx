@@ -18,7 +18,7 @@
           <li>
             <a
               href=""
-              (click)="scrollTo($event, section.id)"
+              (click)="ScrollUtil.scrollTo($event, section.id)"
               class="text-text-secondary hover:text-accent text-xs transition"
             >
               {{ section.title }}
@@ -48,7 +48,7 @@
             @if (section.id === 'data-privacy') {
               <p class="text-text-secondary text-sm leading-relaxed">
                 If you want data associated with your summoner name removed from the cache, see
-                <a href="" (click)="scrollTo($event, 'contact')" class="text-accent hover:underline">Contact</a> below.
+                <a href="" (click)="ScrollUtil.scrollTo($event, 'contact')" class="text-accent hover:underline">Contact</a> below.
               </p>
             }
 

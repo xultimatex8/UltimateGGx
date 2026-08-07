@@ -12,7 +12,7 @@ import { ItemsUtil } from '../utils/items.util';
 export class ItemSlots {
   items = input.required<ItemDto[]>();
   ddragonVersion = input.required<string>();
-  size = input('w-6 h-6');
+  size = input('w-5.5 h-5.5 lg:w-6.5 lg:h-6.5');
 
   protected readonly slots = [0, 1, 2, 3, 4, 5];
 

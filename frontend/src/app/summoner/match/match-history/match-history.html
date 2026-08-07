@@ -1,10 +1,10 @@
-<div class="mb-5 flex items-center justify-between">
+<div class="mb-4 sm:mb-5 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
   <div class="inline-flex rounded-lg border border-border bg-surface-alt p-1 space-x-1">
     @for (type of queueTypes; track type) {
       <button
         type="button"
         (click)="changeQueue(type)"
-        class="rounded-md border border-transparent px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer"
+        class="rounded-md border border-transparent p-1 sm:px-2 sm:py-2 md:px-4 text-sm font-medium transition-all duration-150 cursor-pointer"
         [class.border-accent]="queueType() === type"
         [class.bg-surface]="queueType() === type"
         [class.text-accent]="queueType() === type"
@@ -20,12 +20,12 @@
 
   <button
     type="button"
-    class="inline-flex items-center gap-2 rounded border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition hover:border-accent hover:bg-surface-alt cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+    class="inline-flex items-center gap-2 rounded border border-border bg-surface px-3 py-2 md:px-4 text-sm font-medium text-text-primary transition hover:border-accent hover:bg-surface-alt cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
     (click)="fetchMatches()"
     [disabled]="loading()">
 
     @if (loading()) {
-      <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+      <span class="inline-block w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
       Fetching...
     } @else {
       <span class="text-accent">↻</span>
@@ -36,7 +36,7 @@
 
 @if (error()) {
   <div class="mb-5 bg-danger-surface border border-danger-border rounded-lg p-4">
-    <p class="text-danger-border text-sm font-medium">
+    <p class="text-danger-border text-sm font-medium whitespace-normal wrap-break-word">
       {{ error() }}
     </p>
   </div>
@@ -60,22 +60,22 @@
 
       @if (participant) {
         <div
-          class="relative rounded-lg border border-border bg-surface px-4 py-1.5 transition hover:border-accent/50 cursor-pointer"
+          class="relative rounded-lg border border-border bg-surface px-4 py-0.5 sm:py-1.5 transition hover:border-accent/50 cursor-pointer"
           (click)="toggleMatch($index)">
           <div
             class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
             [class]="matchBorderClass(match)">
           </div>
 
-          <div class="flex items-center gap-6 pl-2">
-            <div class="flex flex-col gap-2.5 shrink-0 w-72">
+          <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 pl-2">
+            <div class="flex flex-col items-center sm:items-start gap-2.5 shrink-0 w-72 md:w-64 lg:w-72">
               <div class="flex items-center gap-2">
                 <div class="relative">
                   <img
                     [src]="championIconUrl(participant.champion.riotId)"
                     [alt]="participant.champion.name"
                     [title]="participant.champion.name"
-                    class="w-16 h-16 rounded-lg border border-border-alt object-cover" />
+                    class="w-14 h-14 md:w-15 md:h-15 lg:w-16 lg:h-16 rounded-lg border border-border-alt object-cover" />
 
                   <div 
                     class="absolute -bottom-1 -left-1 bg-surface-alt/90 border border-border rounded-md p-0.5 backdrop-blur-xs"
@@ -83,45 +83,45 @@
                     <img
                       [src]="'/icons/' + ParticipantsUtil.getLaneIcon(participant.lane)"
                       [alt]="ParticipantsUtil.getLaneLabel(participant.lane)"
-                      class="w-5 h-5 opacity-80 brightness-200" />
+                      class="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5 opacity-80 brightness-200" />
                   </div>
 
                   <span
-                    class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-1 py-px text-[11px] font-medium text-text-secondary leading-none">
+                    class="absolute -bottom-1 -right-1 bg-surface border border-border rounded px-0.5 sm:px-1 py-px text-[11px] font-medium text-text-secondary leading-none">
                     {{ participant.championLevel }}
                   </span>
                 </div>
 
-                <div class="flex flex-col -space-y-1">
+                <div class="mt-2 lg:mt-0 flex flex-col -space-y-1">
                   <app-summoner-spell
                     [spell]="participant.summonerSpells[0]"
                     [ddragonVersion]="ddragonVersion"
-                    size="w-6.5 h-6.5" />
+                    size="w-6 h-6 lg:w-6.5 lg:h-6.5" />
 
                   <app-summoner-spell
                     [spell]="participant.summonerSpells[1]"
                     [ddragonVersion]="ddragonVersion"
-                    size="w-6.5 h-6.5" />
+                    size="w-6 h-6 lg:w-6.5 lg:h-6.5" />
                 </div>
 
-                <div class="-ml-0.5 flex flex-col -space-y-0.5">
+                <div class="mt-2 lg:mt-0 -ml-0.5 flex flex-col -space-y-0.5">
                   <app-rune
                     [rune]="participant.primaryRune"
-                    size="w-6 h-6" />
+                    size="w-w-5.5 h-5.5 lg:w-6 lg:h-6" />
 
                   <app-rune
                     [rune]="participant.secondaryTree"
-                    size="w-5 h-5" />
+                    size="w-5.5 h-5.5 lg:w-6 lg:h-6" />
                 </div>
 
                 <div>
                   <div class="flex items-center gap-2">
-                    <p class="font-semibold text-text-primary">
+                    <p class="font-semibold text-text-primary text-[16px] sm:text-[15px] lg:text-base">
                       {{ participant.champion.name }}
                     </p>
 
                     <span
-                      class="px-2 py-0.5 rounded text-[11px] font-semibold"
+                      class="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold"
                       [class]="matchResultClass(match)">
                       {{ matchResult(match) }}
                     </span>
@@ -136,16 +136,10 @@
                       {{ participant.assists }}
                     </p>
 
-                    <p class="text-xs text-text-muted">
+                    <p class="text-[11px] sm:text-xs text-text-muted">
                       {{ participant.minions }} CS
                     </p>
                   </div>
-
-                  @if (match.endOfGameResult !== 'GameComplete') {
-                    <p class="text-[11px] text-warning-border mt-1">
-                      {{ match.endOfGameResult }}
-                    </p>
-                  }
                 </div>
               </div>
 
@@ -154,12 +148,12 @@
                   <app-item
                     [item]="item"
                     [ddragonVersion]="ddragonVersion"
-                    size="w-6.5 h-6.5" />
+                    size="w-8 h-8 sm:w-6.5 sm:h-6.5" />
                 }
               </div>
             </div>
 
-            <div class="flex-1 grid grid-cols-2 gap-6 border-l border-r border-border px-6">
+            <div class="flex-1 hidden md:grid grid-cols-2 gap-6 border-l border-r border-border px-6 ">
               <div>
                 @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 100); track p.puuid) {
                   <div class="flex items-center gap-3 text-xs">
@@ -175,7 +169,7 @@
                       [class.font-semibold]="p.puuid === puuid()"
                       [class.text-text-primary]="p.puuid !== puuid()"
                       [title]="p.summonerName + '#' + p.summonerTag">
-                      {{ p.summonerName }}
+                        {{ p.summonerName }}
                     </a>
                   </div>
                 }
@@ -196,15 +190,15 @@
                       [class.font-semibold]="p.puuid === puuid()"
                       [class.text-text-primary]="p.puuid !== puuid()"
                       [title]="p.summonerName + '#' + p.summonerTag">
-                      {{ p.summonerName }}
+                        {{ p.summonerName }}
                     </a>
                   </div>
                 }
               </div>
             </div>
 
-            <div class="text-right space-y-1 shrink-0 w-28">
-              <p class="text-sm font-medium text-text-primary">
+            <div class="flex sm:flex-col sm:text-right gap-3 sm:gap-0 space-y-1 shrink-0 w-fit sm:w-28">
+              <p class="px-2 sm:px-0 text-xs sm:text-sm font-medium text-text-primary">
                 {{ FormatDurationUtil.formatDuration(match.gameDuration) }}
               </p>
 
@@ -217,7 +211,7 @@
               </p>
             </div>
 
-            <div class="flex flex-col items-center gap-2 shrink-0">
+            <div class="flex flex-col items-center sm:gap-2 shrink-0">
               <button
                 type="button"
                 (click)="$event.stopPropagation(); goToTimeline(match.matchId)"
@@ -244,121 +238,129 @@
               (click)="$event.stopPropagation()">
 
               <div class="p-3 bg-linear-to-b from-blue-500/5 via-blue-500/2 to-transparent rounded-t-lg">
-                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-blue-400">
+                <p class="mb-2 text-[10px] md:text-[11px] font-semibold uppercase tracking-wide text-blue-400">
                   Blue team
                 </p>
 
-                <table class="w-full text-xs">
-                  <thead>
-                    <tr class="text-left text-text-disabled border-b border-border/20">
-                      <th class="pb-1.5 font-medium">Player</th>
-                      <th class="pb-1.5 font-medium text-center w-15">KDA</th>
-                      <th class="pb-1.5 font-medium text-center w-15">CS</th>
-                      <th class="pb-1.5 font-medium text-center w-15">Gold</th>
-                      <th class="pb-1.5 font-medium text-center w-28">Damage</th>
-                      <th class="pb-1.5 font-medium text-center">Items</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-border/10">
-                    @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 100); track p.puuid) {
-                      <tr
-                        class="transition-colors hover:bg-blue-500/3"
-                        [class.bg-blue-500/10]="p.puuid === puuid()">
-                        <td class="py-1.5 w-2xs">
-                          <app-participant-identity
-                            [participant]="p"
-                            [ddragonVersion]="ddragonVersion"
-                            [linkToProfile]="true"
-                            [highlightPuuid]="puuid()" />
-                        </td>
-                        <td class="text-center whitespace-nowrap text-text-secondary">
-                          <span>{{ p.kills }}</span>
-                          <span class="text-text-muted">/</span>
-                          <span>{{ p.deaths }}</span>
-                          <span class="text-text-muted">/</span>
-                          <span>{{ p.assists }}</span>
-                        </td>
-                        <td class="text-center text-text-secondary">{{ p.minions }}</td>
-                        <td class="text-center text-text-secondary">{{ p.gold | number }}</td>
-                        <td class="px-2">
-                          <div class="flex flex-col items-center gap-1">
-                            <span class="text-[11px] text-text-secondary font-medium">
-                              {{ p.damageToChampions | number }}
-                            </span>
-                            <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
-                              <div
-                                class="bg-blue-400 h-full rounded-full transition-all duration-300"
-                                [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                <div class="overflow-x-auto">
+                  <div class="min-w-110">
+                    <table class="w-full text-[11px] md:text-xs">
+                      <thead>
+                        <tr class="text-left text-text-disabled border-b border-border/20">
+                          <th class="pb-1.5 font-medium">Player</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">KDA</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">CS</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">Gold</th>
+                          <th class="pb-1.5 font-medium text-center w-18 md:w-22 lg:w-28">Damage</th>
+                          <th class="pb-1.5 font-medium text-center">Items</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-border/10">
+                        @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 100); track p.puuid) {
+                          <tr
+                            class="transition-colors hover:bg-blue-500/3"
+                            [class.bg-blue-500/10]="p.puuid === puuid()">
+                            <td class="py-1.5 w-38 md:w-45 lg:w-2xs">
+                              <app-participant-identity
+                                [participant]="p"
+                                [ddragonVersion]="ddragonVersion"
+                                [linkToProfile]="true"
+                                [highlightPuuid]="puuid()" />
+                            </td>
+                            <td class="text-[11px] md:text-[11.5px] lg:text-[12px] text-center whitespace-nowrap text-text-secondary">
+                              <span>{{ p.kills }}</span>
+                              <span class="text-text-muted">/</span>
+                              <span>{{ p.deaths }}</span>
+                              <span class="text-text-muted">/</span>
+                              <span>{{ p.assists }}</span>
+                            </td>
+                            <td class="text-center text-text-secondary text-[11px] md:text-[11.5px] lg:text-[12px]">{{ p.minions }}</td>
+                            <td class="text-center text-text-secondary text-[11px] md:text-[11.5px] lg:text-[12px]">{{ p.gold | number }}</td>
+                            <td class="px-2">
+                              <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] sm:text-[10.5px] md:text-[11px] text-text-secondary font-medium">
+                                  {{ p.damageToChampions | number }}
+                                </span>
+                                <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
+                                  <div
+                                    class="bg-blue-400 h-full rounded-full transition-all duration-300"
+                                    [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                            </td>
+                            <td>
+                              <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
 
               <div class="border-t border-border p-3 bg-linear-to-b from-red-500/5 via-red-500/2 to-transparent rounded-b-lg">
-                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-red-400">
+                <p class="mb-2 text-[10px] md:text-[11px] font-semibold uppercase tracking-wide text-red-400">
                   Red team
                 </p>
 
-                <table class="w-full text-xs">
-                  <thead>
-                    <tr class="text-left text-text-disabled border-b border-border/20">
-                      <th class="pb-1.5 font-medium">Player</th>
-                      <th class="pb-1.5 font-medium text-center w-15">KDA</th>
-                      <th class="pb-1.5 font-medium text-center w-15">CS</th>
-                      <th class="pb-1.5 font-medium text-center w-15">Gold</th>
-                      <th class="pb-1.5 font-medium text-center w-28">Damage</th>
-                      <th class="pb-1.5 font-medium text-center">Items</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-border/10">
-                    @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 200); track p.puuid) {
-                      <tr
-                        class="transition-colors hover:bg-red-500/3"
-                        [class.bg-red-500/10]="p.puuid === puuid()">
-                        <td class="py-1.5 w-2xs">
-                          <app-participant-identity
-                            [participant]="p"
-                            [ddragonVersion]="ddragonVersion"
-                            [linkToProfile]="true"
-                            [highlightPuuid]="puuid()" />
-                        </td>
-                        <td class="text-center whitespace-nowrap text-text-secondary">
-                          <span>{{ p.kills }}</span>
-                          <span class="text-text-muted">/</span>
-                          <span>{{ p.deaths }}</span>
-                          <span class="text-text-muted">/</span>
-                          <span>{{ p.assists }}</span>
-                        </td>
-                        <td class="text-center text-text-secondary">{{ p.minions }}</td>
-                        <td class="text-center text-text-secondary">{{ p.gold | number }}</td>
-                        <td class="px-2">
-                          <div class="flex flex-col items-center gap-1">
-                            <span class="text-[11px] text-text-secondary font-medium">
-                              {{ p.damageToChampions | number }}
-                            </span>
-                            <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
-                              <div
-                                class="bg-red-400 h-full rounded-full transition-all duration-300"
-                                [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                <div class="overflow-x-auto">
+                  <div class="min-w-110">
+                    <table class="w-full text-[11px] md:text-xs">
+                      <thead>
+                        <tr class="text-left text-text-disabled border-b border-border/20">
+                          <th class="pb-1.5 font-medium">Player</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">KDA</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">CS</th>
+                          <th class="pb-1.5 font-medium text-center w-10 md:w-12 lg:w-15">Gold</th>
+                          <th class="pb-1.5 font-medium text-center w-18 md:w-22 lg:w-28">Damage</th>
+                          <th class="pb-1.5 font-medium text-center">Items</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-border/10">
+                        @for (p of ParticipantsUtil.getTeamFromFlatList(match.participants, 200); track p.puuid) {
+                          <tr
+                            class="transition-colors hover:bg-red-500/3"
+                            [class.bg-red-500/10]="p.puuid === puuid()">
+                            <td class="py-1.5 w-38 md:w-45 lg:w-2xs">
+                              <app-participant-identity
+                                [participant]="p"
+                                [ddragonVersion]="ddragonVersion"
+                                [linkToProfile]="true"
+                                [highlightPuuid]="puuid()" />
+                            </td>
+                            <td class="text-[11px] md:text-[11.5px] lg:text-[12px] text-center whitespace-nowrap text-text-secondary">
+                              <span>{{ p.kills }}</span>
+                              <span class="text-text-muted">/</span>
+                              <span>{{ p.deaths }}</span>
+                              <span class="text-text-muted">/</span>
+                              <span>{{ p.assists }}</span>
+                            </td>
+                            <td class="text-center text-text-secondary text-[11px] md:text-[11.5px] lg:text-[12px]">{{ p.minions }}</td>
+                            <td class="text-center text-text-secondary text-[11px] md:text-[11.5px] lg:text-[12px]">{{ p.gold | number }}</td>
+                            <td class="px-2">
+                              <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] sm:text-[10.5px] md:text-[11px] text-text-secondary font-medium">
+                                  {{ p.damageToChampions | number }}
+                                </span>
+                                <div class="w-full bg-border-alt rounded-full h-1 overflow-hidden">
+                                  <div
+                                    class="bg-red-400 h-full rounded-full transition-all duration-300"
+                                    [style.width.%]="(p.damageToChampions / maxDamage) * 100">
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                            </td>
+                            <td>
+                              <app-item-slots [items]="p.items" [ddragonVersion]="ddragonVersion" />
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           }

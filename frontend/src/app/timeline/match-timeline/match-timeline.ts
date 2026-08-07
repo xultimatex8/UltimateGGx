@@ -11,6 +11,7 @@ import { LaneType } from '../../shared/enums/lane-type';
 import { MonsterType, MonsterSubType } from '../../shared/enums/monster-type';
 import { DataDragonUrlUtil } from '../../shared/utils/data-dragon-url.utils';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ScrollUtil } from '../../shared/utils/scroll-util';
 
 @Component({
   selector: 'app-match-timeline',
@@ -25,6 +26,7 @@ export class MatchTimeline {
   protected readonly ddragonVersion = this.dataDragon.version();
   protected readonly FormatDurationUtil = FormatDurationUtil;
   protected readonly DataDragonUrlUtil = DataDragonUrlUtil;
+  readonly ScrollUtil = ScrollUtil;
 
   protected readonly MAP_SIZE = 14820;
 

@@ -1,15 +1,15 @@
-<div class="flex justify-center items-center gap-0.5">
+<div class="grid grid-cols-4 place-items-center md:flex justify-center items-center gap-0.5">
   @for (i of slots; track i) {
     @if (mainItems()[i]) {
       <app-item [item]="mainItems()[i]" [ddragonVersion]="ddragonVersion()" [size]="size()" />
     } @else {
-      <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+      <div class="relative bottom-px w-5.5 h-5.5 lg:w-6.5 lg:h-6.5 rounded bg-background/40 border border-border/20 shrink-0"></div>
     }
   }
 
   @if (trinket()) {
     <app-item [item]="trinket()" [ddragonVersion]="ddragonVersion()" [size]="size()" />
   } @else {
-    <div class="relative bottom-px w-6 h-6 rounded bg-background/40 border border-border/20 shrink-0"></div>
+    <div class="relative bottom-px w-5.5 h-5.5 lg:w-6.5 lg:h-6.5 rounded bg-background/40 border border-border/20 shrink-0"></div>
   }
 </div>

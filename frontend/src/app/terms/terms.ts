@@ -1,4 +1,5 @@
 import { afterNextRender, Component } from '@angular/core';
+import { ScrollUtil } from '../shared/utils/scroll-util';
 
 interface TermsSection {
   id: string;
@@ -14,6 +15,8 @@ interface TermsSection {
 export class Terms {
   protected readonly lastUpdated = 'August 6, 2026';
   protected readonly privacyEmail = 'agmdeveloper@outlook.com';
+
+  readonly ScrollUtil = ScrollUtil;
 
   protected readonly sections: TermsSection[] = [
     {
@@ -88,27 +91,5 @@ export class Terms {
     afterNextRender(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth', });
     });
-  }
-
-  scrollTo(event: MouseEvent, id: string) {
-    event.preventDefault();
-
-    const element = document.getElementById(id);
-    if (!element) return;
-
-    const navbarHeight = 64;
-
-    const y =
-      element.getBoundingClientRect().top +
-      window.scrollY -
-      navbarHeight -
-      16;
-
-    window.scrollTo({
-      top: y,
-      behavior: 'smooth',
-    });
-
-    history.replaceState(null, '', `#${id}`);
   }
 }
