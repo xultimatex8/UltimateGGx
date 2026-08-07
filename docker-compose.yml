@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ultimateggx-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build: ./backend
+    container_name: ultimateggx-backend
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+
+      RIOT_API_KEY: ${RIOT_API_KEY}
+      RIOT_RATE_LIMIT_PER_SECOND: ${RIOT_RATE_LIMIT_PER_SECOND}
+      RIOT_RATE_LIMIT_PER_SECOND_WINDOW: ${RIOT_RATE_LIMIT_PER_SECOND_WINDOW}
+      RIOT_RATE_LIMIT_PER_WINDOW: ${RIOT_RATE_LIMIT_PER_WINDOW}
+      RIOT_RATE_LIMIT_WINDOW_MINUTES: ${RIOT_RATE_LIMIT_WINDOW_MINUTES}
+
+      ASPNETCORE_ENVIRONMENT: Production
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/datadragon/version"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    expose:
+      - "8080"
+
+  frontend:
+    build: ./frontend
+    container_name: ultimateggx-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:

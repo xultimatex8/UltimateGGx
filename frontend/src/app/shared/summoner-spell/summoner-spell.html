@@ -1,0 +1,13 @@
+@if (spell(); as s) {
+  <div class="relative group inline-block">
+    <img
+      [src]="iconUrl()"
+      [alt]="s.name"
+      [title]="s.name"
+      [class]="size()"
+      class="rounded border border-border-alt" 
+    />
+  </div>
+} @else {
+  <div [class]="size()" class="rounded border border-dashed border-border-alt bg-surface-alt"></div>
+}

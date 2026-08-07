@@ -1,0 +1,657 @@
+@if (!initialLoadComplete()) {
+  <div class="flex min-h-screen w-full items-center justify-center bg-background">
+    <div class="text-center">
+      <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-accent border-t-transparent"></div>
+      <p class="text-sm text-text-secondary">Loading match...</p>
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="min-h-[calc(100vh-14rem)] bg-background text-text-primary flex items-center">
+    <div class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div class="min-h-[55vh] bg-surface border border-border rounded p-6 sm:p-8 lg:p-12 flex flex-col items-center justify-center text-center">
+        <div class="flex justify-center items-center gap-2 mb-6">
+          <span class="w-1 h-5 bg-accent rounded-sm"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+            Error
+          </h2>
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-text-primary mb-4">
+          Couldn't load match
+        </h1>
+
+        <p class="text-text-secondary text-sm leading-relaxed max-w-md">
+          The match data could not be retrieved. It may not exist or is currently unavailable.
+        </p>
+
+        @if (error()) {
+          <div class="mt-5 max-w-md rounded border border-border bg-surface-alt px-4 py-3">
+            <p class="text-xs text-text-muted leading-relaxed">
+              {{ error() }}
+            </p>
+          </div>
+        }
+
+        <div class="flex gap-3 mt-8">
+          <a
+            routerLink="/"
+            class="bg-accent-dark hover:bg-accent text-text-primary text-sm font-medium px-5 py-2.5 rounded transition cursor-pointer"
+          >
+            Go back home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="min-h-screen w-full bg-background px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] items-start gap-4 lg:gap-3">
+      <main class="min-w-0 space-y-4 lg:space-y-3">
+        <section class="rounded-xl border border-border bg-hero p-3 sm:p-3">
+          <div class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] items-start gap-4 lg:gap-3">
+            <div class="w-full lg:w-60 xl:w-80 rounded-lg border border-border bg-surface p-3">
+              <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-text-primary">
+                  Summoner's Rift
+                </h2>
+
+                @if (loadingScoreboard()) {
+                  <span class="inline-block h-5 w-14 animate-pulse rounded bg-surface-alt"></span>
+                } @else if (scoreboard()) {
+                  <span class="rounded bg-surface-alt px-2 py-1 font-mono text-[11px] text-text-secondary">
+                    {{ FormatDurationUtil.formatTimestamp(scoreboard()!.timestamp) }}
+                  </span>
+                }
+              </div>
+
+              @if (loadingScoreboard()) {
+                <div class="flex aspect-square w-full max-w-xs mx-auto lg:max-w-none animate-pulse items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                  <span class="text-xs text-text-disabled">Loading map...</span>
+                </div>
+              } @else {
+                <div class="flex aspect-square w-full max-w-xs mx-auto lg:max-w-none items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-alt">
+                  <div class="relative h-full w-full">
+                    <img
+                      [src]="DataDragonUrlUtil.summonersRiftMapImage(ddragonVersion)"
+                      class="h-full w-full object-cover" />
+
+                    @for (team of getTeams(); track team.teamId) {
+                      @for (participant of team.participants; track participant.participantId) {
+                        <img
+                          [src]="DataDragonUrlUtil.championIcon(ddragonVersion, participant.champion.riotId)"
+                          [alt]="participant.summonerName"
+                          [title]="participant.summonerName"
+                          class="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 object-cover"
+                          [class.border-blue-500]="team.teamId === 100"
+                          [class.border-red-500]="team.teamId === 200"
+                          [style.left.%]="mapX(participant.positionX)"
+                          [style.top.%]="mapY(participant.positionY)" />
+                      }
+                    }
+                  </div>
+                </div>
+              }
+
+              <p class="mt-2 text-[11px] leading-snug text-text-disabled">
+                Player positions may be off by up to 1 min.
+              </p>
+            </div>
+
+            @if (loadingScoreboard()) {
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-accent">
+                      Selected Event
+                    </span>
+                    <span class="inline-block h-6.5 w-14 animate-pulse rounded bg-surface-alt"></span>
+                  </div>
+
+                  <div class="mt-3 h-6 w-48 animate-pulse rounded bg-surface-alt"></div>
+
+                  <div class="mt-4 flex items-center gap-1.5">
+                    <div class="h-6 w-6 animate-pulse rounded-full bg-surface-alt"></div>
+                    <div class="h-3 w-20 animate-pulse rounded bg-surface-alt"></div>
+                    <div class="h-3 w-10 animate-pulse rounded bg-surface-alt"></div>
+                    <div class="h-6 w-6 animate-pulse rounded-full bg-surface-alt"></div>
+                    <div class="h-3 w-20 animate-pulse rounded bg-surface-alt"></div>
+                  </div>
+                </div>
+              </div>
+            } @else if (selectedEvent(); as event) {
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+                <div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-accent">
+                      Selected Event
+                    </span>
+                    <span class="shrink-0 rounded bg-surface-alt px-3 py-1 font-mono text-xs text-text-secondary">
+                      {{ FormatDurationUtil.formatTimestamp(event.timestamp) }}
+                    </span>
+                  </div>
+
+                  <h2 class="mt-2 text-lg sm:text-xl font-bold text-text-primary">
+                    {{ getEventTitle(event) }}
+                  </h2>
+
+                  <div class="mt-3 text-sm text-text-secondary">
+                    @let actor = getParticipantByParticipantId(event.mainParticipantId);
+                    @let victim = getParticipantByParticipantId(event.victimParticipantId);
+
+                    @switch (event.type) {
+                      @case ('CHAMPION_KILL') {
+                        <div class="space-y-3">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-semibold"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>killed</span>
+                            @if (victim?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-semibold"
+                              [class]="getActorColorClass(event.victimParticipantId, event.teamId === 100 ? 200 : 100)">
+                              {{ getActorName(event.victimParticipantId, event.teamId === 100 ? 200 : 100) }}
+                            </span>
+                            
+                            @if (event.bounty || event.shutdownBounty) {
+                              <span class="rounded bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-400 text-xs border border-amber-500/20">
+                                Bounty +{{ (event.bounty ?? 0) + (event.shutdownBounty ?? 0) }}g
+                              </span>
+                            }
+                          </div>
+
+                          @if (event.assistingParticipants.length) {
+                            <div class="flex items-center gap-1.5 pt-1 border-t border-border/50 text-xs flex-wrap">
+                              <span class="text-text-disabled">Assisted by:</span>
+                              <div class="flex items-center gap-1.5 flex-wrap">
+                                @for (assistId of event.assistingParticipants; track assistId) {
+                                  @let assistant = getParticipantByParticipantId(assistId);
+                                  <div class="flex items-center gap-1 rounded bg-surface-alt px-2 py-0.5 border border-border">
+                                    @if (assistant?.champion; as champ) {
+                                      <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-4 w-4 rounded-full object-cover" />
+                                    }
+                                    <span
+                                      class="font-semibold"
+                                      [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                                      {{ getActorName(assistId, event.teamId) }}
+                                    </span>
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @case ('ELITE_MONSTER_KILL') {
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          @if (actor?.champion; as champ) {
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                          }
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
+                          <span>defeated</span>
+                          <span class="font-bold text-text-primary">{{ formatMonster(event) }}</span>
+                        </div>
+                      }
+
+                      @case ('BUILDING_KILL') {
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          @if (actor?.champion; as champ) {
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                          }
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
+                          <span>destroyed</span>
+                          <span class="font-bold text-text-primary">
+                            @if (event.buildingType === 'INHIBITOR_BUILDING') {
+                              the {{ formatLane(event.laneType) }} inhibitor
+                            } @else {
+                              the {{ formatLane(event.laneType) }} {{ formatTower(event.towerType) }}
+                            }
+                          </span>
+                        </div>
+                      }
+
+                      @case ('TURRET_PLATE_DESTROYED') {
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          @if (actor?.champion; as champ) {
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                          }
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
+                          <span>
+                            destroyed a 
+                            @if (event.laneType) {
+                              <span class="font-bold text-text-primary">{{ formatLane(event.laneType) }}</span>
+                            }
+                            turret plate
+                          </span>
+                        </div>
+                      }
+
+                      @case ('ITEM_PURCHASED')
+                      @case ('ITEM_SOLD')
+                      @case ('ITEM_DESTROYED') {
+                        <div class="flex items-center gap-2 flex-wrap">
+                          @if (actor?.champion; as champ) {
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                          }
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
+                          <span>
+                            @switch (event.type) {
+                              @case ('ITEM_PURCHASED') { purchased }
+                              @case ('ITEM_SOLD') { sold }
+                              @case ('ITEM_DESTROYED') { consumed / destroyed }
+                            }
+                          </span>
+                          @if (event.item; as itemData) {
+                            <div class="flex items-center gap-2 rounded border border-border bg-surface-alt px-2.5 py-1">
+                              <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-5 w-5 rounded object-cover" />
+                              <span class="font-bold text-text-primary">{{ itemData.name }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @case ('ITEM_UNDO') {
+                        <div class="flex items-center gap-3 flex-wrap">
+                          @if (actor?.champion; as champ) {
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                          }
+                          <span
+                            class="font-semibold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }}
+                          </span>
+                          <span>undid purchase</span>
+                        </div>
+                      }
+
+                      @case ('GAME_END') {
+                        <div class="flex items-center gap-3 flex-wrap">
+                          <span
+                            class="font-bold"
+                            [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                            {{ getActorName(event.mainParticipantId, event.teamId) }} won the game
+                          </span>
+                        </div>
+                      }
+
+                      @default {
+                        <p>{{ getEventDescription(event) }}</p>
+                      }
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div id="selected-event" class="flex flex-col justify-between rounded-lg border border-border bg-surface p-4 sm:p-5">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-accent">
+                      Selected Event
+                    </span>
+                    <span class="rounded bg-surface-alt px-3 py-1 font-mono text-xs text-text-secondary">
+                      0:00
+                    </span>
+                  </div>
+
+                  <h2 class="mt-2 text-lg sm:text-xl font-bold text-text-primary">
+                    Select an Event
+                  </h2>
+                  
+                  <div class="mt-3 text-sm text-text-secondary">
+                    Select an event on the 'Match Timeline' to see its details.
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="rounded-xl border border-border bg-hero">
+          <div class="rounded-t-xl flex items-center justify-between border-b border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3 gap-2">
+            <div class="min-w-0">
+              <h2 class="text-sm font-semibold text-text-primary">
+                Scoreboard
+              </h2>
+
+              <p class="text-[11px] text-text-disabled">
+                Shows the closest available snapshot, not the exact moment.
+              </p>
+            </div>
+
+            @if (loadingScoreboard()) {
+              <span class="inline-block h-6.5 w-14 shrink-0 animate-pulse rounded bg-surface-alt"></span>
+            } @else if (scoreboard()) {
+                <span class="shrink-0 rounded bg-surface-alt px-2 py-1 font-mono text-xs text-text-secondary">
+                {{ FormatDurationUtil.formatTimestamp(scoreboard()!.timestamp) }}
+              </span>
+            }
+          </div>
+
+          @if (loadingScoreboard()) {
+            <div class="rounded-b-xl bg-surface p-3 sm:p-4">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                @for (side of [1, 2]; track side) {
+                  <div class="relative overflow-hidden rounded-lg rounded-tr-none border border-border bg-surface">
+                    <div
+                      class="rounded-l-xl absolute left-0 top-0 bottom-0 w-1 animate-pulse"
+                      [class]="side === 1 ? 'bg-blue-400/40' : 'bg-red-400/40'">
+                    </div>
+
+                    <div
+                      class="flex items-center justify-between border-b border-border px-3 py-2 pl-4 sm:px-4 sm:py-2.5 sm:pl-5"
+                      [class]="side === 1 ? 'bg-blue-500/5' : 'bg-red-500/5'">
+                      <div class="h-3 w-20 animate-pulse rounded bg-surface-alt"></div>
+                    </div>
+
+                    <div class="p-2 sm:p-3 overflow-x-auto">
+                      <table class="w-full min-w-105 sm:min-w-0 text-[11px] sm:text-xs">
+                        <thead>
+                          <tr class="text-left text-text-disabled border-b border-border/20">
+                            <th class="pb-2 font-medium">Player</th>
+                            <th class="pb-2 font-medium text-center w-16">KDA</th>
+                            <th class="hidden sm:table-cell pb-2 font-medium text-center w-12">CS</th>
+                            <th class="pb-2 font-medium text-center w-16">Gold</th>
+                            <th class="pb-2 font-medium text-center">Items</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border/10">
+                          @for (row of [1, 2, 3, 4, 5]; track row) {
+                            <tr>
+                              <td class="py-3">
+                                <div class="flex items-center gap-2">
+                                  <div class="h-6 w-6 shrink-0 animate-pulse rounded-full bg-surface-alt"></div>
+                                  <div class="h-3 w-16 animate-pulse rounded bg-surface-alt"></div>
+                                </div>
+                              </td>
+                              <td class="text-center">
+                                <div class="mx-auto h-3 w-10 animate-pulse rounded bg-surface-alt"></div>
+                              </td>
+                              <td class="hidden sm:table-cell text-center">
+                                <div class="mx-auto h-3 w-6 animate-pulse rounded bg-surface-alt"></div>
+                              </td>
+                              <td class="text-center">
+                                <div class="mx-auto h-3 w-10 animate-pulse rounded bg-surface-alt"></div>
+                              </td>
+                              <td class="text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                  @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+                                    <div class="h-5 w-5 shrink-0 animate-pulse rounded bg-surface-alt"></div>
+                                  }
+                                </div>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="rounded-b-xl bg-surface">
+              <app-match-scoreboard
+                [scoreboard]="scoreboard()"
+                [selectedEvent]="selectedEvent()"
+                [ddragonVersion]="ddragonVersion">
+              </app-match-scoreboard>
+            </div>
+          }
+        </section>
+      </main>
+
+      <aside class="relative">
+        <div class="overflow-hidden rounded-xl border border-border bg-hero">
+          <div class="border-b border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3">
+            <h2 class="text-sm font-semibold text-text-primary">
+              Match Timeline
+            </h2>
+          </div>
+          @if (loadingTimeline()) {
+            <div class="p-8 text-center text-sm text-text-secondary">
+              Loading timeline...
+            </div>
+          } @else {
+            <div class="h-105 sm:h-130 lg:h-179 xl:h-199 overflow-y-auto p-3">
+              @for (event of timeline()?.events ?? []; track event.timestamp; let isLast = $last) {
+                <div class="relative flex gap-3">
+                  <div class="flex shrink-0 flex-col items-center">
+                    <div class="mt-4 h-2.5 w-2.5 rounded-full bg-accent"></div>
+                    @if (!isLast) {
+                      <div class="my-1 w-px flex-1 bg-border"></div>
+                    }
+                  </div>
+
+                  <button
+                    type="button"
+                    (click)="selectEvent(event); ScrollUtil.scrollTo(null, 'selected-event', 120)"
+                    class="mb-3 w-full rounded-lg border border-border bg-surface p-3 text-left transition hover:bg-surface-alt disabled:opacity-60"
+                    [class.cursor-pointer]="selectedTimestamp() !== event.timestamp && !loadingScoreboard()"
+                    [class.cursor-auto]="loadingScoreboard() && selectedTimestamp() !== event.timestamp"
+                    [class.cursor-auto]="selectedTimestamp() === event.timestamp && !loadingScoreboard()"
+                    [disabled]="selectedTimestamp() === event.timestamp || loadingScoreboard()"
+                    [class.border-accent]="selectedTimestamp() === event.timestamp"
+                    [class.bg-surface-alt]="selectedTimestamp() === event.timestamp">
+
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="font-mono text-[11px] text-text-disabled">
+                        {{ FormatDurationUtil.formatTimestamp(event.timestamp) }}
+                      </div>
+                      <span class="shrink-0 text-[10px] uppercase tracking-wide text-accent font-semibold">
+                        {{ getEventTitle(event) }}
+                      </span>
+                    </div>
+
+                    <div class="mt-2 text-xs text-text-secondary">
+                      @let actor = getParticipantByParticipantId(event.mainParticipantId);
+                      @let victim = getParticipantByParticipantId(event.victimParticipantId);
+
+                      @switch (event.type) {
+                        @case ('CHAMPION_KILL') {
+                          <div class="flex items-center gap-1 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>killed</span>
+                            @if (victim?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.victimParticipantId, event.teamId === 100 ? 200 : 100)">
+                              {{ getActorName(event.victimParticipantId, event.teamId === 100 ? 200 : 100) }}
+                            </span>
+                            
+                            @if (event.bounty || event.shutdownBounty) {
+                              <span class="font-semibold text-amber-400">
+                                (+{{ (event.bounty ?? 0) + (event.shutdownBounty ?? 0) }}g)
+                              </span>
+                            }
+                          </div>
+                        }
+
+                        @case ('ELITE_MONSTER_KILL') {
+                          <div class="flex items-center gap-1 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>defeated</span>
+                            <span class="font-semibold text-text-primary">{{ formatMonster(event) }}</span>
+                          </div>
+                        }
+
+                        @case ('BUILDING_KILL') {
+                          <div class="flex items-center gap-1 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>destroyed</span>
+                            <span class="font-semibold text-text-primary">
+                              @if (event.buildingType === 'INHIBITOR_BUILDING') {
+                                the {{ formatLane(event.laneType) }} inhibitor
+                              } @else {
+                                the {{ formatLane(event.laneType) }} {{ formatTower(event.towerType) }}
+                              }
+                            </span>
+                          </div>
+                        }
+
+                        @case ('TURRET_PLATE_DESTROYED') {
+                          <div class="flex items-center gap-1 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                              <span
+                                class="font-medium"
+                                [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                                {{ getActorName(event.mainParticipantId, event.teamId) }}
+                              </span>
+                            <span>
+                              destroyed a 
+                              @if (event.laneType) {
+                                <span class="font-semibold text-text-primary"
+                                >{{ formatLane(event.laneType) }}</span>
+                              }
+                              turret plate
+                            </span>
+                          </div>
+                        }
+
+                        @case ('ITEM_PURCHASED') {
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>purchased</span>
+                            @if (event.item; as itemData) {
+                              <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <span class="font-medium text-text-primary">{{ itemData.name }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        @case ('ITEM_SOLD') {
+                          <div class="flex items-center gap-2 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>sold</span>
+                            @if (event.item; as itemData) {
+                              <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <span class="font-medium text-text-primary">{{ itemData.name }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        @case ('ITEM_DESTROYED') {
+                          <div class="flex items-center gap-2 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>consumed / destroyed</span>
+                            @if (event.item; as itemData) {
+                              <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <span class="font-medium text-text-primary">{{ itemData.name }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        @case ('ITEM_UNDO') {
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            @if (actor?.champion; as champ) {
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                            }
+                            <span
+                              class="font-medium"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }}
+                            </span>
+                            <span>undid purchase</span>
+                          </div>
+                        }
+
+                        @case ('GAME_END') {
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              class="font-semibold"
+                              [class]="getActorColorClass(event.mainParticipantId, event.teamId)">
+                              {{ getActorName(event.mainParticipantId, event.teamId) }} won the game
+                            </span>
+                          </div>
+                        }
+
+                        @default {
+                          <span>{{ getEventDescription(event) }}</span>
+                        }
+                      }
+                    </div>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </aside>
+    </div>
+  </div>
+}
