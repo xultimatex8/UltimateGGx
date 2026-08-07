@@ -2,11 +2,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ScoreboardDto, TimelineDto } from './timeline.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Timeline {
   private http = inject(HttpClient);
-  private baseUrl = '/api/timelines';
+  private baseUrl = `${environment.apiUrl}/api/timelines`;
 
   getMatchTimeline(matchId: string): Observable<TimelineDto> {
     return this.http.get<TimelineDto>(

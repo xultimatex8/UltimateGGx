@@ -4,11 +4,12 @@ import { Observable } from 'rxjs/internal/Observable';
 import { MatchDto } from './match.model';
 import { PagedResult } from '../../shared/models/paged-result.model';
 import { QueueType } from '../../shared/enums/queue-type';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Match {
   private http = inject(HttpClient);
-  private baseUrl = '/api/matches';
+  private baseUrl = `${environment.apiUrl}/api/matches`;
 
   fetchSummonerMatches(
     puuid: string,
