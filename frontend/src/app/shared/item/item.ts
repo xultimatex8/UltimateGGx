@@ -18,6 +18,11 @@ export class Item {
   private overlay = inject(Overlay);
   private overlayRef?: OverlayRef;
 
+  protected itemName = computed(() => {
+    const item = this.item();
+    return item ? item.name : 'Item';
+  });
+
   protected iconUrl = computed(() => {
     const item = this.item();
     return item ? DataDragonUrlUtil.itemIcon(this.ddragonVersion(), item.key) : null;
