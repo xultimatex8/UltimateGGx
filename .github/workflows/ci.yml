@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  check-cis:
+    name: Check Backend CI and Frontend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CI results
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -e
+
+          workflows=("Backend CI" "Frontend CI")
+
+          for workflow in "${workflows[@]}"; do
+            echo "Checking $workflow..."
+
+            run=$(gh run list \
+              --workflow="$workflow" \
+              --commit="$SHA" \
+              --limit=1 \
+              --json status,conclusion \
+              --jq '.[0]')
+
+            if [ -z "$run" ]; then
+              echo "$workflow was not executed. Skipping."
+              continue
+            fi
+
+            status=$(echo "$run" | jq -r '.status')
+            conclusion=$(echo "$run" | jq -r '.conclusion')
+
+            echo "$workflow: status=$status conclusion=$conclusion"
+
+            if [ "$status" != "completed" ]; then
+              echo "$workflow is still running. Waiting..."
+
+              for i in {1..60}; do
+                sleep 10
+
+                run=$(gh run list \
+                  --workflow="$workflow" \
+                  --commit="$SHA" \
+                  --limit=1 \
+                  --json status,conclusion \
+                  --jq '.[0]')
+
+                status=$(echo "$run" | jq -r '.status')
+                conclusion=$(echo "$run" | jq -r '.conclusion')
+
+                echo "$workflow: status=$status conclusion=$conclusion"
+
+                if [ "$status" = "completed" ]; then
+                  break
+                fi
+              done
+            fi
+
+            if [ "$status" != "completed" ]; then
+              echo "$workflow did not finish in time."
+              exit 1
+            fi
+
+            if [ "$conclusion" = "success" ]; then
+              echo "$workflow passed."
+            elif [ "$conclusion" = "skipped" ] || [ "$conclusion" = "null" ]; then
+              echo "$workflow did not run. Skipping."
+            else
+              echo "$workflow failed."
+              exit 1
+            fi
+          done
+
+          echo "All applicable CIs passed."
