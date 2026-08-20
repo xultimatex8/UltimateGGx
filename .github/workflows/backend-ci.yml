@@ -1,0 +1,69 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths: ['backend/**', 'backend.Tests/**']
+  push:
+    branches: [main]
+    paths: ['backend/**', 'backend.Tests/**']
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: |
+          dotnet restore backend/backend.csproj
+          dotnet restore backend.Tests/backend.Tests.csproj
+
+      - name: Build backend
+        run: dotnet build backend/backend.csproj --no-restore --configuration Release /warnaserror
+
+      - name: Build and run tests
+        run: dotnet test backend.Tests/backend.Tests.csproj --configuration Release --verbosity normal
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check vulnerable NuGet packages
+        run: dotnet list backend/backend.csproj package --vulnerable --include-transitive
+
+  migrate:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Apply migrations to Neon
+        run: dotnet ef database update --project backend/backend.csproj
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.NEON_CONNECTION_STRING }}
