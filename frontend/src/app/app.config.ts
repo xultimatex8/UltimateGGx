@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { routes } from './app.routes';
 import { DataDragon } from './shared/data-dragon/data-dragon';
 import { errorInterceptor } from './interceptors/error/error.interceptor';
+import { initializeAnalytics } from './analytics';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([errorInterceptor])
     ),
     provideAppInitializer(() => {
+      initializeAnalytics();
       const dataDragon = inject(DataDragon);
       return firstValueFrom(dataDragon.load());
     }),
