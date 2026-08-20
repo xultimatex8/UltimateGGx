@@ -7,6 +7,10 @@ on:
     branches: [main]
     paths: ['backend/**', 'backend.Tests/**']
 
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -16,6 +20,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
 
       - name: Restore
         run: |
@@ -27,6 +38,16 @@ jobs:
 
       - name: Build and run tests
         run: dotnet test backend.Tests/backend.Tests.csproj --configuration Release --verbosity normal
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check vulnerable NuGet packages
+        run: dotnet list backend/backend.csproj package --vulnerable --include-transitive
 
   migrate:
     runs-on: ubuntu-latest
