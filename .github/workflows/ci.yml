@@ -18,22 +18,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          set -e
-
-          workflows=("Backend CI" "Frontend CI")
+          workflows=("backend-ci.yml" "frontend-ci.yml")
 
           for workflow in "${workflows[@]}"; do
             echo "Checking $workflow..."
 
+            set +e
             run=$(gh run list \
               --repo "$GITHUB_REPOSITORY" \
               --workflow="$workflow" \
               --commit="$SHA" \
               --limit=1 \
               --json status,conclusion \
-              --jq '.[0]')
+              --jq '.[0]' 2>/dev/null)
+            exit_code=$?
+            set -e
 
-            if [ -z "$run" ]; then
+            if [ $exit_code -ne 0 ] || [ -z "$run" ]; then
               echo "$workflow was not executed. Skipping."
               continue
             fi
@@ -55,7 +56,7 @@ jobs:
                   --commit="$SHA" \
                   --limit=1 \
                   --json status,conclusion \
-                  --jq '.[0]')
+                  --jq '.[0]' 2>/dev/null)
 
                 status=$(echo "$run" | jq -r '.status')
                 conclusion=$(echo "$run" | jq -r '.conclusion')
@@ -75,10 +76,8 @@ jobs:
 
             if [ "$conclusion" = "success" ]; then
               echo "$workflow passed."
-            elif [ "$conclusion" = "skipped" ] || [ "$conclusion" = "null" ]; then
-              echo "$workflow did not run. Skipping."
             else
-              echo "$workflow failed."
+              echo "$workflow failed with conclusion: $conclusion"
               exit 1
             fi
           done
