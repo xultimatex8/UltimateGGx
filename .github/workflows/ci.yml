@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   actions: read
@@ -28,6 +26,7 @@ jobs:
             echo "Checking $workflow..."
 
             run=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
               --workflow="$workflow" \
               --commit="$SHA" \
               --limit=1 \
@@ -51,6 +50,7 @@ jobs:
                 sleep 10
 
                 run=$(gh run list \
+                  --repo "$GITHUB_REPOSITORY" \
                   --workflow="$workflow" \
                   --commit="$SHA" \
                   --limit=1 \
