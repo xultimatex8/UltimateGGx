@@ -2,10 +2,9 @@ name: Frontend CI
 
 on:
   pull_request:
-    paths: ['frontend/**']
   push:
-    branches: [main]
-    paths: ['frontend/**']
+    branches:
+      - main
 
 concurrency:
   group: frontend-ci-${{ github.ref }}
@@ -13,6 +12,7 @@ concurrency:
 
 jobs:
   build-and-test:
+    name: Frontend Build and Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +36,7 @@ jobs:
         working-directory: frontend
 
   dependency-audit:
+    name: Frontend Dependency Audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
