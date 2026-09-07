@@ -12,14 +12,14 @@
   "packageManager": "npm@11.18.0",
   "dependencies": {
     "@angular/cdk": "^21.2.14",
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
+    "@angular/common": "^21.2.19",
+    "@angular/compiler": "^21.2.19",
+    "@angular/core": "^22.1.5",
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "postcss": "^8.5.19",
+    "postcss": "^8.5.28",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.3.3",
     "tslib": "^2.3.0"
