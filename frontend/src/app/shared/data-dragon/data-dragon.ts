@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, retry, tap, timer } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -16,6 +16,8 @@ export class DataDragon {
 
   private readonly _version = signal<string>('');
   readonly version = this._version.asReadonly();
+
+  readonly loaded = computed(() => this._version() !== '');
 
   load(): Observable<DataDragonVersionResponse> {
     return this.http
