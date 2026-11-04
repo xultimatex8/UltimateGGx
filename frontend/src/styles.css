@@ -57,3 +57,35 @@
   --color-warning-surface: var(--warning-surface);
   --color-warning-border: var(--warning-border);
 }
+
+@theme {
+  --animate-banner-in: banner-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-banner-slide: banner-slide 1.6s ease-in-out infinite;
+
+  @keyframes banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes banner-slide {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-banner-in,
+  .animate-banner-slide {
+    animation: none;
+  }
+}
