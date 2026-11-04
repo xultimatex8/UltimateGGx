@@ -117,12 +117,12 @@ docker compose ps
 ```bash
 cd backend
 dotnet restore
+dotnet ef database update
 dotnet watch run
 ```
 
 The API will be available at `http://localhost:5037`.
 
-> Database migrations are applied automatically when the application starts.
 
 #### Start the frontend
 
