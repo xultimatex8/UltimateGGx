@@ -24,7 +24,7 @@ export class Terms {
       title: '1. About this project',
       paragraphs: [
         'UltimateGGx is an independent, fan-made project for exploring and analyzing League of Legends match data. It is not an official Riot Games product and is not affiliated with, endorsed by, or sponsored by Riot Games, Inc.',
-        'UltimateGGx was created under Riot Games\u2019 \"Legal Jibber Jabber\" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.',
+        'UltimateGGx was created under Riot Games\u2019 "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.',
         'The project is provided free of charge, for informational and educational purposes. UltimateGGx does not charge for access and does not use paywalled content. Any future monetization would only be introduced in compliance with Riot Games\u2019 API Terms and with Riot\u2019s prior written approval.',
         'UltimateGGx depends on Riot Games APIs and may be temporarily unavailable due to maintenance, Riot API outages, rate limits, or other technical issues.',
       ],
