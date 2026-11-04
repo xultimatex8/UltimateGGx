@@ -45,11 +45,12 @@ builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<ITimelineService, TimelineService>();
 
 var connectionString =
-    $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
-    $"Port=5432;" +
-    $"Database={Environment.GetEnvironmentVariable("POSTGRES_DB")};" +
-    $"Username={Environment.GetEnvironmentVariable("POSTGRES_USER")};" +
-    $"Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")}";
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? $"Host={Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost"};" +
+       $"Port=5432;" +
+       $"Database={Environment.GetEnvironmentVariable("POSTGRES_DB")};" +
+       $"Username={Environment.GetEnvironmentVariable("POSTGRES_USER")};" +
+       $"Password={Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")}";
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
