@@ -73,7 +73,8 @@
                   <div class="relative h-full w-full">
                     <img
                       [src]="DataDragonUrlUtil.summonersRiftMapImage(ddragonVersion)"
-                      class="h-full w-full object-cover" />
+                      class="h-full w-full object-cover" 
+                      alt="Summoner's Rift" />
 
                     @for (team of getTeams(); track team.teamId) {
                       @for (participant of team.participants; track participant.participantId) {
@@ -143,7 +144,7 @@
                         <div class="space-y-3">
                           <div class="flex items-center gap-1.5 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-semibold"
@@ -152,7 +153,7 @@
                             </span>
                             <span>killed</span>
                             @if (victim?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-semibold"
@@ -175,7 +176,7 @@
                                   @let assistant = getParticipantByParticipantId(assistId);
                                   <div class="flex items-center gap-1 rounded bg-surface-alt px-2 py-0.5 border border-border">
                                     @if (assistant?.champion; as champ) {
-                                      <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-4 w-4 rounded-full object-cover" />
+                                      <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-4 w-4 rounded-full object-cover" />
                                     }
                                     <span
                                       class="font-semibold"
@@ -193,7 +194,7 @@
                       @case ('ELITE_MONSTER_KILL') {
                         <div class="flex items-center gap-1.5 flex-wrap">
                           @if (actor?.champion; as champ) {
-                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
                           <span
                             class="font-semibold"
@@ -208,7 +209,7 @@
                       @case ('BUILDING_KILL') {
                         <div class="flex items-center gap-1.5 flex-wrap">
                           @if (actor?.champion; as champ) {
-                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
                           <span
                             class="font-semibold"
@@ -229,7 +230,7 @@
                       @case ('TURRET_PLATE_DESTROYED') {
                         <div class="flex items-center gap-1.5 flex-wrap">
                           @if (actor?.champion; as champ) {
-                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
                           <span
                             class="font-semibold"
@@ -251,7 +252,7 @@
                       @case ('ITEM_DESTROYED') {
                         <div class="flex items-center gap-2 flex-wrap">
                           @if (actor?.champion; as champ) {
-                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
                           <span
                             class="font-semibold"
@@ -267,7 +268,7 @@
                           </span>
                           @if (event.item; as itemData) {
                             <div class="flex items-center gap-2 rounded border border-border bg-surface-alt px-2.5 py-1">
-                              <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-5 w-5 rounded object-cover" />
+                              <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" [alt]="itemData.name" class="h-5 w-5 rounded object-cover" />
                               <span class="font-bold text-text-primary">{{ itemData.name }}</span>
                             </div>
                           }
@@ -277,7 +278,7 @@
                       @case ('ITEM_UNDO') {
                         <div class="flex items-center gap-3 flex-wrap">
                           @if (actor?.champion; as champ) {
-                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-6 w-6 rounded-full object-cover border border-border" />
+                            <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-6 w-6 rounded-full object-cover border border-border" />
                           }
                           <span
                             class="font-semibold"
@@ -474,7 +475,7 @@
                         @case ('CHAMPION_KILL') {
                           <div class="flex items-center gap-1 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -483,7 +484,7 @@
                             </span>
                             <span>killed</span>
                             @if (victim?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -502,7 +503,7 @@
                         @case ('ELITE_MONSTER_KILL') {
                           <div class="flex items-center gap-1 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -517,7 +518,7 @@
                         @case ('BUILDING_KILL') {
                           <div class="flex items-center gap-1 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -538,7 +539,7 @@
                         @case ('TURRET_PLATE_DESTROYED') {
                           <div class="flex items-center gap-1 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                               <span
                                 class="font-medium"
@@ -559,7 +560,7 @@
                         @case ('ITEM_PURCHASED') {
                           <div class="flex items-center gap-1.5 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -569,7 +570,7 @@
                             <span>purchased</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
-                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" [alt]="itemData.name" class="h-4 w-4 rounded object-cover" />
                                 <span class="font-medium text-text-primary">{{ itemData.name }}</span>
                               </div>
                             }
@@ -579,7 +580,7 @@
                         @case ('ITEM_SOLD') {
                           <div class="flex items-center gap-2 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -589,7 +590,7 @@
                             <span>sold</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
-                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" [alt]="itemData.name" class="h-4 w-4 rounded object-cover" />
                                 <span class="font-medium text-text-primary">{{ itemData.name }}</span>
                               </div>
                             }
@@ -599,7 +600,7 @@
                         @case ('ITEM_DESTROYED') {
                           <div class="flex items-center gap-2 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
@@ -609,7 +610,7 @@
                             <span>consumed / destroyed</span>
                             @if (event.item; as itemData) {
                               <div class="flex items-center gap-1 rounded border border-border bg-surface-alt px-1.5 py-0.5">
-                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" class="h-4 w-4 rounded object-cover" />
+                                <img [src]="DataDragonUrlUtil.itemIcon(ddragonVersion, itemData.key)" [alt]="itemData.name" class="h-4 w-4 rounded object-cover" />
                                 <span class="font-medium text-text-primary">{{ itemData.name }}</span>
                               </div>
                             }
@@ -619,7 +620,7 @@
                         @case ('ITEM_UNDO') {
                           <div class="flex items-center gap-1.5 flex-wrap">
                             @if (actor?.champion; as champ) {
-                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" class="h-5 w-5 rounded-full object-cover border border-border" />
+                              <img [src]="DataDragonUrlUtil.championIcon(ddragonVersion, champ.riotId)" [alt]="champ.name" class="h-5 w-5 rounded-full object-cover border border-border" />
                             }
                             <span
                               class="font-medium"
